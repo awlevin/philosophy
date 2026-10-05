@@ -26,7 +26,13 @@ npm run fetch-portraits  # (re)download portraits from Wikidata / Wikimedia Comm
 - **Detail navigation** — prev/next buttons, ← / → keys, swipe on touch screens, Esc to close.
 - **Prerendering** — `npm run build` renders `/` and all 61 `/p/:slug` pages to static HTML
   (`dist/index.html`, `dist/p/{slug}.html`) and hydrates on load, so text paints before the JS
-  arrives. `public/_redirects` sends any other path (e.g. query-string variants) to the SPA.
+  arrives. Other paths fall back to the SPA (`vercel.json` on Vercel, `public/_redirects` on Netlify).
+
+## Deploying to Vercel
+
+`vercel.json` is set up: Vite preset, `npm run build`, output `dist`, `cleanUrls` so
+`/p/plato` serves the prerendered `p/plato.html`, an SPA fallback, and long-lived caching for
+hashed assets. Import the GitHub repo in Vercel (or run `vercel --prod`) and it deploys as-is.
 
 ## Portraits
 
