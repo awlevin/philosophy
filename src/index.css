@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-chip: var(--chip);
+}
+
+/* ---------- Theme tokens ---------- */
+:root {
+  color-scheme: light;
+  --paper: #f4efe6;
+  --paper-2: #ebe4d8;
+  --ink: #1d1a16;
+  --ink-2: #3a342c;
+  --muted: #6a6054;
+  --rule: #d8cfc1;
+  --accent: #8b5a2b;
+  --accent-ink: #fbf7f0;
+  --chip: #e6dece;
+  /* Portrait treatment: desaturate, then tint toward warm sepia. */
+  --portrait-filter: grayscale(1) contrast(1.06) brightness(1.02);
+  --portrait-tint: #b48a5a;
+  --portrait-tint-blend: multiply;
+  --portrait-tint-opacity: 0.28;
+  --portrait-bg: #ddd3c3;
+  --shadow: 0 1px 2px rgb(60 40 20 / 0.06), 0 8px 24px -12px rgb(60 40 20 / 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #131210;
+    --paper-2: #1c1a17;
+    --ink: #ede6da;
+    --ink-2: #cfc6b8;
+    --muted: #978d80;
+    --rule: #34302a;
+    --accent: #d1a36b;
+    --accent-ink: #1a140d;
+    --chip: #24211d;
+    --portrait-filter: grayscale(1) contrast(1.1) brightness(0.86);
+    --portrait-tint: #c9925a;
+    --portrait-tint-blend: soft-light;
+    --portrait-tint-opacity: 0.55;
+    --portrait-bg: #2a2621;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -12px rgb(0 0 0 / 0.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #131210;
+  --paper-2: #1c1a17;
+  --ink: #ede6da;
+  --ink-2: #cfc6b8;
+  --muted: #978d80;
+  --rule: #34302a;
+  --accent: #d1a36b;
+  --accent-ink: #1a140d;
+  --chip: #24211d;
+  --portrait-filter: grayscale(1) contrast(1.1) brightness(0.86);
+  --portrait-tint: #c9925a;
+  --portrait-tint-blend: soft-light;
+  --portrait-tint-opacity: 0.55;
+  --portrait-bg: #2a2621;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -12px rgb(0 0 0 / 0.6);
+}
+
+/* ---------- Base ---------- */
+html {
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Theme-dependent visibility (works before hydration) */
+.theme-dark-only {
+  display: none;
+}
+:root[data-theme="dark"] .theme-dark-only {
+  display: block;
+}
+:root[data-theme="dark"] .theme-light-only {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-dark-only {
+    display: block;
+  }
+  :root:not([data-theme="light"]) .theme-light-only {
+    display: none;
+  }
+}
+
+/* Museum-label small caps */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- Portrait treatment ---------- */
+.portrait {
+  position: relative;
+  overflow: hidden;
+  background: var(--portrait-bg);
+  isolation: isolate;
+}
+.portrait img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: var(--portrait-filter);
+  transition: filter 400ms ease;
+}
+.portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--portrait-tint);
+  mix-blend-mode: var(--portrait-tint-blend);
+  opacity: var(--portrait-tint-opacity);
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+/* A hint of the original color on hover */
+.card:hover .portrait img,
+.card:focus-visible .portrait img {
+  filter: grayscale(0.35) contrast(1.04);
+}
+.card:hover .portrait::after,
+.card:focus-visible .portrait::after {
+  opacity: calc(var(--portrait-tint-opacity) * 0.5);
+}
+
+/* Horizontal chip rows fade at the edges when they overflow */
+.scroll-row {
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 24px), transparent 100%);
+}
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
