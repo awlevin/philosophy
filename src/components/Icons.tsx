@@ -61,3 +61,9 @@ export const List = (p: SVGProps<SVGSVGElement>) => (
     <path d="M10 6.5h10M10 12h10M10 17.5h10" />
   </svg>
 );
+export const Check = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="m5 12 5 5 9-10" /></svg>
+);
+export const ChevronDown = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="m6 9 6 6 6-6" /></svg>
+);

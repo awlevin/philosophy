@@ -57,7 +57,7 @@ export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, pe
       <Link
         to={`/p/${p.slug}`}
         state={{ gridSearch, fromGrid: true }}
-        onClick={(e) => onPeek && peekInstead(e, () => onPeek(p))}
+        onClick={(e) => onPeek && !peeking && peekInstead(e, () => onPeek(p))}
         className="group block rounded-[10px] outline-offset-4"
       >
         <div className="transition-transform duration-500 ease-out sm:group-hover:-translate-y-1">

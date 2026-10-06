@@ -37,7 +37,7 @@ export function PhilosopherRow({ p, gridSearch, timeline, deferImage, peeking, o
       <Link
         to={`/p/${p.slug}`}
         state={{ gridSearch, fromGrid: true }}
-        onClick={(e) => onPeek && peekInstead(e, () => onPeek(p))}
+        onClick={(e) => onPeek && !peeking && peekInstead(e, () => onPeek(p))}
         className={`flex h-16 items-center gap-3 rounded-xl pr-3 transition-colors ${
           peeking ? "bg-[var(--era-tint)]" : "hover:bg-paper-2"
         } ${timeline ? "" : "pl-2"}`}

@@ -20,3 +20,15 @@ export async function openFromGallery(page: Page, slug: string, name: string) {
   await expect(page).toHaveURL(new RegExp(`/p/${slug}$`));
   await page.waitForTimeout(1200);
 }
+
+/** Picks a view: icon toggle on larger screens, the "Show as" menu on phones. */
+export async function chooseView(page: Page, label: "Faces" | "List" | "Classic") {
+  if (isTouch()) await page.getByRole("button", { name: /^Show as:/ }).click();
+  await page.getByRole("radio", { name: label }).click();
+}
+
+/** Picks an order from its menu. */
+export async function chooseOrder(page: Page, label: "By time" | "A–Z") {
+  await page.getByRole("button", { name: /^(By time|A–Z)$/ }).click();
+  await page.getByRole("radio", { name: label }).click();
+}

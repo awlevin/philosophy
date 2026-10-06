@@ -27,9 +27,10 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
   "Open" or a swipe up goes to the full page.
 - **Color** — each era has a color, an ink and a tint (`--era-*` tokens in `src/index.css`, scoped
   to an element with `eraVars()` from `src/lib/era.ts`). Portraits sit on their era's tint.
-- **Filters** — the "View & filter" panel holds view, order, and Era / Tradition / Big Question
-  chips (OR within a group, AND across groups); name search is diacritic-insensitive. Filters and
-  order are mirrored in the URL, e.g. `/?era=ancient,medieval&question=live&sort=alpha&q=th`.
+- **Filters** — a menu per facet (Era, Tradition, Big question) with counts, plus Order and the
+  view: popovers on larger screens, bottom sheets from a row of pills on phones (`FilterBar.tsx`,
+  `Menu.tsx`). OR within a group, AND across groups; name search is diacritic-insensitive. Filters
+  and order are mirrored in the URL, e.g. `/?era=ancient,medieval&question=live&sort=alpha&q=th`.
   Chips on a detail page ("See others like …") filter the gallery; the tapped chip flies into the
   bar, and "Back to …" returns to the page.
 - **Detail navigation** — prev/next buttons, ← / → keys, swipe on touch screens, Esc to close.

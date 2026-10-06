@@ -97,6 +97,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
         onChange={setFilters}
         view={view}
         onView={setView}
+        onMenuOpen={closePeek}
         shown={list.length}
         total={philosophers.length}
         arrivedKey={arrival.chip}
