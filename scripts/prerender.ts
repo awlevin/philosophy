@@ -2,6 +2,8 @@
  * Prerender "/", "/quiz" and every "/p/:slug" into dist/ so pages paint before JS loads
  * (and are linkable/crawlable). Runs after `vite build` + the SSR build.
  */
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -32,6 +34,12 @@ function clip(s: string, max = 160) {
   return s.slice(0, max - 1).replace(/\s+\S*$/, "") + "…";
 }
 
+/** Slack and others cache preview images by URL, so the URL changes whenever the image does. */
+function versioned(image: string) {
+  const hash = createHash("sha1").update(readFileSync(path.join(ROOT, "public", image))).digest("hex").slice(0, 8);
+  return `${image}?v=${hash}`;
+}
+
 function page(url: string, title: string, description: string, image: string, imageAlt: string, [w, h] = [1200, 630]) {
   const d = esc(description);
   const social = [
@@ -41,7 +49,7 @@ function page(url: string, title: string, description: string, image: string, im
     `<meta property="og:title" content="${esc(title)}" />`,
     `<meta property="og:description" content="${d}" />`,
     `<meta property="og:url" content="${SITE}${url === "/" ? "" : url}" />`,
-    `<meta property="og:image" content="${SITE}${image}" />`,
+    `<meta property="og:image" content="${SITE}${versioned(image)}" />`,
     `<meta property="og:image:width" content="${w}" />`,
     `<meta property="og:image:height" content="${h}" />`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}" />`,
