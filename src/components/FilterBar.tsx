@@ -388,7 +388,8 @@ function TraditionOptions({ filters, set }: { filters: Filters; set: (patch: Par
   const matches = useMemo(() => TRADITIONS.filter((t) => fold(t).includes(fold(q.trim()))), [q]);
   return (
     <>
-      <div className="sticky top-0 z-10 bg-[var(--sheet)] px-3 pt-1.5 pb-2">
+      {/* -mt-1.5 pulls the header over the popover's top padding, so rows can't show through above it. */}
+      <div className="sticky top-0 z-10 -mt-1.5 bg-[var(--sheet)] px-3 pt-3 pb-2">
         <SearchField
           value={q}
           onChange={setQ}
