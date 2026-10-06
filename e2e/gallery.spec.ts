@@ -46,11 +46,26 @@ test("a menu per facet: pick a tradition, see the count, keep the chip", async (
 
 const RULED = "/?question=ruled";
 
-test("without a filter, a tap opens the page on desktop and peeks with a fact on touch", async ({ page }) => {
+test("without a filter, a tap opens the page", async ({ page }) => {
   const card = page.locator('[data-slug="kant"] a');
   await card.scrollIntoViewIfNeeded();
   await card.click();
-  if (!isTouch()) return expect(page).toHaveURL(/\/p\/kant$/);
+  await expect(page).toHaveURL(/\/p\/kant$/);
+});
+
+test("on touch, set to peek first, a tap peeks with a fact even without a filter", async ({ page }) => {
+  test.skip(!isTouch(), "peek is for touch screens");
+  await page.getByRole("button", { name: /^Show as:/ }).click();
+  const taps = page.getByRole("radio", { name: /^(Open the page|Peek first)/ });
+  await expect(taps.first()).toHaveAccessibleName(/^Open the page/);
+  await expect(taps.first()).toBeChecked();
+  await page.waitForTimeout(400);
+  await snap(page, "g12-tap-setting");
+  await page.getByRole("radio", { name: /Peek first/ }).click();
+  await page.getByRole("button", { name: "Done" }).click();
+  const card = page.locator('[data-slug="kant"] a');
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
   const peek = page.getByRole("dialog", { name: "Immanuel Kant, preview" });
   await expect(peek).toContainText("Act only on rules you could will everyone to follow.");
   await expect(page).toHaveURL(/\/$/);
@@ -123,7 +138,7 @@ test("on touch, opening a filter menu puts the peek sheet away", async ({ page }
   await expect(page.getByRole("dialog", { name: "Era" })).toBeVisible();
 });
 
-test("on touch, opening from the peek grows the page out of the sheet", async ({ page }) => {
+test("on touch, opening from the peek grows the page out of the sheet, never a blank screen", async ({ page }) => {
   test.skip(!isTouch(), "peek is for touch screens");
   await page.goto(RULED, { waitUntil: "networkidle" });
   const card = page.locator('[data-slug="hobbes"] a');
@@ -132,6 +147,25 @@ test("on touch, opening from the peek grows the page out of the sheet", async ({
   const peek = page.getByRole("dialog", { name: "Thomas Hobbes, preview" });
   await expect(peek).toBeVisible();
   await page.waitForTimeout(500);
+  // Every frame from the tap until the page settles, how visible the most visible text is: the
+  // sheet's, leaving, or the page's, arriving.
+  await page.evaluate(() => {
+    const shown = (el: Element | null | undefined) => {
+      let o = el ? 1 : 0;
+      for (let e = el; e; e = e.parentElement) o *= parseFloat(getComputedStyle(e).opacity);
+      return o;
+    };
+    const frames: number[] = [];
+    Object.assign(window, { frames_: frames });
+    const sheet = document.querySelector('[aria-label$=", preview"] p.font-display');
+    const tick = () => {
+      const pg = document.querySelector('[aria-modal="true"]');
+      const page = ["h1", ".portrait", "article .eyebrow"].map((s) => shown(pg?.querySelector(s)));
+      frames.push(Math.max(sheet?.isConnected ? shown(sheet) : 0, ...page));
+      if (frames.length < 60) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
   await peek.getByRole("button", { name: "Open Hobbes" }).click();
   let elapsed = 0;
   for (const ms of [40, 120, 220, 350, 550, 900]) {
@@ -141,6 +175,9 @@ test("on touch, opening from the peek grows the page out of the sheet", async ({
   }
   await expect(page).toHaveURL(/\/p\/hobbes$/);
   await expect(page.getByRole("heading", { name: "Thomas Hobbes", level: 1 })).toBeInViewport();
+  const frames = await page.evaluate(() => (window as unknown as { frames_: number[] }).frames_);
+  expect(frames).toHaveLength(60);
+  expect(Math.min(...frames)).toBeGreaterThan(0.25);
 });
 
 test("in the list, a selected first row stays distinct from its section band", async ({ page }) => {
@@ -153,16 +190,18 @@ test("in the list, a selected first row stays distinct from its section band", a
   await snap(page, "g10-list-first-row-selected");
 });
 
-test("on touch, peeking can be turned off so a tap opens the page", async ({ page }) => {
+test("on touch, set to open the page, filtering still peeks", async ({ page }) => {
   test.skip(!isTouch(), "peek is for touch screens");
-  await page.goto(RULED, { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: /^Show as:/ }).click();
-  await page.getByRole("radio", { name: /Open the page/ }).click();
-  await page.getByRole("button", { name: "Done" }).click();
   const card = page.locator('[data-slug="plato"] a');
   await card.scrollIntoViewIfNeeded();
   await card.click();
   await expect(page).toHaveURL(/\/p\/plato$/);
+
+  await page.goto(RULED, { waitUntil: "networkidle" });
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
+  await expect(page.getByRole("dialog", { name: "Plato, preview" })).toContainText("By philosopher-kings");
+  await expect(page).toHaveURL(/question=ruled$/);
 });
 
 test("on touch, every question has takes: e.g. what is the mind?", async ({ page }) => {

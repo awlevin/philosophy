@@ -1,6 +1,6 @@
-import { m, useIsPresent, useTransform, type PanInfo, type Variants } from "framer-motion";
+import { animate, m, useIsPresent, useMotionValue, useTransform, type PanInfo, type Variants } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate, useNavigationType } from "react-router";
 import { ArrowLeft, ArrowRight } from "../components/Icons";
 import { Portrait } from "../components/Portrait";
 import { ThemeToggle } from "../components/ThemeToggle";
@@ -21,7 +21,7 @@ import { eraVars } from "../lib/era";
 import { lifespan } from "../lib/format";
 import { usePullToDismiss } from "../lib/usePullToDismiss";
 import { useViewMode } from "../lib/view";
-import { EXITING_LAYER, PEEK_HANDOFF, ease, morph, nameId } from "../lib/motion";
+import { EXITING_LAYER, PEEK_LEAD, ease, grow, morph, nameId, type SheetRect } from "../lib/motion";
 
 export type DetailState = {
   /** Query string of the grid we came from, so it stays filtered underneath. */
@@ -30,8 +30,8 @@ export type DetailState = {
   fromGrid?: boolean;
   /** -1 / 1 when reached via prev/next, for the slide direction. */
   dir?: -1 | 1;
-  /** Opened from the peek sheet: the sheet grows into the page, so nothing flies in from the card. */
-  fromPeek?: boolean;
+  /** Opened from the peek sheet, which was here: the page grows out of it, so nothing flies in from the card. */
+  fromPeek?: SheetRect;
 };
 
 /** History state of a gallery reached by tapping a chip on a detail page. */
@@ -56,6 +56,12 @@ const factItem: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
 };
 const fadeOut = { opacity: 0, transition: { duration: 0.15 } };
+/** Rises into place, `delay` seconds in (opening from the peek sheet, where nothing morphs). */
+const rise = (delay: number) => ({
+  initial: { opacity: 0, y: 14 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5, ease, delay },
+});
 
 export function Detail({ slug }: { slug: string }) {
   const navigate = useNavigate();
@@ -135,11 +141,29 @@ export function Detail({ slug }: { slug: string }) {
     else if (info.offset.x > 70 || info.velocity.x > 450) go(prev, -1);
   };
 
-  const fromPeek = !!state.fromPeek && !dir;
+  // Only on the way in: coming back to this entry later (or reloading it) there is no sheet to grow from.
+  const sheet = useNavigationType() === "PUSH" && !dir ? state.fromPeek : undefined;
+  const fromPeek = !!sheet;
   const layoutTransition = dir || fromPeek ? instant : morph;
-  // From the peek sheet, the sheet itself grows to fill the screen first; the page waits for it, then
-  // fades in on top (its background last, once the sheet underneath already matches it).
-  const handoff = fromPeek ? PEEK_HANDOFF : 0;
+  // From the peek sheet, the page grows out of the sheet's place while its contents rise in one
+  // after another. Their delays count from when the growth starts.
+  const lead = fromPeek ? PEEK_LEAD : 0;
+  const [grewFrom] = useState(sheet);
+  const growth = useMotionValue(grewFrom ? 0 : 1);
+  useEffect(() => {
+    if (grewFrom) return animate(growth, 1, grow).stop;
+  }, [grewFrom, growth]);
+  const clipPath = useTransform(growth, (g) => {
+    const k = Math.max(0, 1 - g);
+    if (!grewFrom || k < 0.001) return "none";
+    const { top, right, bottom, left, radii } = grewFrom;
+    const [a, b, c, d] = radii.map((r) => r * k);
+    return `inset(${top * k}px ${right * k}px ${bottom * k}px ${left * k}px round ${a}px ${b}px ${c}px ${d}px)`;
+  });
+  // Nothing morphs in from a card, so the name rises in with the rest.
+  const nameRise = fromPeek ? rise(0.18 + lead) : undefined;
+  // The growing surface starts in the sheet's color and turns into the page's.
+  const sheetTint = useTransform(growth, [0, 1], [1, 0]);
 
   // Tapping a chip filters the gallery to that value. The chip takes a shared layoutId for a frame
   // first, so the gallery's pinned chip can fly from exactly where it was tapped.
@@ -166,16 +190,18 @@ export function Detail({ slug }: { slug: string }) {
       // Keeps the overlay mounted while children run their exit animations.
       exit={{ opacity: 1, transition: { duration: 0.45 } }}
       // …and lets touches and wheels through to the gallery meanwhile, sinking under the bar.
-      style={present ? undefined : { pointerEvents: "none", zIndex: EXITING_LAYER }}
+      style={{ clipPath, ...(!present && { pointerEvents: "none", zIndex: EXITING_LAYER }) }}
     >
       <m.div style={{ opacity: backdrop }} className="absolute inset-0">
         <m.div
           className="absolute inset-0 bg-paper"
-          initial={{ opacity: 0 }}
+          initial={fromPeek ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.32, ease: "easeOut" } }}
-          transition={{ duration: fromPeek ? 0.14 : 0.3, delay: handoff }}
-        />
+          transition={{ duration: 0.3 }}
+        >
+          {fromPeek && <m.div style={{ opacity: sheetTint }} className="absolute inset-0 bg-[var(--sheet)]" />}
+        </m.div>
       </m.div>
 
       {/* The page's own sheet of paper, shown only while pulled, so it reads as a card being lifted. */}
@@ -196,7 +222,7 @@ export function Detail({ slug }: { slug: string }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={fadeOut}
-          transition={{ duration: 0.3, delay: 0.1 + handoff }}
+          transition={{ duration: 0.3, delay: 0.1 + lead }}
           className="sticky top-0 z-10 bg-gradient-to-b from-paper via-paper/90 to-transparent"
         >
           <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-3 sm:px-8 sm:py-5">
@@ -222,9 +248,9 @@ export function Detail({ slug }: { slug: string }) {
         {p ? (
           <m.article
             key={p.slug}
-            initial={dir ? { opacity: 0, x: dir * 56 } : fromPeek ? { opacity: 0, y: 14 } : false}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            transition={{ duration: 0.4, ease, delay: handoff }}
+            initial={dir ? { opacity: 0, x: dir * 56 } : false}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, ease }}
             drag={touch ? "x" : false}
             dragDirectionLock
             dragConstraints={{ left: 0, right: 0 }}
@@ -236,7 +262,7 @@ export function Detail({ slug }: { slug: string }) {
           >
             <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14 lg:gap-20">
               <div>
-                <div className="md:sticky md:top-24">
+                <m.div className="md:sticky md:top-24" {...(fromPeek && rise(lead))}>
                   <Portrait
                     p={p}
                     eager
@@ -251,12 +277,12 @@ export function Detail({ slug }: { slug: string }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={fadeOut}
-                    transition={{ delay: 0.35, duration: 0.4 }}
+                    transition={{ delay: 0.35 + lead, duration: 0.4 }}
                     className="mx-auto mt-3 max-w-[460px] text-[0.7rem] leading-relaxed text-muted md:max-w-none"
                   >
                     <Credit p={p} />
                   </m.p>
-                </div>
+                </m.div>
               </div>
 
               <div className="min-w-0">
@@ -264,7 +290,7 @@ export function Detail({ slug }: { slug: string }) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={fadeOut}
-                  transition={{ delay: dir ? 0 : 0.15, duration: 0.45, ease }}
+                  transition={{ delay: dir ? 0 : 0.15 + lead, duration: 0.45, ease }}
                   className="eyebrow"
                   style={{ color: "var(--era-ink)" }}
                 >
@@ -274,9 +300,11 @@ export function Detail({ slug }: { slug: string }) {
                 <m.h1
                   layoutId={nameId(p.slug)}
                   layoutCrossfade={false}
+                  initial={nameRise?.initial}
+                  animate={nameRise?.animate}
                   // Fades when the card shows a short name, so there is nothing to morph into.
                   exit={fadeOut}
-                  transition={{ layout: layoutTransition }}
+                  transition={{ ...nameRise?.transition, layout: layoutTransition }}
                   className="mt-3 origin-top-left font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.01em] text-balance text-ink sm:text-[3.75rem] lg:text-[4.5rem]"
                 >
                   {p.name}
@@ -286,7 +314,7 @@ export function Detail({ slug }: { slug: string }) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={fadeOut}
-                  transition={{ delay: dir ? 0.03 : 0.2, duration: 0.45, ease }}
+                  transition={{ delay: dir ? 0.03 : 0.2 + (fromPeek ? 0.04 + lead : 0), duration: 0.45, ease }}
                 >
                   {p.aka && <p className="mt-1 font-display text-[1.5rem] text-ink-2 italic">{p.aka}</p>}
                   <p className="mt-3 text-[0.95rem] tracking-[0.06em] text-ink-2 tabular-nums">{lifespan(p)}</p>
@@ -303,7 +331,7 @@ export function Detail({ slug }: { slug: string }) {
                 <m.ol
                   className="mt-10 border-t border-rule md:mt-12"
                   variants={factList}
-                  custom={dir ? 0.06 : 0.3}
+                  custom={dir ? 0.06 : 0.3 + (fromPeek ? 0.04 + lead : 0)}
                   initial="hidden"
                   animate="show"
                   exit={fadeOut}
@@ -331,7 +359,7 @@ export function Detail({ slug }: { slug: string }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={fadeOut}
-              transition={{ delay: dir ? 0 : 0.5, duration: 0.4 }}
+              transition={{ delay: dir ? 0 : 0.5 + lead, duration: 0.4 }}
               className="mt-14 grid grid-cols-2 gap-4 sm:gap-8"
             >
               <PagerLink p={prev} label="Earlier" side="left" onClick={() => go(prev, -1)} />

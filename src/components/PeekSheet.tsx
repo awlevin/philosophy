@@ -1,10 +1,10 @@
 import { m } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import type { BigQuestion, Philosopher } from "../data/philosophers";
 import { eraVars } from "../lib/era";
 import { lifespan, shortName } from "../lib/format";
-import { PEEK_HANDOFF, ease } from "../lib/motion";
+import { grow, type SheetRect } from "../lib/motion";
 import type { DetailState } from "../pages/Detail";
 import { ArrowRight, Close } from "./Icons";
 import { Thumb } from "./Portrait";
@@ -14,8 +14,8 @@ import { Thumb } from "./Portrait";
  * Big Question (or their first fact when no question is filtered). Swipe down to dismiss, up (or "Open") for
  * the full page; tapping another face swaps the sheet, for comparing takes.
  *
- * Opening grows the sheet up to fill the screen as the page fades in over it, rather than flying
- * the page out of the card hidden behind the sheet (the page knows, via `fromPeek`).
+ * Opening hands the sheet's place on screen to the page (via `fromPeek`), which grows out of it to
+ * fill the screen. Meanwhile the sheet's own contents ride up with its top edge and fade away.
  */
 export function PeekSheet({
   p,
@@ -31,13 +31,26 @@ export function PeekSheet({
 }) {
   const takes = questions.flatMap((q) => (p.takes?.[q] ? [{ q, take: p.takes[q] }] : []));
   const navigate = useNavigate();
-  // Set on "Open": the page's background color, which the sheet turns into as it grows.
-  const [opening, setOpening] = useState<string | null>(null);
+  const sheet = useRef<HTMLDivElement>(null);
+  // Set on "Open": where the sheet is, for the page to grow out of.
+  const [opening, setOpening] = useState<SheetRect | null>(null);
   const open = () => {
-    setOpening(getComputedStyle(document.documentElement).getPropertyValue("--paper").trim());
+    if (!sheet.current) return;
+    const r = sheet.current.getBoundingClientRect();
+    const cs = getComputedStyle(sheet.current);
+    const px = (v: string) => parseFloat(v) || 0;
+    const rect: SheetRect = {
+      top: r.top,
+      right: innerWidth - r.right,
+      // Flush with the bottom on phones, even while pulled up (the fill below the sheet covers the gap).
+      bottom: px(cs.bottom) === 0 ? 0 : innerHeight - r.bottom,
+      left: r.left,
+      radii: [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius].map(px) as SheetRect["radii"],
+    };
+    setOpening(rect);
     // One frame for the exit to pick up `opening` before the sheet unmounts.
     requestAnimationFrame(() =>
-      navigate(`/p/${p.slug}`, { state: { gridSearch, fromGrid: true, fromPeek: true } satisfies DetailState }),
+      navigate(`/p/${p.slug}`, { state: { gridSearch, fromGrid: true, fromPeek: rect } satisfies DetailState }),
     );
   };
 
@@ -49,6 +62,7 @@ export function PeekSheet({
 
   return (
     <m.div
+      ref={sheet}
       role="dialog"
       aria-label={`${p.name}, preview`}
       drag="y"
@@ -62,27 +76,34 @@ export function PeekSheet({
       animate={{ y: 0 }}
       exit={
         opening
-          ? {
-              // Grow to full screen and take on the page's color; the page then fades in over it.
-              height: "100dvh",
-              borderRadius: 0,
-              backgroundColor: opening,
-              // A real keyframe (not [1, 1], which ends at once) holds the sheet until the page is opaque.
-              opacity: [1, 1, 0],
-              transition: { duration: PEEK_HANDOFF, ease, opacity: { duration: PEEK_HANDOFF + 0.4, times: [0, 0.85, 1] } },
-            }
+          ? // Stays for its contents to leave; the page has taken its place underneath.
+            { opacity: [1, 1, 0], transition: { duration: 0.5, times: [0, 0.9, 1] } }
           : { y: "120%", transition: { duration: 0.22, ease: "easeIn" } }
       }
       transition={{ type: "spring", stiffness: 420, damping: 38 }}
-      style={eraVars(p.era)}
+      // Above the opening page, whose growing surface starts out identical to this one.
+      style={{ ...eraVars(p.era), ...(opening && { zIndex: 60, pointerEvents: "none" }) }}
       // Phones: flush with the bottom edge and padded past the home indicator, so nothing shows
       // underneath as Safari's toolbar slides. Larger screens: a floating card.
-      className="fixed inset-x-0 bottom-0 z-40 mx-auto touch-none rounded-t-[22px] bg-[var(--sheet)] px-4 pt-2.5 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[var(--shadow-lift)] sm:inset-x-2 sm:bottom-4 sm:max-w-[420px] sm:rounded-[22px] sm:pb-4"
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto touch-none rounded-t-[22px] px-4 pt-2.5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:inset-x-2 sm:bottom-4 sm:max-w-[420px] sm:rounded-[22px] sm:pb-4"
     >
-      {/* Fills in below when the sheet is pulled up past its resting place. */}
-      <span aria-hidden className="absolute inset-x-0 top-full h-[50vh] bg-[var(--sheet)] sm:hidden" />
-      {/* On "Open" the contents clear first, leaving an empty sheet to grow into the page. */}
-      <m.div exit={opening ? { opacity: 0, transition: { duration: 0.12 } } : undefined}>
+      <m.div
+        aria-hidden
+        exit={opening ? { opacity: 0, transition: { duration: 0.16, ease: "easeOut" } } : undefined}
+        className="absolute inset-0 rounded-[inherit] bg-[var(--sheet)] shadow-[var(--shadow-lift)]"
+      >
+        {/* Fills in below when the sheet is pulled up past its resting place. */}
+        <span className="absolute inset-x-0 top-full h-[50vh] bg-[var(--sheet)] sm:hidden" />
+      </m.div>
+      {/* On "Open" the contents ride up with the growing page's top edge as they fade. */}
+      <m.div
+        className="relative"
+        exit={
+          opening
+            ? { y: -opening.top, opacity: 0, transition: { y: grow, opacity: { duration: 0.2, ease: "easeOut" } } }
+            : undefined
+        }
+      >
         <div aria-hidden className="mx-auto mb-3 h-1 w-9 rounded-full bg-rule" />
         <div className="flex items-center gap-3.5">
           <Thumb p={p} sizes="144px" className="h-[72px] w-[72px] shrink-0 rounded-[14px]" />

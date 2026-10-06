@@ -9,6 +9,6 @@ export const useViewMode = storedChoice<ViewMode>("view", ["faces", "list", "cla
   else delete document.documentElement.dataset.look;
 });
 
-/** On touch screens, while filtering: a tap peeks first (with their take), or opens the page. */
-export type TapMode = "peek" | "open";
-export const useTapMode = storedChoice<TapMode>("tap", ["peek", "open"], "peek");
+/** On touch screens, when not filtering (which always peeks): a tap opens the page, or peeks first. */
+export type TapMode = "open" | "peek";
+export const useTapMode = storedChoice<TapMode>("tap", ["open", "peek"], "open");

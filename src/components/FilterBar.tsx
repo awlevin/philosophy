@@ -46,8 +46,8 @@ const VIEWS: { value: ViewMode; label: string; hint: string; icon: ReactNode }[]
   { value: "classic", label: "Classic", hint: "The original sepia grid", icon: <Frame className="h-4 w-4" /> },
 ];
 const TAPS: { value: TapMode; label: string; hint: string }[] = [
+  { value: "open", label: "Open the page", hint: "Straight to the full page, except while filtering" },
   { value: "peek", label: "Peek first", hint: "A quick look; tap again to open" },
-  { value: "open", label: "Open the page", hint: "Straight to the full page" },
 ];
 const ORDERS: { value: SortMode; label: string }[] = [
   { value: "chrono", label: "By time" },
