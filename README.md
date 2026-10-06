@@ -11,7 +11,7 @@ npm run dev              # http://localhost:5173
 npm run build            # typecheck, client build, SSR build, prerender every route into dist/
 npm run preview
 npm run fetch-portraits  # (re)download portraits from Wikidata / Wikimedia Commons
-npm run e2e              # Playwright: phone + desktop-dark walk-throughs (screens in test-results/shots)
+npm run e2e              # Playwright, phone + desktop-dark (screens in test-results/shots); BASE_URL=… to test a deploy
 ```
 
 ## How it's put together
