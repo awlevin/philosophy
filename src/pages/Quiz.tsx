@@ -1,4 +1,4 @@
-import { m } from "framer-motion";
+import { m, stagger, useAnimate, useReducedMotion } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { FacePile } from "../components/FacePile";
@@ -40,8 +40,16 @@ export function Quiz() {
   const [run, setRun] = useState<Run | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
+  // The intro's entrance plays once per opening, and only when opened from the gallery: a direct
+  // load shows the prerendered page as it is, and returning to the intro with Back shouldn't replay it.
+  const reduce = useReducedMotion();
+  const entrance = useRef(state.gridSearch !== undefined && !reduce);
+
   const close = () => (state.gridSearch !== undefined ? navigate(-1) : navigate("/"));
-  const start = () => setRun({ i: 0, answers: [], revealed: false });
+  const start = () => {
+    entrance.current = false;
+    setRun({ i: 0, answers: [], revealed: false });
+  };
   const finish = (answers: (Answer | undefined)[]) => {
     save({ answers: STATEMENTS.map((_, k) => answers[k] ?? null) });
     setRun(null);
@@ -80,7 +88,7 @@ export function Quiz() {
         ) : ranking ? (
           <Results ranking={ranking} gridSearch={state.gridSearch ?? ""} onClose={close} onRetake={start} onClear={() => save(null)} />
         ) : (
-          <Intro onStart={start} onClose={close} />
+          <Intro onStart={start} onClose={close} entrance={entrance.current} />
         )}
       </div>
     </m.div>
@@ -115,26 +123,129 @@ function BackButton({ onClick, children }: { onClick: () => void; children: Reac
 
 // ---------- Intro ----------
 
-function Intro({ onStart, onClose }: { onStart: () => void; onClose: () => void }) {
+const TITLE = "Who thinks like you?";
+
+/** Until the entrance reveals them: the title's letters, the faces, and everything marked data-enter. */
+const HIDDEN_FOR_ENTRANCE =
+  "[&_[data-char]]:opacity-0 [&_[data-qmark]]:opacity-0 [&_[data-pile]_.portrait]:opacity-0 [&_[data-enter]]:opacity-0";
+
+function Intro({ onStart, onClose, entrance }: { onStart: () => void; onClose: () => void; entrance: boolean }) {
+  const [scope, animate] = useAnimate<HTMLDivElement>();
+  // Measured once: StrictMode runs the effect twice, and the second run would see the first one's offsets.
+  const geometry = useRef<{ dx: number; dy: number; scale: number; faces: { x: number; y: number }[] } | null>(null);
+
+  // The question: a large "?" pops up, flies into the end of the title while the letters type in
+  // behind it, and the faces gather out of the space it left. Then the rest rises in.
+  useLayoutEffect(() => {
+    if (!entrance) return;
+    const root = scope.current;
+    const big = root.querySelector<HTMLElement>("[data-bigq]")!;
+    const mark = root.querySelector<HTMLElement>("[data-qmark]")!;
+    const title = mark.closest("h1")!;
+    const faces = [...root.querySelectorAll<HTMLElement>("[data-pile] .portrait")];
+    const mid = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
+    const from = mid(big);
+    geometry.current ??= (() => {
+      const to = mid(mark);
+      return {
+        dx: to.x - from.x,
+        dy: to.y - from.y,
+        scale: parseFloat(getComputedStyle(title).fontSize) / parseFloat(getComputedStyle(big).fontSize),
+        // Each face starts on a ring around the "?", where it was a moment before.
+        faces: faces.map((f, i) => {
+          const c = mid(f);
+          const a = (i / faces.length) * Math.PI * 2 - Math.PI / 2;
+          return { x: from.x + Math.cos(a) * 130 - c.x, y: from.y + Math.sin(a) * 130 - c.y };
+        }),
+      };
+    })();
+    const g = geometry.current;
+    const ink = getComputedStyle(title).color;
+    const accent = getComputedStyle(big).color;
+
+    const controls = [
+      animate(
+        big,
+        {
+          opacity: [0, 1, 1, 1, 0],
+          scale: [0.5, 1, 1, g.scale, g.scale],
+          rotate: [-20, 0, 0, 0, 0],
+          x: [0, 0, 0, g.dx, g.dx],
+          y: [0, 0, 0, g.dy, g.dy],
+          color: [accent, accent, accent, ink, ink],
+        },
+        { duration: 1.8, times: [0, 0.32, 0.5, 0.94, 1], ease: ["backOut", "linear", [0.7, 0, 0.2, 1], "linear"] },
+      ),
+      animate("[data-char]", { opacity: [0, 1] }, { duration: 0.01, delay: stagger(0.045, { startDelay: 0.76 }) }),
+      animate(mark, { opacity: [0, 1] }, { duration: 0.1, delay: 1.69 }),
+      ...faces.map((f, i) =>
+        animate(
+          f,
+          { opacity: [0, 1], x: [g.faces[i].x, 0], y: [g.faces[i].y, 0], scale: [0.6, 1] },
+          { delay: 1.55 + i * 0.06, type: "spring", stiffness: 260, damping: 16 },
+        ),
+      ),
+      animate("[data-enter='eyebrow']", { opacity: [0, 1], y: [6, 0] }, { delay: 1.6, duration: 0.45, ease }),
+      animate("[data-enter='sub']", { opacity: [0, 1], y: [8, 0] }, { delay: 1.8, duration: 0.5, ease }),
+      animate("[data-enter='steps']", { opacity: [0, 1] }, { delay: 1.9, duration: 0.3 }),
+      animate("[data-enter='step']", { opacity: [0, 1], y: [6, 0] }, { delay: stagger(0.08, { startDelay: 1.95 }), duration: 0.45, ease }),
+      animate("[data-enter='begin']", { opacity: [0, 1] }, { delay: 2.15, duration: 0.3 }),
+      animate("[data-enter='begin']", { y: [16, 0], scale: [0.97, 1] }, { delay: 2.15, type: "spring", stiffness: 300, damping: 18 }),
+      animate("[data-enter='foot']", { opacity: [0, 1] }, { delay: 2.3, duration: 0.4 }),
+    ];
+    return () => controls.forEach((c) => c.stop());
+  }, [entrance, animate, scope]);
+
   return (
-    <div className="mx-auto flex min-h-full max-w-xl flex-col px-4 sm:px-8">
+    <div ref={scope} className={`mx-auto flex min-h-full max-w-xl flex-col px-4 sm:px-8 ${entrance ? HIDDEN_FOR_ENTRANCE : ""}`}>
+      {entrance && (
+        <div aria-hidden className="pointer-events-none fixed top-[42%] left-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
+          <span data-bigq className="block font-display text-[15rem] leading-none font-semibold text-accent opacity-0">
+            ?
+          </span>
+        </div>
+      )}
       <QuizNav left={<BackButton onClick={onClose}>All philosophers</BackButton>} />
-      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease }} className="flex-1 pt-2 tall:pt-4 sm:tall:pt-10">
-        <FacePile people={INTRO_FACES} faceClass="h-12 w-12 ring-[3px] ring-paper tall:h-14 tall:w-14" />
-        <p className="eyebrow mt-6 tall:mt-8">Quiz · {N} statements</p>
+      <m.div
+        initial={entrance ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease }}
+        className="flex-1 pt-2 tall:pt-4 sm:tall:pt-10"
+      >
+        <div data-pile>
+          <FacePile people={INTRO_FACES} faceClass="h-12 w-12 ring-[3px] ring-paper tall:h-14 tall:w-14" />
+        </div>
+        <p data-enter="eyebrow" className="eyebrow mt-6 tall:mt-8">
+          Quiz · {N} statements
+        </p>
         <h1 className="mt-2.5 font-display text-[2.5rem] leading-[0.98] font-semibold tracking-[-0.01em] text-ink tall:mt-3 tall:text-[3rem] sm:text-[4rem]">
-          Who thinks like you?
+          {entrance
+            ? [...TITLE].map((ch, k) =>
+                k === TITLE.length - 1 ? (
+                  <span key={k} data-qmark>
+                    {ch}
+                  </span>
+                ) : (
+                  <span key={k} data-char>
+                    {ch}
+                  </span>
+                ),
+              )
+            : TITLE}
         </h1>
-        <p className="mt-3 font-display text-[1.2rem] leading-snug text-ink-2 italic tall:mt-4 tall:text-[1.35rem]">
+        <p data-enter="sub" className="mt-3 font-display text-[1.2rem] leading-snug text-ink-2 italic tall:mt-4 tall:text-[1.35rem]">
           React to {N} big ideas. We’ll rank all {philosophers.length} philosophers by how often they’d side with you.
         </p>
-        <ol className="mt-5 border-t border-rule tall:mt-8">
+        <ol data-enter="steps" className="mt-5 border-t border-rule tall:mt-8">
           {[
             "Agree or disagree, strongly or a little.",
             "See who’s with you after each answer.",
             "Get your closest five, and five to argue with.",
           ].map((line, k) => (
-            <li key={k} className="flex gap-4 border-b border-rule py-2.5 tall:py-4">
+            <li key={k} data-enter="step" className="flex gap-4 border-b border-rule py-2.5 tall:py-4">
               <span className="eyebrow w-5 shrink-0 pt-[0.4em] tabular-nums">{["i", "ii", "iii"][k]}</span>
               <span className="font-display text-[1.15rem] leading-snug text-ink tall:text-[1.3rem]">{line}</span>
             </li>
@@ -142,11 +253,13 @@ function Intro({ onStart, onClose }: { onStart: () => void; onClose: () => void 
         </ol>
       </m.div>
       <div className="sticky bottom-0 -mx-4 bg-gradient-to-t from-paper via-paper to-paper/0 px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-6 tall:pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:px-0 sm:tall:pt-10 sm:tall:pb-16">
-        <button type="button" onClick={onStart} className={`${primary} w-full`}>
+        <button type="button" data-enter="begin" onClick={onStart} className={`${primary} w-full`}>
           Begin
           <ArrowRight className="h-[18px] w-[18px]" />
         </button>
-        <p className="mt-3 text-center text-[0.78rem] text-muted">Takes ~ 3 minutes. Your answers stay on this device.</p>
+        <p data-enter="foot" className="mt-3 text-center text-[0.78rem] text-muted">
+          Takes ~ 3 minutes. Your answers stay on this device.
+        </p>
       </div>
     </div>
   );

@@ -43,7 +43,8 @@ test("take the quiz, open a match, come back, and see everyone ranked for you", 
   await page.getByRole("link", { name: /Which of them think like you\?/ }).click();
   await expect(page).toHaveURL(/\/quiz$/);
   await expect(page.getByRole("heading", { name: "Who thinks like you?" })).toBeVisible();
-  await page.waitForTimeout(500);
+  // Settled after the entrance (see the next test).
+  await page.waitForTimeout(3000);
   await snap(page, "q2-intro");
 
   await takeQuiz(page, true);
@@ -75,6 +76,38 @@ test("take the quiz, open a match, come back, and see everyone ranked for you", 
   await expect(page.getByRole("link", { name: /Closest to you: Russell, Marx and Arendt/ })).toBeVisible();
   await page.waitForTimeout(700);
   await snap(page, "q8-ranked-for-you");
+});
+
+test("opened from the gallery, the intro enters with its question mark, then settles", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("link", { name: /Which of them think like you\?/ }).click();
+  const big = page.locator("[data-bigq]");
+  const opacity = () => big.evaluate((el) => Number(getComputedStyle(el).opacity));
+  const mark = page.locator("[data-qmark]");
+
+  await page.waitForTimeout(650);
+  expect(await opacity()).toBeGreaterThan(0.9);
+  await snap(page, "q2a-question-mark");
+  await page.waitForTimeout(700);
+  await snap(page, "q2b-question-flying");
+
+  await page.waitForTimeout(1700);
+  expect(await opacity()).toBe(0);
+  expect(await mark.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(1);
+  await expect(page.getByRole("button", { name: "Begin" })).toHaveCSS("opacity", "1");
+  await snap(page, "q2c-settled");
+
+  // Back from the first statement: no second entrance.
+  await page.getByRole("button", { name: "Begin" }).click();
+  await page.getByRole("button", { name: "Back" }).click();
+  await expect(page.getByRole("heading", { name: "Who thinks like you?" })).toBeVisible();
+  await expect(big).toHaveCount(0);
+});
+
+test("loaded directly, the intro shows at rest", async ({ page }) => {
+  await page.goto("/quiz", { waitUntil: "networkidle" });
+  await expect(page.locator("[data-bigq]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Begin" })).toHaveCSS("opacity", "1");
 });
 
 test("results are remembered on this device until cleared", async ({ page }) => {
