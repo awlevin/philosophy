@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import type { Philosopher } from "../data/philosophers";
 import { eraVars } from "../lib/era";
 import { lifespan, shortName } from "../lib/format";
-import { ease } from "../lib/motion";
+import { PEEK_HANDOFF, ease } from "../lib/motion";
 import type { DetailState } from "../pages/Detail";
 import { ArrowRight, Close } from "./Icons";
 import { Thumb } from "./Portrait";
@@ -18,9 +18,10 @@ import { Thumb } from "./Portrait";
  */
 export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSearch: string; onClose: () => void }) {
   const navigate = useNavigate();
-  const [opening, setOpening] = useState(false);
+  // Set on "Open": the page's background color, which the sheet turns into as it grows.
+  const [opening, setOpening] = useState<string | null>(null);
   const open = () => {
-    setOpening(true);
+    setOpening(getComputedStyle(document.documentElement).getPropertyValue("--paper").trim());
     // One frame for the exit to pick up `opening` before the sheet unmounts.
     requestAnimationFrame(() =>
       navigate(`/p/${p.slug}`, { state: { gridSearch, fromGrid: true, fromPeek: true } satisfies DetailState }),
@@ -48,7 +49,15 @@ export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSear
       animate={{ y: 0 }}
       exit={
         opening
-          ? { height: "100dvh", borderRadius: 0, opacity: [1, 1, 0], transition: { duration: 0.36, ease, opacity: { times: [0, 0.55, 1], duration: 0.36 } } }
+          ? {
+              // Grow to full screen and take on the page's color; the page then fades in over it.
+              height: "100dvh",
+              borderRadius: 0,
+              backgroundColor: opening,
+              // A real keyframe (not [1, 1], which ends at once) holds the sheet until the page is opaque.
+              opacity: [1, 1, 0],
+              transition: { duration: PEEK_HANDOFF, ease, opacity: { duration: PEEK_HANDOFF + 0.4, times: [0, 0.85, 1] } },
+            }
           : { y: "120%", transition: { duration: 0.22, ease: "easeIn" } }
       }
       transition={{ type: "spring", stiffness: 420, damping: 38 }}
@@ -59,35 +68,38 @@ export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSear
     >
       {/* Fills in below when the sheet is pulled up past its resting place. */}
       <span aria-hidden className="absolute inset-x-0 top-full h-[50vh] bg-[var(--sheet)] sm:hidden" />
-      <div aria-hidden className="mx-auto mb-3 h-1 w-9 rounded-full bg-rule" />
-      <div className="flex items-center gap-3.5">
-        <Thumb p={p} sizes="144px" className="h-[72px] w-[72px] shrink-0 rounded-[14px]" />
-        <div className="min-w-0 flex-1">
-          <p className="eyebrow" style={{ color: "var(--era-ink)" }}>
-            {p.era} · {p.tradition[0]}
-          </p>
-          <p className="mt-1 font-display text-[1.9rem] leading-none font-semibold text-balance text-ink">{p.name}</p>
-          <p className="mt-1.5 text-[0.8rem] text-muted tabular-nums">{lifespan(p)}</p>
+      {/* On "Open" the contents clear first, leaving an empty sheet to grow into the page. */}
+      <m.div exit={opening ? { opacity: 0, transition: { duration: 0.12 } } : undefined}>
+        <div aria-hidden className="mx-auto mb-3 h-1 w-9 rounded-full bg-rule" />
+        <div className="flex items-center gap-3.5">
+          <Thumb p={p} sizes="144px" className="h-[72px] w-[72px] shrink-0 rounded-[14px]" />
+          <div className="min-w-0 flex-1">
+            <p className="eyebrow" style={{ color: "var(--era-ink)" }}>
+              {p.era} · {p.tradition[0]}
+            </p>
+            <p className="mt-1 font-display text-[1.9rem] leading-none font-semibold text-balance text-ink">{p.name}</p>
+            <p className="mt-1.5 text-[0.8rem] text-muted tabular-nums">{lifespan(p)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close preview"
+            // Quiet: a swipe down closes it too. Still a full 44px target.
+            className="-mt-2 -mr-2.5 grid h-11 w-11 shrink-0 place-items-center self-start rounded-full text-muted transition-colors hover:text-ink"
+          >
+            <Close className="h-[15px] w-[15px]" />
+          </button>
         </div>
+        <p className="mt-3.5 font-display text-[1.3rem] leading-snug text-pretty text-ink">{p.facts[0]}</p>
         <button
           type="button"
-          onClick={onClose}
-          aria-label="Close preview"
-          // Quiet: a swipe down closes it too. Still a full 44px target.
-          className="-mt-2 -mr-2.5 grid h-11 w-11 shrink-0 place-items-center self-start rounded-full text-muted transition-colors hover:text-ink"
+          onClick={open}
+          className="mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--era-ink)] text-[0.95rem] font-semibold text-paper"
         >
-          <Close className="h-[15px] w-[15px]" />
+          Open {shortName(p)}
+          <ArrowRight className="h-4 w-4" />
         </button>
-      </div>
-      <p className="mt-3.5 font-display text-[1.3rem] leading-snug text-pretty text-ink">{p.facts[0]}</p>
-      <button
-        type="button"
-        onClick={open}
-        className="mt-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--era-ink)] text-[0.95rem] font-semibold text-paper"
-      >
-        Open {shortName(p)}
-        <ArrowRight className="h-4 w-4" />
-      </button>
+      </m.div>
     </m.div>
   );
 }

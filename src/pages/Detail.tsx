@@ -20,7 +20,7 @@ import {
 import { eraVars } from "../lib/era";
 import { lifespan } from "../lib/format";
 import { useViewMode } from "../lib/view";
-import { EXITING_LAYER, ease, morph, nameId } from "../lib/motion";
+import { EXITING_LAYER, PEEK_HANDOFF, ease, morph, nameId } from "../lib/motion";
 
 export type DetailState = {
   /** Query string of the grid we came from, so it stays filtered underneath. */
@@ -128,9 +128,9 @@ export function Detail({ slug }: { slug: string }) {
 
   const fromPeek = !!state.fromPeek && !dir;
   const layoutTransition = dir || fromPeek ? instant : morph;
-  // From the peek sheet the portrait and title rise into place with the page instead of morphing.
-  const rise = (delay: number) =>
-    fromPeek ? { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.45, ease, delay } } : {};
+  // From the peek sheet, the sheet itself grows to fill the screen first; the page waits for it, then
+  // fades in on top (its background last, once the sheet underneath already matches it).
+  const handoff = fromPeek ? PEEK_HANDOFF : 0;
 
   // Tapping a chip filters the gallery to that value. The chip takes a shared layoutId for a frame
   // first, so the gallery's pinned chip can fly from exactly where it was tapped.
@@ -164,7 +164,7 @@ export function Detail({ slug }: { slug: string }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0, transition: { duration: 0.32, ease: "easeOut" } }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: fromPeek ? 0.14 : 0.3, delay: handoff }}
       />
 
       <m.div ref={scroller} layoutScroll className="relative h-full overflow-x-hidden overflow-y-auto overscroll-contain">
@@ -172,7 +172,7 @@ export function Detail({ slug }: { slug: string }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={fadeOut}
-          transition={{ duration: 0.3, delay: 0.1 }}
+          transition={{ duration: 0.3, delay: 0.1 + handoff }}
           className="sticky top-0 z-10 bg-gradient-to-b from-paper via-paper/90 to-transparent"
         >
           <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-3 sm:px-8 sm:py-5">
@@ -198,9 +198,9 @@ export function Detail({ slug }: { slug: string }) {
         {p ? (
           <m.article
             key={p.slug}
-            initial={dir ? { opacity: 0, x: dir * 56 } : false}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, ease }}
+            initial={dir ? { opacity: 0, x: dir * 56 } : fromPeek ? { opacity: 0, y: 14 } : false}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 0.4, ease, delay: handoff }}
             drag={touch ? "x" : false}
             dragDirectionLock
             dragConstraints={{ left: 0, right: 0 }}
@@ -213,18 +213,16 @@ export function Detail({ slug }: { slug: string }) {
             <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14 lg:gap-20">
               <div>
                 <div className="md:sticky md:top-24">
-                  <m.div {...rise(0.08)}>
-                    <Portrait
-                      p={p}
-                      eager
-                      priority
-                      withGridPlaceholder={!!state.fromGrid}
-                      sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 92vw"
-                      radius={view === "classic" ? 4 : 16}
-                      className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
-                      layoutTransition={layoutTransition}
-                    />
-                  </m.div>
+                  <Portrait
+                    p={p}
+                    eager
+                    priority
+                    withGridPlaceholder={!!state.fromGrid}
+                    sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 92vw"
+                    radius={view === "classic" ? 4 : 16}
+                    className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
+                    layoutTransition={layoutTransition}
+                  />
                   <m.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -249,16 +247,14 @@ export function Detail({ slug }: { slug: string }) {
                   {p.era} · {p.tradition.join(" / ")}
                 </m.p>
 
-                <m.div {...rise(0.14)}>
-                  <m.h1
-                    layoutId={nameId(p.slug)}
-                    layoutCrossfade={false}
-                    transition={{ layout: layoutTransition }}
-                    className="mt-3 origin-top-left font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.01em] text-balance text-ink sm:text-[3.75rem] lg:text-[4.5rem]"
-                  >
-                    {p.name}
-                  </m.h1>
-                </m.div>
+                <m.h1
+                  layoutId={nameId(p.slug)}
+                  layoutCrossfade={false}
+                  transition={{ layout: layoutTransition }}
+                  className="mt-3 origin-top-left font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.01em] text-balance text-ink sm:text-[3.75rem] lg:text-[4.5rem]"
+                >
+                  {p.name}
+                </m.h1>
 
                 <m.div
                   initial={{ opacity: 0, y: 8 }}

@@ -12,5 +12,8 @@ export const ease = [0.22, 1, 0.36, 1] as const;
 export const EXITING_LAYER = 5;
 export const RETURNING_LAYER = 6;
 
+/** Seconds the peek sheet takes to grow to full screen before the page fades in over it. */
+export const PEEK_HANDOFF = 0.32;
+
 export const portraitId = (slug: string) => `portrait-${slug}`;
 export const nameId = (slug: string) => `name-${slug}`;
