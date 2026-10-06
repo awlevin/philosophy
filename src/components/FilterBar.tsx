@@ -1,6 +1,19 @@
 import { m } from "framer-motion";
-import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
-import { ERAS, ERA_RANGES, QUESTIONS, TRADITIONS, philosophers } from "../data/philosophers";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
+import {
+  ERAS,
+  ERA_RANGES,
+  QUESTIONS,
+  TRADITIONS,
+  philosophers,
+} from "../data/philosophers";
 import { eraVars } from "../lib/era";
 import {
   EMPTY_FILTERS,
@@ -41,16 +54,52 @@ type Props = {
   forYou?: boolean;
 };
 
+const GROUP_FIELD = {
+  era: "eras",
+  tradition: "traditions",
+  question: "questions",
+} as const;
+const pickedIn = (f: Filters, group: keyof typeof GROUP_FIELD) =>
+  f[GROUP_FIELD[group]].length;
+
 type MenuKey = "era" | "tradition" | "question" | "order" | "view";
 
-const VIEWS: { value: ViewMode; label: string; hint: string; icon: ReactNode }[] = [
-  { value: "faces", label: "Faces", hint: "A wall of portraits by era", icon: <Grid className="h-4 w-4" /> },
-  { value: "list", label: "List", hint: "A timeline, one per row", icon: <List className="h-4 w-4" /> },
-  { value: "classic", label: "Classic", hint: "The original sepia grid", icon: <Frame className="h-4 w-4" /> },
+const VIEWS: {
+  value: ViewMode;
+  label: string;
+  hint: string;
+  icon: ReactNode;
+}[] = [
+  {
+    value: "faces",
+    label: "Faces",
+    hint: "A wall of portraits by era",
+    icon: <Grid className="h-4 w-4" />,
+  },
+  {
+    value: "list",
+    label: "List",
+    hint: "A timeline, one per row",
+    icon: <List className="h-4 w-4" />,
+  },
+  {
+    value: "classic",
+    label: "Classic",
+    hint: "The original sepia grid",
+    icon: <Frame className="h-4 w-4" />,
+  },
 ];
 const TAPS: { value: TapMode; label: string; hint: string }[] = [
-  { value: "open", label: "Open the page", hint: "Straight to the full page, except while filtering" },
-  { value: "peek", label: "Peek first", hint: "A quick look; tap again to open" },
+  {
+    value: "open",
+    label: "Open the page",
+    hint: "Straight to the full page, except while filtering",
+  },
+  {
+    value: "peek",
+    label: "Peek first",
+    hint: "A quick look; tap again to open",
+  },
 ];
 const ORDERS: { value: SortMode; label: string }[] = [
   { value: "chrono", label: "By time" },
@@ -71,7 +120,18 @@ const COUNT = new Map(
  * Sticky search bar with a menu per facet (Era, Tradition, Big question), order and view.
  * Larger screens get popovers under each button; phones get a row of pills that open bottom sheets.
  */
-export function FilterBar({ filters, onChange, view, onView, shown, total, arrivedKey, raised, onMenuOpen, forYou }: Props) {
+export function FilterBar({
+  filters,
+  onChange,
+  view,
+  onView,
+  shown,
+  total,
+  arrivedKey,
+  raised,
+  onMenuOpen,
+  forYou,
+}: Props) {
   const orders = forYou ? ORDERS : ORDERS.filter((o) => o.value !== "match");
   const [menu, setMenu] = useState<MenuKey | null>(null);
   const [tap, setTap] = useTapMode();
@@ -80,6 +140,7 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
   useBarHeight(bar);
 
   const tokens = activeTokens(filters);
+  const phoneChips = tokens.some((t) => pickedIn(filters, t.group) > 1);
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   const clear = () => onChange({ ...EMPTY_FILTERS, sort: filters.sort });
   const close = () => setMenu(null);
@@ -93,7 +154,8 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
   useEffect(() => {
     if (!menu) return;
     const onDown = (e: PointerEvent) => {
-      if (!(e.target as Element).closest("[data-filter-bar], [data-menu]")) setMenu(null);
+      if (!(e.target as Element).closest("[data-filter-bar], [data-menu]"))
+        setMenu(null);
     };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(null);
     document.addEventListener("pointerdown", onDown);
@@ -125,7 +187,13 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
     </div>
   );
 
-  const facets: { key: "era" | "tradition" | "question"; label: string; picked: string[]; body: ReactNode; clearGroup: () => void }[] = [
+  const facets: {
+    key: "era" | "tradition" | "question";
+    label: string;
+    picked: string[];
+    body: ReactNode;
+    clearGroup: () => void;
+  }[] = [
     {
       key: "era",
       label: "Era",
@@ -139,7 +207,13 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
           checked={filters.eras.includes(e)}
           onToggle={() => set({ eras: toggle(filters.eras, e) })}
           count={COUNT.get(tokenKey({ group: "era", value: e }))}
-          lead={<span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--era)]" style={eraVars(e)} />}
+          lead={
+            <span
+              aria-hidden
+              className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--era)]"
+              style={eraVars(e)}
+            />
+          }
         />
       )),
     },
@@ -169,7 +243,14 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
 
   const orderLabel = orders.find((o) => o.value === filters.sort)!.label;
   const orderMenu = (
-    <Menu open={menu === "order"} onClose={close} title="Order" sheet={sheet} align="right" width={200}>
+    <Menu
+      open={menu === "order"}
+      onClose={close}
+      title="Order"
+      sheet={sheet}
+      align="right"
+      width={200}
+    >
       {orders.map((o) => (
         <OptionRow
           key={o.value}
@@ -208,7 +289,12 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
         {/* Larger screens: a button per facet with its popover. Phones open the same menus as sheets. */}
         {facets.map((f) => (
           <div key={f.key} className="relative hidden md:block">
-            <FacetButton label={f.label} picked={f.picked} open={menu === f.key} onClick={() => openMenu(f.key)} />
+            <FacetButton
+              label={f.label}
+              picked={f.picked}
+              open={menu === f.key}
+              onClick={() => openMenu(f.key)}
+            />
             <Menu
               open={menu === f.key}
               onClose={close}
@@ -224,18 +310,27 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
 
         <span className="flex-1 max-md:hidden" />
         {tokens.length === 0 && (
-          <span className="mr-1 text-[0.78rem] text-muted tabular-nums max-md:hidden" aria-live="polite">
+          <span
+            className="mr-1 text-[0.78rem] text-muted tabular-nums max-md:hidden"
+            aria-live="polite"
+          >
             {shown === total ? `${total} philosophers` : `${shown} of ${total}`}
           </span>
         )}
 
         {/* The pill slides with CSS, not a shared layout: layout nodes in this sticky bar get re-measured
             whenever the page below reflows, and read the bar's sticking as movement. */}
-        <div role="radiogroup" aria-label="Show as" className="relative flex rounded-full bg-paper-2 p-[3px] max-md:hidden">
+        <div
+          role="radiogroup"
+          aria-label="Show as"
+          className="relative flex rounded-full bg-paper-2 p-[3px] max-md:hidden"
+        >
           <span
             aria-hidden
             className="absolute top-[3px] left-[3px] h-[38px] w-[38px] rounded-full bg-ink transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-            style={{ transform: `translateX(${VIEWS.findIndex((v) => v.value === view) * 38}px)` }}
+            style={{
+              transform: `translateX(${VIEWS.findIndex((v) => v.value === view) * 38}px)`,
+            }}
           />
           {VIEWS.map((v) => (
             <button
@@ -273,7 +368,12 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
           >
             {current.icon}
           </button>
-          <Menu open={menu === "view"} onClose={close} title="Show as" sheet={sheet}>
+          <Menu
+            open={menu === "view"}
+            onClose={close}
+            title="Show as"
+            sheet={sheet}
+          >
             <div role="radiogroup" aria-label="Show as">
               {VIEWS.map((v) => (
                 <OptionRow
@@ -292,10 +392,21 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
             </div>
             {/* Classic always opens the page. */}
             {view !== "classic" && (
-              <div role="radiogroup" aria-label="When you tap a face" className="mt-2 border-t border-rule pt-2">
+              <div
+                role="radiogroup"
+                aria-label="When you tap a face"
+                className="mt-2 border-t border-rule pt-2"
+              >
                 <p className="eyebrow px-4 pt-2 pb-1">When you tap a face</p>
                 {TAPS.map((t) => (
-                  <OptionRow key={t.value} kind="radio" label={t.label} hint={t.hint} checked={tap === t.value} onToggle={() => setTap(t.value)} />
+                  <OptionRow
+                    key={t.value}
+                    kind="radio"
+                    label={t.label}
+                    hint={t.hint}
+                    checked={tap === t.value}
+                    onToggle={() => setTap(t.value)}
+                  />
                 ))}
               </div>
             )}
@@ -305,10 +416,30 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
 
       {/* Phones: facets and order as a scrolling row of pills. */}
       <div className="scroll-row flex gap-2 overflow-x-auto px-4 pb-3 md:hidden">
-        {facets.map((f) => (
-          <FacetButton key={f.key} small label={f.label} picked={f.picked} open={menu === f.key} onClick={() => openMenu(f.key)} />
-        ))}
-        <BarButton small open={menu === "order"} onClick={() => openMenu("order")}>
+        {facets.map((f) => {
+          const single =
+            f.picked.length === 1
+              ? tokens.find((t) => t.group === f.key)
+              : undefined;
+          return (
+            <FacetButton
+              key={f.key}
+              small
+              label={f.label}
+              picked={f.picked}
+              open={menu === f.key}
+              onClick={() => openMenu(f.key)}
+              token={single}
+              arrived={!!single && arrivedKey === tokenKey(single)}
+              onRemove={() => set({ [GROUP_FIELD[f.key]]: [] })}
+            />
+          );
+        })}
+        <BarButton
+          small
+          open={menu === "order"}
+          onClick={() => openMenu("order")}
+        >
           {orderLabel}
         </BarButton>
         {sheet && orderMenu}
@@ -316,21 +447,35 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
 
       {tokens.length > 0 && (
         <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 pb-2 sm:px-8">
-          <span className="shrink-0 text-[0.8rem] text-muted tabular-nums" aria-live="polite">
+          <span
+            className="shrink-0 text-[0.8rem] text-muted tabular-nums"
+            aria-live="polite"
+          >
             <span className="font-semibold text-ink">{shown}</span> of {total}
           </span>
           {/* Wraps instead of scrolling: a scroll box would clip a chip flying in from a detail page. */}
-          <ul aria-label="Active filters" className="flex min-w-0 flex-1 flex-wrap gap-1.5 py-1.5">
+          {/* On phones a group with one pick is shown by its own pill, so only multi-pick groups get chips here. */}
+          <ul
+            aria-label="Active filters"
+            className={`min-w-0 flex-1 flex-wrap gap-1.5 py-1.5 md:flex ${phoneChips ? "flex" : "hidden"}`}
+          >
             {tokens.map((t) => (
-              <li key={tokenKey(t)} className="max-w-full min-w-0">
-                <ActiveChip t={t} arrived={arrivedKey === tokenKey(t)} onRemove={() => onChange(withoutToken(filters, t))} />
+              <li
+                key={tokenKey(t)}
+                className={`max-w-full min-w-0 ${pickedIn(filters, t.group) === 1 ? "max-md:hidden" : ""}`}
+              >
+                <ActiveChip
+                  t={t}
+                  arrived={arrivedKey === tokenKey(t)}
+                  onRemove={() => onChange(withoutToken(filters, t))}
+                />
               </li>
             ))}
           </ul>
           <button
             type="button"
             onClick={clear}
-            className="shrink-0 rounded-full px-1 py-2 text-[0.8rem] font-medium text-accent hover:underline"
+            className="ml-auto shrink-0 rounded-full px-1 py-2 text-[0.8rem] font-medium text-accent hover:underline"
           >
             Clear
           </button>
@@ -341,9 +486,18 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
 }
 
 /** Seventeen traditions: a find box keeps the list short. */
-function TraditionOptions({ filters, set }: { filters: Filters; set: (patch: Partial<Filters>) => void }) {
+function TraditionOptions({
+  filters,
+  set,
+}: {
+  filters: Filters;
+  set: (patch: Partial<Filters>) => void;
+}) {
   const [q, setQ] = useState("");
-  const matches = useMemo(() => TRADITIONS.filter((t) => fold(t).includes(fold(q.trim()))), [q]);
+  const matches = useMemo(
+    () => TRADITIONS.filter((t) => fold(t).includes(fold(q.trim()))),
+    [q],
+  );
   return (
     <>
       <div className="sticky top-0 z-10 bg-[var(--sheet)] px-3 pt-1.5 pb-2">
@@ -365,7 +519,11 @@ function TraditionOptions({ filters, set }: { filters: Filters; set: (patch: Par
           count={COUNT.get(tokenKey({ group: "tradition", value: t }))}
         />
       ))}
-      {matches.length === 0 && <p className="px-4 py-3 text-[0.85rem] text-muted">No tradition by that name.</p>}
+      {matches.length === 0 && (
+        <p className="px-4 py-3 text-[0.85rem] text-muted">
+          No tradition by that name.
+        </p>
+      )}
     </>
   );
 }
@@ -376,14 +534,32 @@ function FacetButton({
   open,
   onClick,
   small,
+  token,
+  arrived,
+  onRemove,
 }: {
   label: string;
   picked: string[];
   open: boolean;
   onClick: () => void;
   small?: boolean;
+  /** Phone pill with exactly one pick: it doubles as the active-filter chip, with its own remove button. */
+  token?: FilterToken;
+  arrived?: boolean;
+  onRemove?: () => void;
 }) {
   const on = picked.length > 0;
+  if (small && token && onRemove)
+    return (
+      <ActivePill
+        label={label}
+        token={token}
+        open={open}
+        arrived={!!arrived}
+        onClick={onClick}
+        onRemove={onRemove}
+      />
+    );
   return (
     <button
       type="button"
@@ -392,17 +568,91 @@ function FacetButton({
       aria-haspopup="dialog"
       aria-label={on ? `${label}: ${picked.join(", ")}` : label}
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full whitespace-nowrap transition-colors ${
-        small ? "h-9 pr-2.5 pl-3.5 text-[0.85rem]" : "h-11 pr-3 pl-4 text-[0.875rem]"
+        small
+          ? "h-9 pr-2.5 pl-3.5 text-[0.85rem]"
+          : "h-11 pr-3 pl-4 text-[0.875rem]"
       } ${on ? "bg-ink font-semibold text-paper" : `border ${open ? "border-ink text-ink" : "border-rule text-ink-2 hover:text-ink"}`}`}
     >
       {on && <span className="font-medium opacity-60">{label}</span>}
-      <span className="max-w-[11rem] truncate">{on ? (picked.length === 1 ? picked[0] : picked.length) : label}</span>
-      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      <span className="max-w-[11rem] truncate">
+        {on ? (picked.length === 1 ? picked[0] : picked.length) : label}
+      </span>
+      <ChevronDown
+        className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+      />
     </button>
   );
 }
 
-function BarButton({ open, onClick, small, children }: { open: boolean; onClick: () => void; small?: boolean; children: ReactNode }) {
+/** A phone facet pill with one pick: label and value open the menu, the cross removes the filter. */
+function ActivePill({
+  label,
+  token,
+  open,
+  arrived,
+  onClick,
+  onRemove,
+}: {
+  label: string;
+  token: FilterToken;
+  open: boolean;
+  arrived: boolean;
+  onClick: () => void;
+  onRemove: () => void;
+}) {
+  const [flying, setFlying] = useState(arrived);
+  return (
+    <m.div
+      layoutId={flying ? filterChipId(token) : undefined}
+      transition={{ layout: morph }}
+      onLayoutAnimationComplete={() => setFlying(false)}
+      className="relative inline-flex h-9 max-w-full shrink-0 items-center rounded-full bg-ink text-[0.85rem] text-paper"
+    >
+      {arrived && (
+        <m.span
+          aria-hidden
+          className="pointer-events-none absolute -inset-[3px] rounded-full border-2 border-accent"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ delay: 1.1, duration: 0.9 }}
+        />
+      )}
+      <button
+        type="button"
+        onClick={onClick}
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        aria-label={`${label}: ${token.value}`}
+        className="inline-flex h-9 min-w-0 items-center gap-1.5 rounded-l-full pr-1 pl-3.5 whitespace-nowrap"
+      >
+        <span className="shrink-0 font-medium opacity-60">{label}</span>
+        <span className="max-w-[11rem] truncate font-semibold">
+          {token.value}
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove filter: ${GROUP_LABELS[token.group]} ${token.value}`}
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-r-full"
+      >
+        <Close className="h-3.5 w-3.5 opacity-80" />
+      </button>
+    </m.div>
+  );
+}
+
+function BarButton({
+  open,
+  onClick,
+  small,
+  children,
+}: {
+  open: boolean;
+  onClick: () => void;
+  small?: boolean;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -410,11 +660,15 @@ function BarButton({ open, onClick, small, children }: { open: boolean; onClick:
       aria-expanded={open}
       aria-haspopup="dialog"
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border whitespace-nowrap transition-colors ${
-        small ? "h-9 pr-2.5 pl-3.5 text-[0.85rem]" : "h-11 pr-3 pl-4 text-[0.875rem]"
+        small
+          ? "h-9 pr-2.5 pl-3.5 text-[0.85rem]"
+          : "h-11 pr-3 pl-4 text-[0.875rem]"
       } ${open ? "border-ink text-ink" : "border-rule text-ink-2 hover:text-ink"}`}
     >
       {children}
-      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      <ChevronDown
+        className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+      />
     </button>
   );
 }
@@ -424,7 +678,12 @@ function useBarHeight(ref: RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => document.documentElement.style.setProperty("--bar-h", `${el.offsetHeight}px`));
+    const ro = new ResizeObserver(() =>
+      document.documentElement.style.setProperty(
+        "--bar-h",
+        `${el.offsetHeight}px`,
+      ),
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, [ref]);
@@ -435,7 +694,15 @@ function useBarHeight(ref: RefObject<HTMLDivElement | null>) {
  * chip's layoutId and flies in; once landed it lets the id go, so later reflows of the page under
  * this sticky bar can't set it drifting.
  */
-function ActiveChip({ t, arrived, onRemove }: { t: FilterToken; arrived: boolean; onRemove: () => void }) {
+function ActiveChip({
+  t,
+  arrived,
+  onRemove,
+}: {
+  t: FilterToken;
+  arrived: boolean;
+  onRemove: () => void;
+}) {
   const [flying, setFlying] = useState(arrived);
   return (
     <m.button
@@ -457,7 +724,10 @@ function ActiveChip({ t, arrived, onRemove }: { t: FilterToken; arrived: boolean
         />
       )}
       {/* `layout` keeps the label from stretching while the chip changes size mid-flight. */}
-      <m.span layout={flying ? "position" : false} className="inline-flex min-w-0 items-center gap-1.5">
+      <m.span
+        layout={flying ? "position" : false}
+        className="inline-flex min-w-0 items-center gap-1.5"
+      >
         <span className="shrink-0 text-paper/60">{GROUP_LABELS[t.group]}</span>
         <span className="truncate font-medium">{t.value}</span>
         <Close className="h-3.5 w-3.5 shrink-0 opacity-80" />
