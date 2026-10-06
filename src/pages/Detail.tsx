@@ -1,4 +1,4 @@
-import { m, type PanInfo, type Variants } from "framer-motion";
+import { m, useIsPresent, type PanInfo, type Variants } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { ArrowLeft, ArrowRight } from "../components/Icons";
@@ -77,15 +77,18 @@ export function Detail({ slug }: { slug: string }) {
   const go = (to: Philosopher, d: -1 | 1) =>
     navigate(`/p/${to.slug}`, { replace: true, state: { ...state, dir: d } satisfies DetailState });
 
-  // Lock the page behind the overlay.
+  // Lock the page behind the overlay while it's open. Closing hands the page back at once (the
+  // overlay stays mounted to animate out), so the gallery scrolls during the morph, not after it.
+  const present = useIsPresent();
   useEffect(() => {
+    if (!present) return;
     const el = document.documentElement;
     const prevOverflow = el.style.overflow;
     el.style.overflow = "hidden";
     return () => {
       el.style.overflow = prevOverflow;
     };
-  }, []);
+  }, [present]);
 
   // On every philosopher change: reset the overlay scroll, and quietly scroll the grid underneath
   // so this philosopher's card is on screen — then closing always morphs back to a visible card.
@@ -153,6 +156,8 @@ export function Detail({ slug }: { slug: string }) {
       aria-label={p ? p.name : "Not found"}
       // Keeps the overlay mounted while children run their exit animations.
       exit={{ opacity: 1, transition: { duration: 0.45 } }}
+      // …and lets touches and wheels through to the gallery meanwhile.
+      style={{ pointerEvents: present ? undefined : "none" }}
     >
       <m.div
         className="absolute inset-0 bg-paper"

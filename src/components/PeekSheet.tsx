@@ -73,9 +73,10 @@ export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSear
           type="button"
           onClick={onClose}
           aria-label="Close preview"
-          className="grid h-11 w-11 shrink-0 place-items-center self-start rounded-full bg-paper-2 text-ink"
+          // Quiet: a swipe down closes it too. Still a full 44px target.
+          className="-mt-2 -mr-2.5 grid h-11 w-11 shrink-0 place-items-center self-start rounded-full text-muted transition-colors hover:text-ink"
         >
-          <Close className="h-4 w-4" />
+          <Close className="h-[15px] w-[15px]" />
         </button>
       </div>
       <p className="mt-3.5 font-display text-[1.3rem] leading-snug text-pretty text-ink">{p.facts[0]}</p>
