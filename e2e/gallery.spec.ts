@@ -5,15 +5,11 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
 });
 
-test("faces by era, with the rail jumping between eras", async ({ page }) => {
+test("faces grouped by era", async ({ page }) => {
   await snap(page, "g1-faces-top");
   for (const era of ["Ancient", "Medieval", "Early Modern", "Modern", "Contemporary"]) {
     await expect(page.getByRole("region", { name: era, exact: true })).toBeAttached();
   }
-  await page.getByRole("link", { name: "Jump to Modern" }).click();
-  await expect(page.getByRole("heading", { name: "Modern", exact: true })).toBeInViewport();
-  await page.waitForTimeout(300);
-  await snap(page, "g2-faces-jumped");
 });
 
 test("view and order live in the filter panel, and the choice of view is remembered", async ({ page }) => {

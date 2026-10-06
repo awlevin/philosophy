@@ -6,7 +6,6 @@ import { Gallery } from "../components/Gallery";
 import { ArrowLeft, ArrowRight } from "../components/Icons";
 import { PeekSheet } from "../components/PeekSheet";
 import { Thumb } from "../components/Portrait";
-import { Rail } from "../components/Rail";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
 import { EMPTY_FILTERS, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
@@ -32,8 +31,6 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
   const hidden = useMemo(() => philosophers.filter((p) => !list.includes(p)), [list]);
   const sections = useMemo(() => toSections(list, filters.sort), [list, filters.sort]);
   const [view, setView] = useViewMode();
-  // The rail earns its place only when there is a long way to scroll.
-  const showRail = list.length > 12 && sections.length >= 3;
 
   const [peek, setPeek] = useState<string | null>(null);
   const closePeek = useCallback(() => setPeek(null), []);
@@ -108,11 +105,10 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
 
       <main
         id="grid"
-        className={`mx-auto px-4 pb-24 sm:px-8 ${view === "list" ? "max-w-3xl pt-3" : "max-w-[1400px]"} ${showRail ? "pr-10 sm:pr-16" : ""}`}
+        className={`mx-auto px-4 pb-24 sm:px-8 ${view === "list" ? "max-w-3xl pt-3" : "max-w-[1400px]"}`}
       >
         <Gallery
           sections={sections}
-          railGutter={showRail}
           view={view}
           timeline={filters.sort === "chrono"}
           gridSearch={search}
@@ -141,8 +137,6 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
           </m.div>
         )}
       </main>
-
-      {showRail && !covered && <Rail sections={sections} timeline={filters.sort === "chrono"} />}
 
       <AnimatePresence>
         {peeked && <PeekSheet key="peek" p={peeked} gridSearch={search} onClose={closePeek} />}

@@ -8,8 +8,6 @@ import { PhilosopherRow } from "./PhilosopherRow";
 
 type Props = {
   sections: Section[];
-  /** The main column leaves room for the jump rail; full-bleed bands reach across it. */
-  railGutter: boolean;
   view: ViewMode;
   /** Sections are eras (by time) rather than letters (A–Z). */
   timeline: boolean;
@@ -23,7 +21,7 @@ type Props = {
   onReturned: () => void;
 };
 
-export function Gallery({ sections, railGutter, view, timeline, gridSearch, eagerFirst, deferImages, peeking, onPeek, returningSlug, onReturned }: Props) {
+export function Gallery({ sections, view, timeline, gridSearch, eagerFirst, deferImages, peeking, onPeek, returningSlug, onReturned }: Props) {
   const item = (p: Philosopher, i: number) => ({
     p,
     gridSearch,
@@ -64,11 +62,7 @@ export function Gallery({ sections, railGutter, view, timeline, gridSearch, eage
             </>
           ) : (
             <>
-              <div
-                className={`sticky top-[var(--bar-h,4.5rem)] z-10 -ml-4 flex h-11 items-center gap-2.5 bg-[var(--era-tint,var(--paper-2))] pl-4 sm:mx-0 sm:rounded-lg sm:px-4 ${
-                  railGutter ? "-mr-10 pr-10" : "-mr-4 pr-4"
-                }`}
-              >
+              <div className="sticky top-[var(--bar-h,4.5rem)] z-10 -mx-4 flex h-11 items-center gap-2.5 bg-[var(--era-tint,var(--paper-2))] px-4 sm:mx-0 sm:rounded-lg">
                 {s.era && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--era)]" />}
                 <h2 className="font-display text-[1.4rem] font-semibold text-ink">{s.title}</h2>
                 {s.range && <span className="text-[0.75rem] font-medium text-[var(--era-ink)]">{s.range}</span>}

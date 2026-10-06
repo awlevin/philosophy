@@ -17,7 +17,7 @@
 
 /* ---------- Theme tokens ---------- */
 /*
- * Each era has a color (dots, bars, rails), an ink (text on paper, 4.5:1+) and a tint
+ * Each era has a color (dots, lines), an ink (text on paper, 4.5:1+) and a tint
  * (portrait grounds, section bands). Components read them as var(--era-<key>[-ink|-tint]).
  */
 :root {
