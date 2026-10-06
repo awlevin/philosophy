@@ -29,6 +29,8 @@ export type DetailState = {
   fromGrid?: boolean;
   /** -1 / 1 when reached via prev/next, for the slide direction. */
   dir?: -1 | 1;
+  /** Opened from the peek sheet: the sheet grows into the page, so nothing flies in from the card. */
+  fromPeek?: boolean;
 };
 
 /** History state of a gallery reached by tapping a chip on a detail page. */
@@ -121,7 +123,11 @@ export function Detail({ slug }: { slug: string }) {
     else if (info.offset.x > 70 || info.velocity.x > 450) go(prev, -1);
   };
 
-  const layoutTransition = dir ? instant : morph;
+  const fromPeek = !!state.fromPeek && !dir;
+  const layoutTransition = dir || fromPeek ? instant : morph;
+  // From the peek sheet the portrait and title rise into place with the page instead of morphing.
+  const rise = (delay: number) =>
+    fromPeek ? { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.45, ease, delay } } : {};
 
   // Tapping a chip filters the gallery to that value. The chip takes a shared layoutId for a frame
   // first, so the gallery's pinned chip can fly from exactly where it was tapped.
@@ -202,16 +208,18 @@ export function Detail({ slug }: { slug: string }) {
             <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14 lg:gap-20">
               <div>
                 <div className="md:sticky md:top-24">
-                  <Portrait
-                    p={p}
-                    eager
-                    priority
-                    withGridPlaceholder={!!state.fromGrid}
-                    sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 92vw"
-                    radius={view === "classic" ? 4 : 16}
-                    className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
-                    layoutTransition={layoutTransition}
-                  />
+                  <m.div {...rise(0.08)}>
+                    <Portrait
+                      p={p}
+                      eager
+                      priority
+                      withGridPlaceholder={!!state.fromGrid}
+                      sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 92vw"
+                      radius={view === "classic" ? 4 : 16}
+                      className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
+                      layoutTransition={layoutTransition}
+                    />
+                  </m.div>
                   <m.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -236,14 +244,16 @@ export function Detail({ slug }: { slug: string }) {
                   {p.era} · {p.tradition.join(" / ")}
                 </m.p>
 
-                <m.h1
-                  layoutId={nameId(p.slug)}
-                  layoutCrossfade={false}
-                  transition={{ layout: layoutTransition }}
-                  className="mt-3 origin-top-left font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.01em] text-balance text-ink sm:text-[3.75rem] lg:text-[4.5rem]"
-                >
-                  {p.name}
-                </m.h1>
+                <m.div {...rise(0.14)}>
+                  <m.h1
+                    layoutId={nameId(p.slug)}
+                    layoutCrossfade={false}
+                    transition={{ layout: layoutTransition }}
+                    className="mt-3 origin-top-left font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.01em] text-balance text-ink sm:text-[3.75rem] lg:text-[4.5rem]"
+                  >
+                    {p.name}
+                  </m.h1>
+                </m.div>
 
                 <m.div
                   initial={{ opacity: 0, y: 8 }}

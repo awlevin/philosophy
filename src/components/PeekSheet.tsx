@@ -1,20 +1,31 @@
 import { m } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import type { Philosopher } from "../data/philosophers";
 import { eraVars } from "../lib/era";
 import { lifespan, shortName } from "../lib/format";
+import { ease } from "../lib/motion";
 import type { DetailState } from "../pages/Detail";
 import { ArrowRight, Close } from "./Icons";
 import { Thumb } from "./Portrait";
 
 /**
  * A quick look from the gallery on touch screens: face, dates, one fact. Swipe down to dismiss,
- * up (or "Open") for the full page, which morphs from the card underneath.
+ * up (or "Open") for the full page.
+ *
+ * Opening grows the sheet up to fill the screen as the page fades in over it, rather than flying
+ * the page out of the card hidden behind the sheet (the page knows, via `fromPeek`).
  */
 export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSearch: string; onClose: () => void }) {
   const navigate = useNavigate();
-  const open = () => navigate(`/p/${p.slug}`, { state: { gridSearch, fromGrid: true } satisfies DetailState });
+  const [opening, setOpening] = useState(false);
+  const open = () => {
+    setOpening(true);
+    // One frame for the exit to pick up `opening` before the sheet unmounts.
+    requestAnimationFrame(() =>
+      navigate(`/p/${p.slug}`, { state: { gridSearch, fromGrid: true, fromPeek: true } satisfies DetailState }),
+    );
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -35,7 +46,11 @@ export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSear
       }}
       initial={{ y: "120%" }}
       animate={{ y: 0 }}
-      exit={{ y: "120%", transition: { duration: 0.22, ease: "easeIn" } }}
+      exit={
+        opening
+          ? { height: "100dvh", borderRadius: 0, opacity: [1, 1, 0], transition: { duration: 0.36, ease, opacity: { times: [0, 0.55, 1], duration: 0.36 } } }
+          : { y: "120%", transition: { duration: 0.22, ease: "easeIn" } }
+      }
       transition={{ type: "spring", stiffness: 420, damping: 38 }}
       style={eraVars(p.era)}
       // Phones: flush with the bottom edge and padded past the home indicator, so nothing shows

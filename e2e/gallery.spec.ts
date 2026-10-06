@@ -109,3 +109,22 @@ test("on touch, peeking can be turned off so a tap opens the page", async ({ pag
   await card.click();
   await expect(page).toHaveURL(/\/p\/kant$/);
 });
+
+test("on touch, opening from the peek grows the page out of the sheet", async ({ page }) => {
+  test.skip(!isTouch(), "peek is for touch screens");
+  const card = page.locator('[data-slug="kant"] a');
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
+  const peek = page.getByRole("dialog", { name: "Immanuel Kant, preview" });
+  await expect(peek).toBeVisible();
+  await page.waitForTimeout(500);
+  await peek.getByRole("button", { name: "Open Kant" }).click();
+  let elapsed = 0;
+  for (const ms of [40, 120, 220, 350, 550, 900]) {
+    await page.waitForTimeout(ms - elapsed);
+    elapsed = ms;
+    await snap(page, `p-open-${String(ms).padStart(4, "0")}ms`);
+  }
+  await expect(page).toHaveURL(/\/p\/kant$/);
+  await expect(page.getByRole("heading", { name: "Immanuel Kant", level: 1 })).toBeInViewport();
+});
