@@ -69,7 +69,7 @@ function slackHome() {
   return shell(
     `<div class="abs" style="left:0;right:0;top:0;height:410px;padding:0 56px;display:flex;flex-direction:column;justify-content:center">
       <div class="d" style="font-size:112px;line-height:.95;white-space:nowrap">Philosophers</div>
-      <div style="font-size:44px;line-height:1.22;color:#46434c;margin-top:20px;font-weight:500;text-wrap:balance">Sixty-one philosophers with skimmable facts about each of them.</div></div>
+      <div style="font-size:56px;line-height:1.18;color:#46434c;margin-top:20px;font-weight:500;text-wrap:balance">The big ideas of 61 philosophers.</div></div>
     <div class="abs" style="left:0;right:0;bottom:0;height:390px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:5px;background:#f7f5f0">${tiles}</div>`,
     "#f7f5f0",
     "#17161b",
