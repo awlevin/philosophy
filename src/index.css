@@ -157,12 +157,18 @@ body {
   pointer-events: none;
   transition: opacity 400ms ease;
 }
-/* A hint of the original color on hover */
-.card:hover .portrait img,
+/* A hint of the original color on hover (real pointers only: touch keeps :hover stuck after a tap) */
+@media (hover: hover) {
+  .card:hover .portrait img {
+    filter: grayscale(0.35) contrast(1.04);
+  }
+  .card:hover .portrait::after {
+    opacity: calc(var(--portrait-tint-opacity) * 0.5);
+  }
+}
 .card:focus-visible .portrait img {
   filter: grayscale(0.35) contrast(1.04);
 }
-.card:hover .portrait::after,
 .card:focus-visible .portrait::after {
   opacity: calc(var(--portrait-tint-opacity) * 0.5);
 }

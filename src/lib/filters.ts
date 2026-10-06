@@ -76,6 +76,72 @@ export function serializeFilters(f: Filters): string {
 
 export const activeCount = (f: Filters) => f.eras.length + f.traditions.length + f.questions.length;
 
+export const EMPTY_FILTERS: Filters = { eras: [], traditions: [], questions: [], q: "", sort: "chrono" };
+
+/** One selected taxonomy value, e.g. Tradition: Greek. */
+export type FilterToken =
+  | { group: "era"; value: Era }
+  | { group: "tradition"; value: Tradition }
+  | { group: "question"; value: BigQuestion };
+
+export const GROUP_LABELS: Record<FilterToken["group"], string> = {
+  era: "Era",
+  tradition: "Tradition",
+  question: "Question",
+};
+
+export function tokenKey(t: FilterToken): string {
+  switch (t.group) {
+    case "era":
+      return `era-${eraCodec.key(t.value)}`;
+    case "tradition":
+      return `tradition-${traditionCodec.key(t.value)}`;
+    case "question":
+      return `question-${questionCodec.key(t.value)}`;
+  }
+}
+
+/** Shared layoutId: a chip on a detail page flies into the filter bar when tapped. */
+export const filterChipId = (t: FilterToken) => `filter-chip-${tokenKey(t)}`;
+
+export function activeTokens(f: Filters): FilterToken[] {
+  return [
+    ...f.eras.map((value): FilterToken => ({ group: "era", value })),
+    ...f.traditions.map((value): FilterToken => ({ group: "tradition", value })),
+    ...f.questions.map((value): FilterToken => ({ group: "question", value })),
+  ];
+}
+
+export function hasToken(f: Filters, t: FilterToken): boolean {
+  return activeTokens(f).some((x) => tokenKey(x) === tokenKey(t));
+}
+
+export function withoutToken(f: Filters, t: FilterToken): Filters {
+  switch (t.group) {
+    case "era":
+      return { ...f, eras: f.eras.filter((v) => v !== t.value) };
+    case "tradition":
+      return { ...f, traditions: f.traditions.filter((v) => v !== t.value) };
+    case "question":
+      return { ...f, questions: f.questions.filter((v) => v !== t.value) };
+  }
+}
+
+/** Filters selecting just this one value. */
+export function onlyToken(t: FilterToken): Filters {
+  switch (t.group) {
+    case "era":
+      return { ...EMPTY_FILTERS, eras: [t.value] };
+    case "tradition":
+      return { ...EMPTY_FILTERS, traditions: [t.value] };
+    case "question":
+      return { ...EMPTY_FILTERS, questions: [t.value] };
+  }
+}
+
+/** Query string of a gallery showing just this one value. */
+export const tokenSearch = (t: FilterToken) => serializeFilters(onlyToken(t));
+
 /** OR within a group, AND across groups; name search matches name + aka, diacritics-insensitive. */
 export function applyFilters(list: Philosopher[], f: Filters): Philosopher[] {
   const q = fold(f.q.trim());

@@ -1,11 +1,22 @@
 import { m, type PanInfo, type Variants } from "framer-motion";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { ArrowLeft, ArrowRight } from "../components/Icons";
 import { Portrait } from "../components/Portrait";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
-import { eraCodec, questionCodec, traditionCodec } from "../lib/filters";
+import {
+  EMPTY_FILTERS,
+  activeTokens,
+  applyFilters,
+  filterChipId,
+  hasToken,
+  onlyToken,
+  parseFilters,
+  tokenKey,
+  tokenSearch,
+  type FilterToken,
+} from "../lib/filters";
 import { lifespan } from "../lib/format";
 import { ease, morph, nameId } from "../lib/motion";
 
@@ -16,6 +27,14 @@ export type DetailState = {
   fromGrid?: boolean;
   /** -1 / 1 when reached via prev/next, for the slide direction. */
   dir?: -1 | 1;
+};
+
+/** History state of a gallery reached by tapping a chip on a detail page. */
+export type GalleryState = {
+  /** The philosopher we came from, for "Back to …". */
+  fromDetail?: string;
+  /** tokenKey of the chip that was tapped. */
+  chip?: string;
 };
 
 const instant = { duration: 0 };
@@ -100,6 +119,22 @@ export function Detail({ slug }: { slug: string }) {
   };
 
   const layoutTransition = dir ? instant : morph;
+
+  // Tapping a chip filters the gallery to that value. The chip takes a shared layoutId for a frame
+  // first, so the gallery's pinned chip can fly from exactly where it was tapped.
+  const similar = useMemo(() => (p ? similarTokens(p) : []), [p]);
+  const [launching, setLaunching] = useState<string | null>(null);
+  useEffect(() => setLaunching(null), [slug]);
+  const launch = (e: MouseEvent, t: FilterToken) => {
+    if (!p || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    const to = { pathname: "/", search: tokenSearch(t) };
+    const next: GalleryState = { fromDetail: p.slug, chip: tokenKey(t) };
+    // Already filtered by this value underneath: its chip is in the bar already, nothing to fly.
+    if (hasToken(parseFilters(state.gridSearch ?? ""), t)) return navigate(to, { state: next });
+    setLaunching(tokenKey(t));
+    requestAnimationFrame(() => navigate(to, { state: next }));
+  };
 
   return (
     <m.div
@@ -191,20 +226,9 @@ export function Detail({ slug }: { slug: string }) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={fadeOut}
                   transition={{ delay: dir ? 0 : 0.15, duration: 0.45, ease }}
-                  className="eyebrow flex flex-wrap gap-x-2"
+                  className="eyebrow"
                 >
-                  <Link to={`/?era=${eraCodec.key(p.era)}`} className="hover:text-accent">
-                    {p.era}
-                  </Link>
-                  <span aria-hidden>·</span>
-                  {p.tradition.map((t, k) => (
-                    <span key={t} className="contents">
-                      {k > 0 && <span aria-hidden>/</span>}
-                      <Link to={`/?tradition=${traditionCodec.key(t)}`} className="hover:text-accent">
-                        {t}
-                      </Link>
-                    </span>
-                  ))}
+                  {p.era} · {p.tradition.join(" / ")}
                 </m.p>
 
                 <m.h1
@@ -224,15 +248,11 @@ export function Detail({ slug }: { slug: string }) {
                 >
                   {p.aka && <p className="mt-1 font-display text-[1.5rem] text-ink-2 italic">{p.aka}</p>}
                   <p className="mt-3 text-[0.95rem] tracking-[0.06em] text-ink-2 tabular-nums">{lifespan(p)}</p>
-                  <ul className="mt-5 flex flex-wrap gap-1.5" aria-label="Big Questions">
-                    {p.questions.map((q) => (
-                      <li key={q}>
-                        <Link
-                          to={`/?question=${questionCodec.key(q)}`}
-                          className="inline-flex h-[1.875rem] items-center rounded-full border border-rule px-3 text-[0.8rem] text-ink-2 transition-colors hover:border-accent hover:text-accent"
-                        >
-                          {q}
-                        </Link>
+                  <p className="eyebrow mt-6">See others like {p.name}</p>
+                  <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label={`See others like ${p.name}`}>
+                    {similar.map(({ t, count }) => (
+                      <li key={tokenKey(t)}>
+                        <SimilarChip t={t} count={count} launching={launching === tokenKey(t)} onClick={(e) => launch(e, t)} />
                       </li>
                     ))}
                   </ul>
@@ -296,6 +316,56 @@ export function Detail({ slug }: { slug: string }) {
         </>
       )}
     </m.div>
+  );
+}
+
+/** Era, traditions and Big Questions of a philosopher, each with how many share it. */
+function similarTokens(p: Philosopher): { t: FilterToken; count: number }[] {
+  const own = { ...EMPTY_FILTERS, eras: [p.era], traditions: [...p.tradition], questions: p.questions };
+  return activeTokens(own).map((t) => ({ t, count: applyFilters(philosophers, onlyToken(t)).length }));
+}
+
+function SimilarChip({
+  t,
+  count,
+  launching,
+  onClick,
+}: {
+  t: FilterToken;
+  count: number;
+  launching: boolean;
+  onClick: (e: MouseEvent) => void;
+}) {
+  const body = (
+    <>
+      <span>{t.value}</span>
+      <span className={`tabular-nums ${launching ? "text-paper/60" : "text-muted"}`}>{count}</span>
+    </>
+  );
+  const chip = "inline-flex h-9 items-center gap-2 rounded-full px-3.5 text-[0.8rem] whitespace-nowrap";
+  return (
+    <Link
+      to={{ pathname: "/", search: tokenSearch(t) }}
+      onClick={onClick}
+      aria-label={`${t.value}: show all ${count}`}
+      className="group block rounded-full"
+    >
+      {launching ? (
+        <m.span layoutId={filterChipId(t)} transition={{ layout: morph }} className={`${chip} bg-ink text-paper`}>
+          <m.span layout="position" className="inline-flex items-center gap-2">
+            {body}
+          </m.span>
+        </m.span>
+      ) : (
+        <span
+          className={`${chip} border border-rule text-ink-2 transition-colors group-hover:border-ink group-hover:text-ink ${
+            t.group === "question" ? "" : "font-medium"
+          }`}
+        >
+          {body}
+        </span>
+      )}
+    </Link>
   );
 }
 

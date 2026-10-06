@@ -63,6 +63,15 @@ export function Portrait({
   );
 }
 
+/** Small portrait with no shared layout (avatars, face piles), so it never steals a card's morph. */
+export function Thumb({ p, className = "" }: { p: Philosopher; className?: string }) {
+  return (
+    <div className={`portrait aspect-square ${className}`}>
+      {p.portrait.src ? <Img p={p} sizes="64px" alt="" /> : <Monogram name={p.name} />}
+    </div>
+  );
+}
+
 function Img({
   p,
   sizes,

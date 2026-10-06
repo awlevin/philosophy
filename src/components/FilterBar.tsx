@@ -1,8 +1,20 @@
 import { AnimatePresence, m } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ERAS, ERA_RANGES, QUESTIONS, TRADITIONS } from "../data/philosophers";
-import { activeCount, toggle, type Filters, type SortMode } from "../lib/filters";
-import { ease } from "../lib/motion";
+import {
+  EMPTY_FILTERS,
+  GROUP_LABELS,
+  activeCount,
+  activeTokens,
+  filterChipId,
+  toggle,
+  tokenKey,
+  withoutToken,
+  type FilterToken,
+  type Filters,
+  type SortMode,
+} from "../lib/filters";
+import { ease, morph } from "../lib/motion";
 import { Close, Search, Sliders } from "./Icons";
 
 type Props = {
@@ -10,9 +22,13 @@ type Props = {
   onChange: (f: Filters) => void;
   shown: number;
   total: number;
+  /** Key of a chip that just flew in from a detail page: ring it briefly so the eye lands on it. */
+  arrivedKey?: string;
+  /** Lift above the closing detail overlay while a chip flies in. */
+  raised?: boolean;
 };
 
-export function FilterBar({ filters, onChange, shown, total }: Props) {
+export function FilterBar({ filters, onChange, shown, total, arrivedKey, raised }: Props) {
   const [open, setOpen] = useState(false);
   const desktop = useMedia("(min-width: 768px)");
   const sentinel = useRef<HTMLDivElement>(null);
@@ -30,9 +46,10 @@ export function FilterBar({ filters, onChange, shown, total }: Props) {
   // Desktop shows the chip groups inline under the bar; once the bar is pinned (or on mobile),
   // they drop down from it on demand instead, so the pinned bar stays one row tall.
   const showToggle = !desktop || stuck;
-  const clear = () => onChange({ eras: [], traditions: [], questions: [], q: "", sort: filters.sort });
+  const clear = () => onChange({ ...EMPTY_FILTERS, sort: filters.sort });
   const countLabel = shown === total ? `${total} philosophers` : `${shown} of ${total}`;
   const n = activeCount(filters);
+  const tokens = activeTokens(filters);
   const dirty = n > 0 || filters.q !== "";
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
 
@@ -66,7 +83,8 @@ export function FilterBar({ filters, onChange, shown, total }: Props) {
     <>
       <div ref={sentinel} aria-hidden className="h-px" />
       <div
-        className={`sticky top-0 z-30 bg-paper/90 backdrop-blur-md transition-[border-color] supports-[backdrop-filter]:bg-paper/75 ${
+        data-filter-bar
+        className={`sticky top-0 ${raised ? "z-[60]" : "z-30"} bg-paper/90 backdrop-blur-md transition-[border-color] supports-[backdrop-filter]:bg-paper/75 ${
           stuck ? "border-b border-rule" : "border-b border-rule md:border-transparent"
         }`}
       >
@@ -108,21 +126,46 @@ export function FilterBar({ filters, onChange, shown, total }: Props) {
             </button>
           )}
 
-          <div className="ml-auto hidden items-center gap-3 sm:flex">
-            <span className="text-[0.78rem] text-muted tabular-nums" aria-live="polite">
-              {countLabel}
-            </span>
-            {dirty && (
-              <button
-                type="button"
-                onClick={clear}
-                className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.78rem] font-medium text-accent hover:bg-chip"
-              >
-                <Close className="h-3.5 w-3.5" /> Clear
-              </button>
-            )}
-          </div>
+          {tokens.length === 0 && (
+            <div className="ml-auto hidden items-center gap-3 sm:flex">
+              <span className="text-[0.78rem] text-muted tabular-nums" aria-live="polite">
+                {countLabel}
+              </span>
+              {dirty && (
+                <button
+                  type="button"
+                  onClick={clear}
+                  className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.78rem] font-medium text-accent hover:bg-chip"
+                >
+                  <Close className="h-3.5 w-3.5" /> Clear
+                </button>
+              )}
+            </div>
+          )}
         </div>
+
+        {tokens.length > 0 && (
+          <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 pb-2 sm:px-8">
+            <span className="shrink-0 text-[0.8rem] text-muted tabular-nums" aria-live="polite">
+              <span className="font-semibold text-ink">{shown}</span> of {total}
+            </span>
+            {/* Wraps instead of scrolling: a scroll box would clip a chip flying in from a detail page. */}
+            <ul aria-label="Active filters" className="flex min-w-0 flex-1 flex-wrap gap-1.5 py-1.5">
+              {tokens.map((t) => (
+                <li key={tokenKey(t)} className="shrink-0">
+                  <ActiveChip t={t} arrived={arrivedKey === tokenKey(t)} onRemove={() => onChange(withoutToken(filters, t))} />
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              onClick={clear}
+              className="shrink-0 rounded-full px-1 py-2 text-[0.8rem] font-medium text-accent hover:underline"
+            >
+              Clear
+            </button>
+          </div>
+        )}
 
         <AnimatePresence>
           {showToggle && open && (
@@ -210,6 +253,36 @@ function Chip({
     >
       {children}
     </button>
+  );
+}
+
+/** A selected filter, pinned in the bar. Shares its layoutId with the detail page's chip of the same value. */
+function ActiveChip({ t, arrived, onRemove }: { t: FilterToken; arrived: boolean; onRemove: () => void }) {
+  return (
+    <m.button
+      type="button"
+      layoutId={filterChipId(t)}
+      transition={{ layout: morph }}
+      onClick={onRemove}
+      aria-label={`Remove filter: ${GROUP_LABELS[t.group]} ${t.value}`}
+      className="relative inline-flex h-9 items-center gap-1.5 rounded-full bg-ink pr-2.5 pl-3.5 text-[0.8rem] whitespace-nowrap text-paper"
+    >
+      {arrived && (
+        <m.span
+          aria-hidden
+          className="pointer-events-none absolute -inset-[3px] rounded-full border-2 border-accent"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ delay: 1.1, duration: 0.9 }}
+        />
+      )}
+      {/* `layout` keeps the label from stretching while the chip changes size mid-flight. */}
+      <m.span layout="position" className="inline-flex items-center gap-1.5">
+        <span className="text-paper/60">{GROUP_LABELS[t.group]}</span>
+        <span className="font-medium">{t.value}</span>
+        <Close className="h-3.5 w-3.5 opacity-80" />
+      </m.span>
+    </m.button>
   );
 }
 

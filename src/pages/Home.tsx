@@ -1,11 +1,15 @@
 import { AnimatePresence, m } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { FilterBar } from "../components/FilterBar";
+import { ArrowLeft, ArrowRight } from "../components/Icons";
 import { PhilosopherCard } from "../components/PhilosopherCard";
+import { Thumb } from "../components/Portrait";
 import { ThemeToggle } from "../components/ThemeToggle";
-import { philosophers } from "../data/philosophers";
-import { applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
+import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
+import { EMPTY_FILTERS, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
+import { ease } from "../lib/motion";
+import type { GalleryState } from "./Detail";
 
 type Props = {
   /** Query string that drives the grid (the live URL on "/", the remembered one under a detail page). */
@@ -18,8 +22,33 @@ type Props = {
 
 export function Home({ search, covered, returningSlug, onReturned }: Props) {
   const navigate = useNavigate();
+  const location = useLocation();
   const filters = useMemo(() => parseFilters(search), [search]);
   const list = useMemo(() => applyFilters(philosophers, filters), [filters]);
+  const hidden = useMemo(() => philosophers.filter((p) => !list.includes(p)), [list]);
+
+  // Reached by tapping a chip on a detail page. Changing filters here replaces the entry without
+  // this state, so "Back to …" goes away once the view is no longer the one that chip produced.
+  const arrival = covered ? {} : ((location.state ?? {}) as GalleryState);
+  const cameFrom = arrival.fromDetail ? bySlug.get(arrival.fromDetail) : undefined;
+
+  // The filtered grid can put the returning card somewhere else entirely; bring it on screen so the
+  // portrait has a visible place to land: from the top of the results if it fits, else centered.
+  // Layout positions, not the in-flight transformed ones.
+  useLayoutEffect(() => {
+    if (!returningSlug) return;
+    const card = document.querySelector<HTMLElement>(`[data-slug="${returningSlug}"]`);
+    const grid = document.getElementById("grid");
+    if (!card || !grid) return;
+    const bar = document.querySelector<HTMLElement>("[data-filter-bar]")?.offsetHeight ?? 0;
+    const cardTop = pageTop(card);
+    const cardBottom = cardTop + card.offsetHeight;
+    const fits = (scroll: number) => cardTop >= scroll + bar && cardBottom <= scroll + window.innerHeight;
+    if (fits(window.scrollY)) return;
+    const resultsTop = pageTop(grid) - bar;
+    const target = fits(resultsTop) ? resultsTop : cardTop - (window.innerHeight + bar - card.offsetHeight) / 2;
+    window.scrollTo({ top: target, behavior: "instant" });
+  }, [returningSlug]);
 
   // Landing directly on a detail page: the grid underneath is hidden, so don't let its images
   // compete with the detail portrait. Load them shortly after, so closing still morphs to a face.
@@ -32,6 +61,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
   }, [covered, deferImages]);
 
   const setFilters = (f: Filters) => navigate({ pathname: "/", search: serializeFilters(f) }, { replace: true });
+  const clearFilters = () => setFilters({ ...EMPTY_FILTERS, sort: filters.sort });
 
   return (
     <div inert={covered} aria-hidden={covered || undefined}>
@@ -50,9 +80,16 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
         </div>
       </header>
 
-      <FilterBar filters={filters} onChange={setFilters} shown={list.length} total={philosophers.length} />
+      <FilterBar
+        filters={filters}
+        onChange={setFilters}
+        shown={list.length}
+        total={philosophers.length}
+        arrivedKey={arrival.chip}
+        raised={!!cameFrom && returningSlug === cameFrom.slug}
+      />
 
-      <main className="mx-auto max-w-[1400px] px-4 pt-8 pb-24 sm:px-8 sm:pt-10">
+      <main id="grid" className="mx-auto max-w-[1400px] px-4 pt-8 pb-24 sm:px-8 sm:pt-10">
         <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           <AnimatePresence mode="popLayout" initial={false}>
             {list.map((p, i) => (
@@ -70,12 +107,16 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
           </AnimatePresence>
         </ul>
 
+        {list.length > 0 && hidden.length > 0 && (
+          <HiddenRow hidden={hidden} onShowAll={clearFilters} />
+        )}
+
         {list.length === 0 && (
           <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-24 text-center">
             <p className="font-display text-3xl text-ink-2 italic">No one fits all of that.</p>
             <button
               type="button"
-              onClick={() => setFilters({ eras: [], traditions: [], questions: [], q: "", sort: filters.sort })}
+              onClick={clearFilters}
               className="mt-4 text-sm font-medium text-accent underline-offset-4 hover:underline"
             >
               Clear filters
@@ -84,10 +125,63 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
         )}
       </main>
 
-      <footer className="mx-auto max-w-[1400px] border-t border-rule px-4 py-10 text-[0.78rem] leading-relaxed text-muted sm:px-8">
+      <AnimatePresence>
+        {cameFrom && (
+          <m.button
+            key="back"
+            type="button"
+            onClick={() => navigate(-1)}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0, transition: { delay: 0.6, duration: 0.45, ease } }}
+            exit={{ opacity: 0, y: 24, transition: { duration: 0.2 } }}
+            className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 inline-flex h-12 max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-ink py-1.5 pr-5 pl-1.5 text-[0.9rem] font-medium text-paper shadow-[0_16px_36px_-10px_rgb(0_0_0/0.5)]"
+          >
+            <Thumb p={cameFrom} className="h-9 w-9 shrink-0 rounded-full" />
+            <ArrowLeft className="h-4 w-4 shrink-0" />
+            <span className="truncate">Back to {cameFrom.name}</span>
+          </m.button>
+        )}
+      </AnimatePresence>
+
+      <footer
+        className={`mx-auto max-w-[1400px] border-t border-rule px-4 pt-10 text-[0.78rem] leading-relaxed text-muted sm:px-8 ${cameFrom ? "pb-28" : "pb-10"}`}
+      >
         Portraits from Wikimedia Commons, public domain or Creative Commons licensed; credits on each page.
         Facts are compressed for skimming — follow your curiosity to the sources.
       </footer>
     </div>
+  );
+}
+
+/** Document-relative top of an element, ignoring transforms (unlike getBoundingClientRect). */
+function pageTop(el: HTMLElement): number {
+  let top = 0;
+  for (let e: HTMLElement | null = el; e; e = e.offsetParent as HTMLElement | null) top += e.offsetTop;
+  return top;
+}
+
+/** Closes a filtered grid: what the filters are hiding, and the way out. */
+function HiddenRow({ hidden, onShowAll }: { hidden: Philosopher[]; onShowAll: () => void }) {
+  // A few faces spread across the hidden range, so the pile hints at its variety.
+  const faces = [0, 1, 2, 3].map((k) => hidden[Math.floor((k * hidden.length) / 4)]).filter((p, k, a) => a.indexOf(p) === k);
+  return (
+    <m.button
+      type="button"
+      onClick={onShowAll}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
+      className="group mt-12 flex w-full items-center gap-4 rounded-2xl bg-paper-2 py-3.5 pr-4 pl-4 text-left transition-colors hover:bg-chip sm:mx-auto sm:max-w-md"
+    >
+      <span className="flex shrink-0">
+        {faces.map((p) => (
+          <Thumb key={p.slug} p={p} className="-mr-3 h-10 w-10 rounded-full ring-2 ring-paper-2" />
+        ))}
+      </span>
+      <span className="ml-3 min-w-0 flex-1">
+        <span className="block text-[0.95rem] font-medium text-ink">{hidden.length} others hidden</span>
+        <span className="block text-[0.8rem] text-muted">Clear filters to see all {philosophers.length}</span>
+      </span>
+      <ArrowRight className="h-5 w-5 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" />
+    </m.button>
   );
 }
