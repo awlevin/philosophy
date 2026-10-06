@@ -21,6 +21,8 @@ export function App() {
   // When the detail closes, lift its card above the fading layer until it lands.
   const [returningSlug, setReturningSlug] = useState<string | null>(null);
   const lastSlug = useRef<string | null>(slug);
+  // Opening a page mid-return drops the lift: the timer below is cancelled on that change, and the
+  // interrupted flight never reports completion, so the card would stay above the new page.
   useLayoutEffect(() => {
     if (!slug && lastSlug.current) {
       setReturningSlug(lastSlug.current);
@@ -28,6 +30,7 @@ export function App() {
       lastSlug.current = null;
       return () => clearTimeout(t);
     }
+    if (slug) setReturningSlug(null);
     lastSlug.current = slug;
   }, [slug]);
   const onReturned = useCallback(() => setReturningSlug(null), []);
