@@ -584,7 +584,10 @@ function FacetButton({
   );
 }
 
-/** A phone facet pill with one pick: label and value open the menu, the cross removes the filter. */
+/**
+ * A phone facet pill with one pick: label and value open the menu, the cross removes the filter.
+ * It sits in a scrolling row, which would clip a chip flying in from a detail page, so it only rings on arrival.
+ */
 function ActivePill({
   label,
   token,
@@ -600,14 +603,8 @@ function ActivePill({
   onClick: () => void;
   onRemove: () => void;
 }) {
-  const [flying, setFlying] = useState(arrived);
   return (
-    <m.div
-      layoutId={flying ? filterChipId(token) : undefined}
-      transition={{ layout: morph }}
-      onLayoutAnimationComplete={() => setFlying(false)}
-      className="relative inline-flex h-9 max-w-full shrink-0 items-center rounded-full bg-ink text-[0.85rem] text-paper"
-    >
+    <div className="relative inline-flex h-9 shrink-0 items-center rounded-full bg-ink text-[0.85rem] text-paper">
       {arrived && (
         <m.span
           aria-hidden
@@ -626,9 +623,7 @@ function ActivePill({
         className="inline-flex h-9 min-w-0 items-center gap-1.5 rounded-l-full pr-1 pl-3.5 whitespace-nowrap"
       >
         <span className="shrink-0 font-medium opacity-60">{label}</span>
-        <span className="max-w-[11rem] truncate font-semibold">
-          {token.value}
-        </span>
+        <span className="max-w-[8.5rem] truncate font-semibold">{token.value}</span>
       </button>
       <button
         type="button"
@@ -638,7 +633,7 @@ function ActivePill({
       >
         <Close className="h-3.5 w-3.5 opacity-80" />
       </button>
-    </m.div>
+    </div>
   );
 }
 
