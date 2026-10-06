@@ -38,3 +38,16 @@ test("a short pull springs back and keeps the page open", async ({ page }) => {
   await expect(page).toHaveURL(/\/p\/kant$/);
   await expect(page.getByRole("heading", { name: "Immanuel Kant", level: 1 })).toBeInViewport();
 });
+
+test("opening another page right after pulling one closed shows it whole, not still pulled", async ({ page }) => {
+  await drag(page, 250, 560);
+  await expect(page).toHaveURL(/\/$/);
+  await page.waitForTimeout(100);
+  await page.locator('[data-slug="laozi"] a').click({ force: true });
+  await expect(page).toHaveURL(/\/p\/laozi$/);
+  await page.waitForTimeout(1200);
+  await snap(page, "pull-then-reopen");
+  await expect(page.getByRole("button", { name: "All philosophers" })).toBeInViewport();
+  const nav = await page.getByRole("button", { name: "All philosophers" }).boundingBox();
+  expect(nav!.y).toBeLessThan(30);
+});

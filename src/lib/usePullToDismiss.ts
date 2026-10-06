@@ -4,6 +4,7 @@ import { useEffect, useRef, type RefObject } from "react";
 /** Past this far (px), or flicked faster than FLICK (px/ms), a release dismisses. */
 const DISTANCE = 110;
 const FLICK = 0.6;
+const settle = { type: "spring", stiffness: 500, damping: 40 } as const;
 
 /**
  * Pull down from the top of a scrolled page to dismiss it (touch only). Returns how far it's pulled,
@@ -22,6 +23,8 @@ export function usePullToDismiss(
   useEffect(() => {
     const el = ref.current;
     if (!el || !enabled) return;
+    // Back from closing (another page opened before this one finished leaving): let go of the old pull.
+    if (pull.get() !== 0) animate(pull, 0, settle);
     let startX = 0;
     let startY = 0;
     let lastY = 0;
@@ -57,7 +60,7 @@ export function usePullToDismiss(
       if (!pulling) return;
       pulling = false;
       if (pull.get() > DISTANCE || speed > FLICK) dismiss.current();
-      else animate(pull, 0, { type: "spring", stiffness: 500, damping: 40 });
+      else animate(pull, 0, settle);
     };
 
     el.addEventListener("touchstart", onStart, { passive: true });
