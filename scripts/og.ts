@@ -62,6 +62,17 @@ function home() {
   );
 }
 
+/** Slack crops the wide image to a small square thumbnail, so it gets just the wall of faces, square. */
+function slackHome() {
+  const wall = "socrates confucius descartes kant plato laozi spinoza marx aristotle avicenna hume arendt nietzsche beauvoir thomas-aquinas zhuangzi".split(" ");
+  const tiles = wall.map((s) => `<i class="ph" style="background-color:${tint(s)};background-image:url(${face(s)})"></i>`).join("");
+  return shell(
+    `<div class="abs" style="inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:5px;background:#f7f5f0">${tiles}</div>`,
+    "#f7f5f0",
+    "#17161b",
+  ).replace("</style>", "body{width:800px;height:800px}</style>");
+}
+
 function quiz() {
   const dots = [[220, 76, "#2847a3"], [340, 58, "#8f9fd1"], [440, 44, "#d9d5cc"], [540, 58, "#d49a8a"], [660, 76, "#a3361e"]]
     .map(([x, s, c]) => `<div class="abs" style="left:${+x - +s / 2}px;top:${430 - +s / 2}px;width:${s}px;height:${s}px;border-radius:50%;background:${c}"></div>`)
@@ -112,6 +123,9 @@ const shoot = async (html: string, file: string) => {
   await page.screenshot({ path: path.join(OUT, file), type: "jpeg", quality: 86 });
 };
 await shoot(home(), "home.jpg");
+await page.setViewportSize({ width: 800, height: 800 });
+await shoot(slackHome(), "slack-home.jpg");
+await page.setViewportSize({ width: 1200, height: 630 });
 await shoot(quiz(), "quiz.jpg");
 for (const p of philosophers) await shoot(placard(p), `p/${p.slug}.jpg`);
 await browser.close();

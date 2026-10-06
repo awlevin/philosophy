@@ -32,7 +32,7 @@ function clip(s: string, max = 160) {
   return s.slice(0, max - 1).replace(/\s+\S*$/, "") + "…";
 }
 
-function page(url: string, title: string, description: string, image: string, imageAlt: string) {
+function page(url: string, title: string, description: string, image: string, imageAlt: string, [w, h] = [1200, 630]) {
   const d = esc(description);
   const social = [
     `<link rel="canonical" href="${SITE}${url === "/" ? "" : url}" />`,
@@ -42,8 +42,8 @@ function page(url: string, title: string, description: string, image: string, im
     `<meta property="og:description" content="${d}" />`,
     `<meta property="og:url" content="${SITE}${url === "/" ? "" : url}" />`,
     `<meta property="og:image" content="${SITE}${image}" />`,
-    `<meta property="og:image:width" content="1200" />`,
-    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:width" content="${w}" />`,
+    `<meta property="og:image:height" content="${h}" />`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
   ].join("\n    ");
@@ -53,15 +53,15 @@ function page(url: string, title: string, description: string, image: string, im
     .replace('<div id="root"></div>', `<div id="root">${render(url)}</div>`);
 }
 
+const HOME = ["/", "Philosophers Quick Reference", "Sixty-one philosophers with skimmable facts about each of them."] as const;
 await writeFile(
   path.join(DIST, "index.html"),
-  page(
-    "/",
-    "Philosophers Quick Reference",
-    "Sixty-one philosophers with skimmable facts about each of them.",
-    "/og/home.jpg",
-    "A wall of philosopher portraits beside the title Philosophers",
-  ),
+  page(...HOME, "/og/home.jpg", "A wall of philosopher portraits beside the title Philosophers"),
+);
+// Slack crops wide previews to a small square, so its crawler (see vercel.json) gets the wall of faces alone.
+await writeFile(
+  path.join(DIST, "slack.html"),
+  page(...HOME, "/og/slack-home.jpg", "A wall of philosopher portraits", [800, 800]),
 );
 
 await writeFile(
