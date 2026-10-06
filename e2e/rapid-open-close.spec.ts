@@ -14,5 +14,5 @@ test("a card returning from a closed page never floats over the next one", async
   await expect(page).toHaveURL(/\/p\/mozi$/);
   await page.waitForTimeout(1600);
 
-  await expect(mozi).not.toHaveCSS("z-index", "60");
+  await expect(mozi).not.toHaveCSS("z-index", "6");
 });

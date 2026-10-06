@@ -20,7 +20,7 @@ import {
 import { eraVars } from "../lib/era";
 import { lifespan } from "../lib/format";
 import { useViewMode } from "../lib/view";
-import { ease, morph, nameId } from "../lib/motion";
+import { EXITING_LAYER, ease, morph, nameId } from "../lib/motion";
 
 export type DetailState = {
   /** Query string of the grid we came from, so it stays filtered underneath. */
@@ -156,8 +156,8 @@ export function Detail({ slug }: { slug: string }) {
       aria-label={p ? p.name : "Not found"}
       // Keeps the overlay mounted while children run their exit animations.
       exit={{ opacity: 1, transition: { duration: 0.45 } }}
-      // …and lets touches and wheels through to the gallery meanwhile.
-      style={{ pointerEvents: present ? undefined : "none" }}
+      // …and lets touches and wheels through to the gallery meanwhile, sinking under the bar.
+      style={present ? undefined : { pointerEvents: "none", zIndex: EXITING_LAYER }}
     >
       <m.div
         className="absolute inset-0 bg-paper"

@@ -3,7 +3,7 @@ import type { ReactNode, Ref } from "react";
 import { Link } from "react-router";
 import type { Philosopher } from "../data/philosophers";
 import { lifespan, shortName } from "../lib/format";
-import { ease, morph, nameId } from "../lib/motion";
+import { RETURNING_LAYER, ease, morph, nameId } from "../lib/motion";
 import { peekInstead } from "../lib/peek";
 import { GRID_SIZES, Portrait } from "./Portrait";
 
@@ -116,7 +116,7 @@ function Shell({
       exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.18 } }}
       transition={{ layout: { duration: 0.45, ease }, opacity: { duration: 0.3 }, scale: { duration: 0.35, ease } }}
       onLayoutAnimationComplete={returning ? onReturned : undefined}
-      style={{ position: "relative", zIndex: returning ? 60 : undefined }}
+      style={{ position: "relative", zIndex: returning ? RETURNING_LAYER : undefined }}
     >
       {children}
     </m.li>

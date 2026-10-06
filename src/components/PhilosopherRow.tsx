@@ -4,7 +4,7 @@ import { Link } from "react-router";
 import type { Philosopher } from "../data/philosophers";
 import { eraVars } from "../lib/era";
 import { bornLabel, lifespan } from "../lib/format";
-import { ease, morph, nameId } from "../lib/motion";
+import { RETURNING_LAYER, ease, morph, nameId } from "../lib/motion";
 import { peekInstead } from "../lib/peek";
 import { Portrait } from "./Portrait";
 
@@ -32,7 +32,7 @@ export function PhilosopherRow({ p, gridSearch, timeline, deferImage, peeking, o
       exit={{ opacity: 0, transition: { duration: 0.15 } }}
       transition={{ layout: { duration: 0.45, ease }, opacity: { duration: 0.25 } }}
       onLayoutAnimationComplete={returning ? onReturned : undefined}
-      style={{ position: "relative", zIndex: returning ? 60 : undefined, ...eraVars(p.era) }}
+      style={{ position: "relative", zIndex: returning ? RETURNING_LAYER : undefined, ...eraVars(p.era) }}
     >
       <Link
         to={`/p/${p.slug}`}
