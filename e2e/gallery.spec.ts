@@ -96,3 +96,16 @@ test("on touch, opening a filter menu puts the peek sheet away", async ({ page }
   await expect(peek).toBeHidden();
   await expect(page.getByRole("dialog", { name: "Era" })).toBeVisible();
 });
+
+test("on touch, peeking can be turned off so a tap opens the page", async ({ page }) => {
+  test.skip(!isTouch(), "peek is for touch screens");
+  await page.getByRole("button", { name: /^Show as:/ }).click();
+  await page.waitForTimeout(300);
+  await snap(page, "g9-tap-setting");
+  await page.getByRole("radio", { name: /Open the page/ }).click();
+  await page.getByRole("button", { name: "Done" }).click();
+  const card = page.locator('[data-slug="kant"] a');
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
+  await expect(page).toHaveURL(/\/p\/kant$/);
+});

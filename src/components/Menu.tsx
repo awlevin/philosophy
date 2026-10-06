@@ -133,7 +133,7 @@ export function OptionRow({
           kind === "radio" ? "rounded-full" : "rounded-[5px]"
         } ${checked ? "border-ink bg-ink text-paper" : "border-rule"}`}
       >
-        {checked && <Check className="h-3 w-3" strokeWidth={3} />}
+        {checked && (kind === "radio" ? <span className="h-1.5 w-1.5 rounded-full bg-paper" /> : <Check className="h-3 w-3" strokeWidth={3} />)}
       </span>
       {lead}
       <span className="min-w-0 flex-1">
