@@ -75,6 +75,11 @@ export type Philosopher = {
   questions: BigQuestion[];
   /** 4–6 skimmable statements, ≤ ~12 words each. */
   facts: string[];
+  /**
+   * Their answer to each Big Question they're tagged with, in one line (≤ ~18 words). Shown in the
+   * peek sheet while that question is filtered. Only keys from `questions` (checked at build).
+   */
+  takes?: Partial<Record<BigQuestion, string>>;
   portrait: Portrait;
   wikidataId: string;
 };

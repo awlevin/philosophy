@@ -8,10 +8,10 @@ import { PeekSheet } from "../components/PeekSheet";
 import { Thumb } from "../components/Portrait";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
-import { EMPTY_FILTERS, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
+import { EMPTY_FILTERS, activeCount, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
 import { ease } from "../lib/motion";
 import { toSections } from "../lib/sections";
-import { useTapMode, useViewMode } from "../lib/view";
+import { useViewMode } from "../lib/view";
 import type { GalleryState } from "./Detail";
 
 type Props = {
@@ -31,8 +31,9 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
   const hidden = useMemo(() => philosophers.filter((p) => !list.includes(p)), [list]);
   const sections = useMemo(() => toSections(list, filters.sort), [list, filters.sort]);
   const [view, setView] = useViewMode();
-  const [tap] = useTapMode();
-  const peeks = view !== "classic" && tap === "peek";
+  // Peeking is for comparing: only while filtering (on touch screens), where the sheet can show
+  // each face's take on the filtered question. Otherwise a tap opens the page.
+  const peeks = view !== "classic" && activeCount(filters) > 0;
 
   const [peek, setPeek] = useState<string | null>(null);
   const closePeek = useCallback(() => setPeek(null), []);
@@ -142,7 +143,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
       </main>
 
       <AnimatePresence>
-        {peeked && <PeekSheet key="peek" p={peeked} gridSearch={search} onClose={closePeek} />}
+        {peeked && <PeekSheet key="peek" p={peeked} questions={filters.questions} gridSearch={search} onClose={closePeek} />}
       </AnimatePresence>
 
       <AnimatePresence>

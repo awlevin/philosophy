@@ -32,6 +32,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Chinese"],
     questions: ["How should I live?", "What exists?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "Govern least: the sage ruler acts through non-action, and the people settle into order themselves.",
+    },
     facts: [
       "Traditionally credited with the Tao Te Ching, Daoism’s founding text.",
       "He may be legendary; the text likely had several authors.",
@@ -49,6 +52,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Chinese"],
     questions: ["How should I live?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "Through virtue and ritual, not laws and punishments: a ruler leads by moral example.",
+    },
     facts: [
       "Taught that ritual, respect, and duty hold families and states together.",
       "His disciples collected his sayings as the Analects.",
@@ -135,6 +141,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Chinese"],
     questions: ["How should I live?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "By the most capable, chosen on merit, who care for all alike and spend nothing on war or luxury.",
+    },
     facts: [
       "Preached impartial care: concern for everyone, not just your kin.",
       "Rival of the Confucians; called their lavish rituals wasteful.",
@@ -151,6 +160,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Greek"],
     questions: ["What exists?", "What can I know?", "How should we be ruled?", "What is beautiful?"],
+    takes: {
+      "How should we be ruled?": "By philosopher-kings: only those who know the Good are fit to rule.",
+    },
     facts: [
       "Student of Socrates, teacher of Aristotle.",
       "True reality is a realm of perfect, unchanging Forms.",
@@ -186,6 +198,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Greek"],
     questions: ["What exists?", "What can I know?", "How should I live?", "How should we be ruled?", "What is beautiful?", "What is logic & language?"],
+    takes: {
+      "How should we be ruled?": "Under a mixed constitution anchored by a large middle class, aimed at citizens’ flourishing.",
+    },
     facts: [
       "Studied at Plato’s Academy for about twenty years.",
       "Tutored the young Alexander the Great.",
@@ -204,6 +219,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Chinese"],
     questions: ["How should I live?", "How should we be ruled?", "What is the mind?"],
+    takes: {
+      "How should we be ruled?": "With benevolence, for the people’s welfare; a tyrant forfeits Heaven’s mandate and may be overthrown.",
+    },
     facts: [
       "Revered as Confucianism’s “Second Sage.”",
       "Argued that human nature is innately good.",
@@ -306,6 +324,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Roman/Hellenistic"],
     questions: ["How should I live?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "By just, self-restrained rulers who serve the common good and respect their subjects’ freedom.",
+    },
     facts: [
       "Roman emperor, and the last of the “Five Good Emperors.”",
       "His private notes to himself became the Meditations.",
@@ -340,6 +361,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Roman/Hellenistic"],
     questions: ["How should I live?", "What exists?", "What is the mind?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "Earthly states keep only a fragile peace; true justice belongs to the City of God.",
+    },
     facts: [
       "Bishop of Hippo, in Roman North Africa.",
       "His Confessions is often called the first Western autobiography.",
@@ -477,6 +501,9 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Scholastic"],
     questions: ["What exists?", "How should I live?", "How should we be ruled?", "What can I know?"],
+    takes: {
+      "How should we be ruled?": "By laws that serve the common good and follow natural law; an unjust law is no true law.",
+    },
     facts: [
       "Fused Aristotle’s philosophy with Christian theology.",
       "Offered “Five Ways” to argue that God exists.",
@@ -511,6 +538,9 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Renaissance"],
     questions: ["How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "The Prince: keeping power takes ruthless realism. The Discourses: free republics last longest.",
+    },
     facts: [
       "The Prince advises rulers how to win and keep power.",
       "Better to be feared than loved, if you can’t be both.",
@@ -562,6 +592,9 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Empiricist", "Renaissance"],
     questions: ["What can I know?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "By a strong crown, with organized science serving the public good, as in his New Atlantis.",
+    },
     facts: [
       "Championed science built on observation, experiment, and induction.",
       "Warned of “idols”: mental habits that distort judgment.",
@@ -579,6 +612,9 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Empiricist"],
     questions: ["How should we be ruled?", "What is the mind?", "What exists?"],
+    takes: {
+      "How should we be ruled?": "By an absolute sovereign: we give up freedom for peace, or live in a war of all against all.",
+    },
     facts: [
       "Without government, life is “solitary, poor, nasty, brutish, and short.”",
       "Leviathan: give power to a sovereign in exchange for peace.",
@@ -630,6 +666,9 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Empiricist", "Enlightenment"],
     questions: ["What can I know?", "How should we be ruled?", "What is the mind?"],
+    takes: {
+      "How should we be ruled?": "By consent, to protect life, liberty, and property; a government that violates them may be resisted.",
+    },
     facts: [
       "The mind starts as a blank slate, written on by experience.",
       "Everyone has natural rights to life, liberty, and property.",
@@ -699,6 +738,9 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Enlightenment"],
     questions: ["How should we be ruled?", "How should I live?"],
+    takes: {
+      "How should we be ruled?": "By the general will: free citizens should make, together, the laws they live under.",
+    },
     facts: [
       "“Man is born free, and everywhere he is in chains.”",
       "Humans are naturally good; society corrupts them.",
@@ -734,6 +776,9 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Enlightenment"],
     questions: ["How should we be ruled?", "How should I live?"],
+    takes: {
+      "How should we be ruled?": "By rational, equal citizens, which means educating women and ending inherited privilege.",
+    },
     facts: [
       "Wrote A Vindication of the Rights of Woman (1792).",
       "Women seem inferior only because they’re denied education.",
@@ -751,6 +796,9 @@ const data: Philosopher[] = [
     era: "Modern",
     tradition: ["German Idealism"],
     questions: ["What exists?", "How should we be ruled?", "What is the mind?", "What is beautiful?"],
+    takes: {
+      "How should we be ruled?": "The rational state, a constitutional monarchy, is where individual freedom becomes real.",
+    },
     facts: [
       "History is Spirit coming to know itself, step by step.",
       "Ideas advance through contradiction and resolution: the dialectic.",
@@ -787,6 +835,9 @@ const data: Philosopher[] = [
     era: "Modern",
     tradition: ["Empiricist"],
     questions: ["How should I live?", "How should we be ruled?", "What is logic & language?"],
+    takes: {
+      "How should we be ruled?": "By representative democracy that limits liberty only to prevent harm to others.",
+    },
     facts: [
       "Actions are right insofar as they promote happiness.",
       "Harm principle: restrict liberty only to prevent harm to others.",
@@ -823,6 +874,9 @@ const data: Philosopher[] = [
     era: "Modern",
     tradition: ["Continental/Critical", "German Idealism"],
     questions: ["How should we be ruled?", "What exists?"],
+    takes: {
+      "How should we be ruled?": "Workers should take power; in a classless society, the state eventually withers away.",
+    },
     facts: [
       "History is the history of class struggle.",
       "Capitalists profit from the surplus value workers create.",
@@ -911,6 +965,9 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Analytic"],
     questions: ["What is logic & language?", "What can I know?", "What exists?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "Democratically, with power dispersed and checked; he also urged world government to end war.",
+    },
     facts: [
       "Co-wrote Principia Mathematica with Alfred North Whitehead.",
       "Russell’s paradox: the set of all sets that don’t contain themselves.",
@@ -962,6 +1019,9 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Existentialist", "Phenomenology"],
     questions: ["How should I live?", "What is the mind?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "He came to call Marxism the philosophy of his time, and backed revolutionary socialist causes.",
+    },
     facts: [
       "“Existence precedes essence”: we define ourselves through choices.",
       "We are “condemned to be free.”",
@@ -979,6 +1039,9 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Continental/Critical", "Phenomenology"],
     questions: ["How should we be ruled?", "How should I live?"],
+    takes: {
+      "How should we be ruled?": "Through citizens acting together in public, not by rulers commanding subjects.",
+    },
     facts: [
       "Coined “the banality of evil,” reporting on Eichmann’s trial.",
       "The Origins of Totalitarianism traced Nazism and Stalinism.",
@@ -996,6 +1059,9 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Existentialist"],
     questions: ["How should I live?", "How should we be ruled?"],
+    takes: {
+      "How should we be ruled?": "Toward equal freedom for all: no one is truly free while others are kept oppressed.",
+    },
     facts: [
       "“One is not born, but rather becomes, a woman.”",
       "The Second Sex (1949) became a founding text of modern feminism.",
@@ -1029,6 +1095,9 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Analytic"],
     questions: ["How should we be ruled?", "How should I live?"],
+    takes: {
+      "How should we be ruled?": "By principles chosen behind a veil of ignorance: equal liberties, and inequality only if it helps the worst-off.",
+    },
     facts: [
       "A Theory of Justice (1971) revived political philosophy.",
       "Choose society’s rules behind a “veil of ignorance.”",
@@ -1046,6 +1115,9 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Continental/Critical"],
     questions: ["How should we be ruled?", "What can I know?", "What is the mind?"],
+    takes: {
+      "How should we be ruled?": "He asked less who should rule than how power works everywhere, and how it can be resisted.",
+    },
     facts: [
       "Power and knowledge are bound together.",
       "Discipline and Punish: modern society watches, measures, and trains us.",

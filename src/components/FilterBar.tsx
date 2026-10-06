@@ -19,7 +19,7 @@ import {
 import { fold } from "../lib/format";
 import { morph } from "../lib/motion";
 import { useMedia } from "../lib/useMedia";
-import { useTapMode, type TapMode, type ViewMode } from "../lib/view";
+import type { ViewMode } from "../lib/view";
 import { ChevronDown, Close, Frame, Grid, List, Search } from "./Icons";
 import { Menu, OptionRow } from "./Menu";
 
@@ -45,10 +45,6 @@ const VIEWS: { value: ViewMode; label: string; hint: string; icon: ReactNode }[]
   { value: "list", label: "List", hint: "A timeline, one per row", icon: <List className="h-4 w-4" /> },
   { value: "classic", label: "Classic", hint: "The original sepia grid", icon: <Frame className="h-4 w-4" /> },
 ];
-const TAPS: { value: TapMode; label: string; hint: string }[] = [
-  { value: "peek", label: "Peek first", hint: "A quick look; tap again to open" },
-  { value: "open", label: "Open the page", hint: "Straight to the full page" },
-];
 const ORDERS: { value: SortMode; label: string }[] = [
   { value: "chrono", label: "By time" },
   { value: "alpha", label: "A–Z" },
@@ -69,7 +65,6 @@ const COUNT = new Map(
  */
 export function FilterBar({ filters, onChange, view, onView, shown, total, arrivedKey, raised, onMenuOpen }: Props) {
   const [menu, setMenu] = useState<MenuKey | null>(null);
-  const [tap, setTap] = useTapMode();
   const sheet = !useMedia("(min-width: 768px)");
   const bar = useRef<HTMLDivElement>(null);
   useBarHeight(bar);
@@ -287,15 +282,6 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
                 />
               ))}
             </div>
-            {/* Classic always opens the page; the others can peek first. */}
-            {view !== "classic" && (
-              <div role="radiogroup" aria-label="When you tap a face" className="mt-2 border-t border-rule pt-2">
-                <p className="eyebrow px-4 pt-2 pb-1">When you tap a face</p>
-                {TAPS.map((t) => (
-                  <OptionRow key={t.value} kind="radio" label={t.label} hint={t.hint} checked={tap === t.value} onToggle={() => setTap(t.value)} />
-                ))}
-              </div>
-            )}
           </Menu>
         </div>
       </div>
@@ -319,7 +305,7 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
           {/* Wraps instead of scrolling: a scroll box would clip a chip flying in from a detail page. */}
           <ul aria-label="Active filters" className="flex min-w-0 flex-1 flex-wrap gap-1.5 py-1.5">
             {tokens.map((t) => (
-              <li key={tokenKey(t)} className="shrink-0">
+              <li key={tokenKey(t)} className="max-w-full min-w-0">
                 <ActiveChip t={t} arrived={arrivedKey === tokenKey(t)} onRemove={() => onChange(withoutToken(filters, t))} />
               </li>
             ))}
@@ -397,7 +383,7 @@ function FacetButton({
       } ${on ? "bg-ink font-semibold text-paper" : `border ${open ? "border-ink text-ink" : "border-rule text-ink-2 hover:text-ink"}`}`}
     >
       {on && <span className="font-medium opacity-60">{label}</span>}
-      {on ? (picked.length === 1 ? picked[0] : picked.length) : label}
+      <span className="max-w-[11rem] truncate">{on ? (picked.length === 1 ? picked[0] : picked.length) : label}</span>
       <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
     </button>
   );
@@ -446,7 +432,7 @@ function ActiveChip({ t, arrived, onRemove }: { t: FilterToken; arrived: boolean
       onLayoutAnimationComplete={() => setFlying(false)}
       onClick={onRemove}
       aria-label={`Remove filter: ${GROUP_LABELS[t.group]} ${t.value}`}
-      className="relative inline-flex h-9 items-center gap-1.5 rounded-full bg-ink pr-2.5 pl-3.5 text-[0.8rem] whitespace-nowrap text-paper"
+      className="relative inline-flex h-9 max-w-full items-center gap-1.5 rounded-full bg-ink pr-2.5 pl-3.5 text-[0.8rem] whitespace-nowrap text-paper"
     >
       {arrived && (
         <m.span
@@ -458,10 +444,10 @@ function ActiveChip({ t, arrived, onRemove }: { t: FilterToken; arrived: boolean
         />
       )}
       {/* `layout` keeps the label from stretching while the chip changes size mid-flight. */}
-      <m.span layout={flying ? "position" : false} className="inline-flex items-center gap-1.5">
-        <span className="text-paper/60">{GROUP_LABELS[t.group]}</span>
-        <span className="font-medium">{t.value}</span>
-        <Close className="h-3.5 w-3.5 opacity-80" />
+      <m.span layout={flying ? "position" : false} className="inline-flex min-w-0 items-center gap-1.5">
+        <span className="shrink-0 text-paper/60">{GROUP_LABELS[t.group]}</span>
+        <span className="truncate font-medium">{t.value}</span>
+        <Close className="h-3.5 w-3.5 shrink-0 opacity-80" />
       </m.span>
     </m.button>
   );

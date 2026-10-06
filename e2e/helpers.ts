@@ -6,12 +6,13 @@ export const snap = (page: Page, name: string) =>
 
 export const isTouch = () => !!test.info().project.use.hasTouch;
 
-/** Opens a philosopher's page from the gallery as a person would: on touch, via the peek sheet. */
+/** Opens a philosopher's page from the gallery as a person would (through the peek sheet when it shows). */
 export async function openFromGallery(page: Page, slug: string, name: string) {
   const card = page.locator(`[data-slug="${slug}"] a`);
   await card.scrollIntoViewIfNeeded();
   await card.click();
-  if (isTouch()) {
+  // Touch screens peek first, but only while a filter is on.
+  if (isTouch() && /[?&](era|tradition|question)=/.test(page.url())) {
     const peek = page.getByRole("dialog", { name: `${name}, preview` });
     await expect(peek).toBeVisible();
     await page.waitForTimeout(350);

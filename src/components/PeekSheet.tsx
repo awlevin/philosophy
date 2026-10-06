@@ -1,7 +1,7 @@
 import { m } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import type { Philosopher } from "../data/philosophers";
+import type { BigQuestion, Philosopher } from "../data/philosophers";
 import { eraVars } from "../lib/era";
 import { lifespan, shortName } from "../lib/format";
 import { PEEK_HANDOFF, ease } from "../lib/motion";
@@ -10,13 +10,26 @@ import { ArrowRight, Close } from "./Icons";
 import { Thumb } from "./Portrait";
 
 /**
- * A quick look from the gallery on touch screens: face, dates, one fact. Swipe down to dismiss,
- * up (or "Open") for the full page.
+ * A quick look from a filtered gallery on touch screens: face, dates, and their take on each
+ * filtered Big Question (or a fact when there is none). Swipe down to dismiss, up (or "Open") for
+ * the full page; tapping another face swaps the sheet, for comparing takes.
  *
  * Opening grows the sheet up to fill the screen as the page fades in over it, rather than flying
  * the page out of the card hidden behind the sheet (the page knows, via `fromPeek`).
  */
-export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSearch: string; onClose: () => void }) {
+export function PeekSheet({
+  p,
+  questions,
+  gridSearch,
+  onClose,
+}: {
+  p: Philosopher;
+  /** Big Questions being filtered on: the sheet shows this philosopher's take on each. */
+  questions: BigQuestion[];
+  gridSearch: string;
+  onClose: () => void;
+}) {
+  const takes = questions.flatMap((q) => (p.takes?.[q] ? [{ q, take: p.takes[q] }] : []));
   const navigate = useNavigate();
   // Set on "Open": the page's background color, which the sheet turns into as it grows.
   const [opening, setOpening] = useState<string | null>(null);
@@ -90,7 +103,20 @@ export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSear
             <Close className="h-[15px] w-[15px]" />
           </button>
         </div>
-        <p className="mt-3.5 font-display text-[1.3rem] leading-snug text-pretty text-ink">{p.facts[0]}</p>
+        {takes.length > 0 ? (
+          <dl className="mt-3.5 flex flex-col gap-3">
+            {takes.map(({ q, take }) => (
+              <div key={q}>
+                <dt className="text-[0.8rem] font-semibold" style={{ color: "var(--era-ink)" }}>
+                  {q}
+                </dt>
+                <dd className="mt-1 font-display text-[1.3rem] leading-snug text-pretty text-ink">{take}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="mt-3.5 font-display text-[1.3rem] leading-snug text-pretty text-ink">{p.facts[0]}</p>
+        )}
         <button
           type="button"
           onClick={open}

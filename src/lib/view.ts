@@ -8,7 +8,3 @@ export const useViewMode = storedChoice<ViewMode>("view", ["faces", "list", "cla
   if (v === "classic") document.documentElement.dataset.look = "classic";
   else delete document.documentElement.dataset.look;
 });
-
-/** On touch screens, what a tap on a face does: a quick look first, or straight to the page. */
-export type TapMode = "peek" | "open";
-export const useTapMode = storedChoice<TapMode>("tap", ["peek", "open"], "peek");
