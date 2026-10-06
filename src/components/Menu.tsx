@@ -31,6 +31,8 @@ export function Menu({ open, onClose, title, sheet, align = "left", width = 320,
   }, [open, sheet]);
 
   if (sheet) {
+    // Prerendering has no document to portal into, and a closed sheet has nothing to show anyway.
+    if (typeof document === "undefined") return null;
     // Portaled: the sticky bar's backdrop blur would otherwise trap `position: fixed` inside it.
     return createPortal(
       <AnimatePresence>
