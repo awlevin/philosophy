@@ -87,7 +87,10 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
   const [landed, setLanded] = useState<string>();
   const flying =
     sheet && landed !== arrivedKey && tokens.some((t) => tokenKey(t) === arrivedKey && pickedIn(filters, t.group) === 1);
-  const phoneChips = tokens.some((t) => pickedIn(filters, t.group) > 1);
+  // A group with one pick shows once, on its own facet button, so only multi-pick groups get chips below.
+  const multiChips = tokens.some((t) => pickedIn(filters, t.group) > 1);
+  const singleOf = (key: "era" | "tradition" | "question") =>
+    pickedIn(filters, key) === 1 ? tokens.find((t) => t.group === key) : undefined;
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   const clear = () => onChange({ ...EMPTY_FILTERS, sort: filters.sort });
   const close = () => setMenu(null);
@@ -214,9 +217,19 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
         </div>
 
         {/* Larger screens: a button per facet with its popover. Phones open the same menus as sheets. */}
-        {facets.map((f) => (
+        {facets.map((f) => {
+          const single = singleOf(f.key);
+          return (
           <div key={f.key} className="relative hidden md:block">
-            <FacetButton label={f.label} picked={f.picked} open={menu === f.key} onClick={() => openMenu(f.key)} />
+            <FacetButton
+              label={f.label}
+              picked={f.picked}
+              open={menu === f.key}
+              onClick={() => openMenu(f.key)}
+              token={single}
+              arrived={!sheet && !!single && arrivedKey === tokenKey(single)}
+              onRemove={() => f.clearGroup()}
+            />
             <Menu
               open={menu === f.key}
               onClose={close}
@@ -228,7 +241,8 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
               {f.body}
             </Menu>
           </div>
-        ))}
+          );
+        })}
 
         <span className="flex-1 max-md:hidden" />
         {tokens.length === 0 && (
@@ -315,7 +329,7 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
           clips sideways only (and drops its fade mask), so the flight is not cut off; afterwards it scrolls again. */}
       <div className={`flex gap-2 px-4 pb-3 md:hidden ${flying ? "overflow-x-clip" : "scroll-row overflow-x-auto"}`}>
         {facets.map((f) => {
-          const single = f.picked.length === 1 ? tokens.find((t) => t.group === f.key) : undefined;
+          const single = singleOf(f.key);
           return (
             <FacetButton
               key={f.key}
@@ -343,13 +357,13 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
             <span className="font-semibold text-ink">{shown}</span> of {total}
           </span>
           {/* Wraps instead of scrolling: a scroll box would clip a chip flying in from a detail page.
-              On phones a group with one pick is shown by its own pill, so only multi-pick groups get chips here. */}
-          <ul aria-label="Active filters" className={`min-w-0 flex-1 flex-wrap gap-1.5 py-1.5 md:flex ${phoneChips ? "flex" : "hidden"}`}>
+              A group with one pick is shown by its own facet button, so only multi-pick groups get chips here. */}
+          <ul aria-label="Active filters" className={`min-w-0 flex-1 flex-wrap gap-1.5 py-1.5 ${multiChips ? "flex" : "hidden"}`}>
             {tokens.map((t) => (
-              <li key={tokenKey(t)} className={`max-w-full min-w-0 ${pickedIn(filters, t.group) === 1 ? "max-md:hidden" : ""}`}>
+              <li key={tokenKey(t)} className={`max-w-full min-w-0 ${pickedIn(filters, t.group) === 1 ? "hidden" : ""}`}>
                 <ActiveChip
                   t={t}
-                  arrived={arrivedKey === tokenKey(t) && !(sheet && pickedIn(filters, t.group) === 1)}
+                  arrived={arrivedKey === tokenKey(t) && pickedIn(filters, t.group) > 1}
                   onRemove={() => onChange(withoutToken(filters, t))}
                 />
               </li>
@@ -414,15 +428,17 @@ function FacetButton({
   open: boolean;
   onClick: () => void;
   small?: boolean;
-  /** Phone pill with exactly one pick: it doubles as the active-filter chip, with its own remove button. */
+  /** A facet with exactly one pick: its button doubles as the active-filter chip, with its own remove button. */
   token?: FilterToken;
   arrived?: boolean;
   onLanded?: () => void;
   onRemove?: () => void;
 }) {
   const on = picked.length > 0;
-  if (small && token && onRemove) {
-    return <ActivePill label={label} token={token} open={open} arrived={!!arrived} onClick={onClick} onLanded={onLanded} onRemove={onRemove} />;
+  if (token && onRemove) {
+    return (
+      <ActivePill label={label} token={token} open={open} small={small} arrived={!!arrived} onClick={onClick} onLanded={onLanded} onRemove={onRemove} />
+    );
   }
   return (
     <button
@@ -443,13 +459,14 @@ function FacetButton({
 }
 
 /**
- * A phone facet pill with one pick: label and value open the menu, the cross removes the filter.
+ * A facet button with one pick: label and value open the menu, the cross removes the filter.
  * Like ActiveChip, it takes the detail page chip's layoutId to fly in, then lets it go.
  */
 function ActivePill({
   label,
   token,
   open,
+  small,
   arrived,
   onClick,
   onLanded,
@@ -458,6 +475,7 @@ function ActivePill({
   label: string;
   token: FilterToken;
   open: boolean;
+  small?: boolean;
   arrived: boolean;
   onClick: () => void;
   onLanded?: () => void;
@@ -472,7 +490,9 @@ function ActivePill({
         setFlying(false);
         onLanded?.();
       }}
-      className="relative inline-flex h-9 shrink-0 items-center rounded-full bg-paper-2 text-[0.85rem] text-ink ring-1 ring-rule ring-inset"
+      className={`relative inline-flex shrink-0 items-center rounded-full bg-paper-2 text-ink ring-1 ring-rule ring-inset ${
+        small ? "h-9 text-[0.85rem]" : "h-11 text-[0.875rem]"
+      }`}
     >
       <button
         type="button"
@@ -480,7 +500,7 @@ function ActivePill({
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label={`${label}: ${token.value}`}
-        className="inline-flex h-9 min-w-0 items-center gap-1.5 rounded-l-full pr-1 pl-3.5 whitespace-nowrap"
+        className={`inline-flex h-full min-w-0 items-center gap-1.5 rounded-l-full pr-1 whitespace-nowrap ${small ? "pl-3.5" : "pl-4"}`}
       >
         <span className="shrink-0 font-medium opacity-60">{label}</span>
         <span className="max-w-[8.5rem] truncate font-semibold">{token.value}</span>
@@ -489,7 +509,7 @@ function ActivePill({
         type="button"
         onClick={onRemove}
         aria-label={`Remove filter: ${GROUP_LABELS[token.group]} ${token.value}`}
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-r-full"
+        className={`grid h-full shrink-0 place-items-center rounded-r-full ${small ? "w-9" : "w-10"}`}
       >
         <Close className="h-3.5 w-3.5 opacity-80" />
       </button>
