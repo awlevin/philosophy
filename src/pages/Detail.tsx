@@ -1,4 +1,4 @@
-import { m, useIsPresent, type PanInfo, type Variants } from "framer-motion";
+import { m, useIsPresent, useTransform, type PanInfo, type Variants } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { ArrowLeft, ArrowRight } from "../components/Icons";
@@ -19,6 +19,7 @@ import {
 } from "../lib/filters";
 import { eraVars } from "../lib/era";
 import { lifespan } from "../lib/format";
+import { usePullToDismiss } from "../lib/usePullToDismiss";
 import { useViewMode } from "../lib/view";
 import { EXITING_LAYER, PEEK_HANDOFF, ease, morph, nameId } from "../lib/motion";
 
@@ -121,6 +122,14 @@ export function Detail({ slug }: { slug: string }) {
   // Swipe only on touch screens (mouse drags should select text). Set after mount for hydration.
   const [touch, setTouch] = useState(false);
   useEffect(() => setTouch(window.matchMedia("(pointer: coarse)").matches), []);
+
+  // Pull down from the top to dismiss: the page shrinks, rounds and follows the finger, and the
+  // gallery shows through behind it. On release it closes (and morphs into its card) or springs back.
+  const pull = usePullToDismiss(scroller, { enabled: touch && present, onDismiss: close });
+  const pullScale = useTransform(pull, [0, 420], [1, 0.84]);
+  const pullRadius = useTransform(pull, [0, 80], [0, 28]);
+  const backdrop = useTransform(pull, [0, 320], [1, 0.35]);
+  const pulled = useTransform(pull, [0, 1], [0, 1]);
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x < -70 || info.velocity.x < -450) go(next, 1);
     else if (info.offset.x > 70 || info.velocity.x > 450) go(prev, -1);
@@ -159,15 +168,30 @@ export function Detail({ slug }: { slug: string }) {
       // …and lets touches and wheels through to the gallery meanwhile, sinking under the bar.
       style={present ? undefined : { pointerEvents: "none", zIndex: EXITING_LAYER }}
     >
-      <m.div
-        className="absolute inset-0 bg-paper"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0, transition: { duration: 0.32, ease: "easeOut" } }}
-        transition={{ duration: fromPeek ? 0.14 : 0.3, delay: handoff }}
-      />
+      <m.div style={{ opacity: backdrop }} className="absolute inset-0">
+        <m.div
+          className="absolute inset-0 bg-paper"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.32, ease: "easeOut" } }}
+          transition={{ duration: fromPeek ? 0.14 : 0.3, delay: handoff }}
+        />
+      </m.div>
 
-      <m.div ref={scroller} layoutScroll className="relative h-full overflow-x-hidden overflow-y-auto overscroll-contain">
+      {/* The page's own sheet of paper, shown only while pulled, so it reads as a card being lifted. */}
+      <m.div aria-hidden exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeOut" } }} className="absolute inset-0">
+        <m.div
+          style={{ y: pull, scale: pullScale, borderRadius: pullRadius, transformOrigin: "50% 20%", opacity: pulled }}
+          className="absolute inset-0 bg-paper shadow-[var(--shadow-lift)]"
+        />
+      </m.div>
+
+      <m.div
+        ref={scroller}
+        layoutScroll
+        style={{ y: pull, scale: pullScale, borderRadius: pullRadius, transformOrigin: "50% 20%" }}
+        className="relative h-full overflow-x-hidden overflow-y-auto overscroll-contain"
+      >
         <m.nav
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -250,6 +274,8 @@ export function Detail({ slug }: { slug: string }) {
                 <m.h1
                   layoutId={nameId(p.slug)}
                   layoutCrossfade={false}
+                  // Fades when the card shows a short name, so there is nothing to morph into.
+                  exit={fadeOut}
                   transition={{ layout: layoutTransition }}
                   className="mt-3 origin-top-left font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.01em] text-balance text-ink sm:text-[3.75rem] lg:text-[4.5rem]"
                 >

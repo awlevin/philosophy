@@ -33,7 +33,8 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
   and order are mirrored in the URL, e.g. `/?era=ancient,medieval&question=live&sort=alpha&q=th`.
   Chips on a detail page ("See others like …") filter the gallery; the tapped chip flies into the
   bar, and "Back to …" returns to the page.
-- **Detail navigation** — prev/next buttons, ← / → keys, swipe on touch screens, Esc to close.
+- **Detail navigation** — prev/next buttons, ← / → keys, swipe sideways on touch screens, pull down from
+  the top to close (`src/lib/usePullToDismiss.ts`), Esc to close.
 - **Prerendering** — `npm run build` renders `/` and all 61 `/p/:slug` pages to static HTML
   (`dist/index.html`, `dist/p/{slug}.html`) and hydrates on load, so text paints before the JS
   arrives. Other paths fall back to the SPA (`vercel.json` on Vercel, `public/_redirects` on Netlify).
