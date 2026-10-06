@@ -123,91 +123,44 @@ function BackButton({ onClick, children }: { onClick: () => void; children: Reac
 
 // ---------- Intro ----------
 
-const TITLE = "Who thinks like you?";
+const TITLE_WORDS = "Who thinks like you?".split(" ");
+const STEPS = [
+  "Agree or disagree, strongly or a little.",
+  "See who’s with you after each answer.",
+  "Get your closest five, and five to argue with.",
+];
 
-/** Until the entrance reveals them: the title's letters, the faces, and everything marked data-enter. */
-const HIDDEN_FOR_ENTRANCE =
-  "[&_[data-char]]:opacity-0 [&_[data-qmark]]:opacity-0 [&_[data-pile]_.portrait]:opacity-0 [&_[data-enter]]:opacity-0";
+/** Until the entrance reveals them: the faces, and everything marked data-enter. */
+const HIDDEN_FOR_ENTRANCE = "[&_[data-pile]_.portrait]:opacity-0 [&_[data-enter]]:opacity-0";
 
 function Intro({ onStart, onClose, entrance }: { onStart: () => void; onClose: () => void; entrance: boolean }) {
   const [scope, animate] = useAnimate<HTMLDivElement>();
-  // Measured once: StrictMode runs the effect twice, and the second run would see the first one's offsets.
-  const geometry = useRef<{ dx: number; dy: number; scale: number; faces: { x: number; y: number }[] } | null>(null);
 
-  // The question: a large "?" pops up, flies into the end of the title while the letters type in
-  // behind it, and the faces gather out of the space it left. Then the rest rises in.
+  // Roll call: the faces pop into the pile one at a time, then the title rises word by word, the
+  // rules draw across, and Begin springs up last.
   useLayoutEffect(() => {
     if (!entrance) return;
-    const root = scope.current;
-    const big = root.querySelector<HTMLElement>("[data-bigq]")!;
-    const mark = root.querySelector<HTMLElement>("[data-qmark]")!;
-    const title = mark.closest("h1")!;
-    const faces = [...root.querySelectorAll<HTMLElement>("[data-pile] .portrait")];
-    const mid = (el: Element) => {
-      const r = el.getBoundingClientRect();
-      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-    };
-    const from = mid(big);
-    geometry.current ??= (() => {
-      const to = mid(mark);
-      return {
-        dx: to.x - from.x,
-        dy: to.y - from.y,
-        scale: parseFloat(getComputedStyle(title).fontSize) / parseFloat(getComputedStyle(big).fontSize),
-        // Each face starts on a ring around the "?", where it was a moment before.
-        faces: faces.map((f, i) => {
-          const c = mid(f);
-          const a = (i / faces.length) * Math.PI * 2 - Math.PI / 2;
-          return { x: from.x + Math.cos(a) * 130 - c.x, y: from.y + Math.sin(a) * 130 - c.y };
-        }),
-      };
-    })();
-    const g = geometry.current;
-    const ink = getComputedStyle(title).color;
-    const accent = getComputedStyle(big).color;
-
+    const faces = [...scope.current.querySelectorAll<HTMLElement>("[data-pile] .portrait")];
+    const rise = (selector: string, y: number, delay: number, duration: number) =>
+      animate(selector, { opacity: [0, 1], y: [y, 0] }, { delay, duration, ease });
     const controls = [
-      animate(
-        big,
-        {
-          opacity: [0, 1, 1, 1, 0],
-          scale: [0.5, 1, 1, g.scale, g.scale],
-          rotate: [-20, 0, 0, 0, 0],
-          x: [0, 0, 0, g.dx, g.dx],
-          y: [0, 0, 0, g.dy, g.dy],
-          color: [accent, accent, accent, ink, ink],
-        },
-        { duration: 1.8, times: [0, 0.32, 0.5, 0.94, 1], ease: ["backOut", "linear", [0.7, 0, 0.2, 1], "linear"] },
-      ),
-      animate("[data-char]", { opacity: [0, 1] }, { duration: 0.01, delay: stagger(0.045, { startDelay: 0.76 }) }),
-      animate(mark, { opacity: [0, 1] }, { duration: 0.1, delay: 1.69 }),
       ...faces.map((f, i) =>
-        animate(
-          f,
-          { opacity: [0, 1], x: [g.faces[i].x, 0], y: [g.faces[i].y, 0], scale: [0.6, 1] },
-          { delay: 1.55 + i * 0.06, type: "spring", stiffness: 260, damping: 16 },
-        ),
+        animate(f, { opacity: [0, 1], y: [10, 0], scale: [0.35, 1] }, { delay: 0.12 + i * 0.085, type: "spring", stiffness: 420, damping: 18 }),
       ),
-      animate("[data-enter='eyebrow']", { opacity: [0, 1], y: [6, 0] }, { delay: 1.6, duration: 0.45, ease }),
-      animate("[data-enter='sub']", { opacity: [0, 1], y: [8, 0] }, { delay: 1.8, duration: 0.5, ease }),
-      animate("[data-enter='steps']", { opacity: [0, 1] }, { delay: 1.9, duration: 0.3 }),
-      animate("[data-enter='step']", { opacity: [0, 1], y: [6, 0] }, { delay: stagger(0.08, { startDelay: 1.95 }), duration: 0.45, ease }),
-      animate("[data-enter='begin']", { opacity: [0, 1] }, { delay: 2.15, duration: 0.3 }),
-      animate("[data-enter='begin']", { y: [16, 0], scale: [0.97, 1] }, { delay: 2.15, type: "spring", stiffness: 300, damping: 18 }),
-      animate("[data-enter='foot']", { opacity: [0, 1] }, { delay: 2.3, duration: 0.4 }),
+      rise("[data-enter='eyebrow']", 6, 0.56, 0.42),
+      animate("[data-enter='word']", { opacity: [0, 1], y: [20, 0] }, { delay: stagger(0.07, { startDelay: 0.62 }), duration: 0.62, ease }),
+      rise("[data-enter='sub']", 8, 0.88, 0.52),
+      animate("[data-enter='rule']", { opacity: [1, 1], scaleX: [0, 1] }, { delay: stagger(0.08, { startDelay: 0.98 }), duration: 0.65, ease }),
+      ...STEPS.map((_, k) => rise(`[data-enter='step-${k}']`, 6, 1.03 + k * 0.08, 0.46)),
+      animate("[data-enter='begin']", { opacity: [0, 1] }, { delay: 1.26, duration: 0.3 }),
+      animate("[data-enter='begin']", { y: [16, 0], scale: [0.97, 1] }, { delay: 1.26, type: "spring", stiffness: 300, damping: 18 }),
+      animate("[data-enter='foot']", { opacity: [0, 1] }, { delay: 1.42, duration: 0.4 }),
     ];
     return () => controls.forEach((c) => c.stop());
   }, [entrance, animate, scope]);
 
   return (
     <div ref={scope} className={`mx-auto flex min-h-full max-w-xl flex-col px-4 sm:px-8 ${entrance ? HIDDEN_FOR_ENTRANCE : ""}`}>
-      {entrance && (
-        <div aria-hidden className="pointer-events-none fixed top-[42%] left-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
-          <span data-bigq className="block font-display text-[15rem] leading-none font-semibold text-accent opacity-0">
-            ?
-          </span>
-        </div>
-      )}
       <QuizNav left={<BackButton onClick={onClose}>All philosophers</BackButton>} />
       <m.div
         initial={entrance ? false : { opacity: 0, y: 12 }}
@@ -222,32 +175,30 @@ function Intro({ onStart, onClose, entrance }: { onStart: () => void; onClose: (
           Quiz · {N} statements
         </p>
         <h1 className="mt-2.5 font-display text-[2.5rem] leading-[0.98] font-semibold tracking-[-0.01em] text-ink tall:mt-3 tall:text-[3rem] sm:text-[4rem]">
-          {entrance
-            ? [...TITLE].map((ch, k) =>
-                k === TITLE.length - 1 ? (
-                  <span key={k} data-qmark>
-                    {ch}
-                  </span>
-                ) : (
-                  <span key={k} data-char>
-                    {ch}
-                  </span>
-                ),
-              )
-            : TITLE}
+          {TITLE_WORDS.map((w, k) => (
+            <span key={k}>
+              <span data-enter="word" className="inline-block">
+                {w}
+              </span>
+              {k < TITLE_WORDS.length - 1 && " "}
+            </span>
+          ))}
         </h1>
         <p data-enter="sub" className="mt-3 font-display text-[1.2rem] leading-snug text-ink-2 italic tall:mt-4 tall:text-[1.35rem]">
           React to {N} big ideas. We’ll rank all {philosophers.length} philosophers by how often they’d side with you.
         </p>
-        <ol data-enter="steps" className="mt-5 border-t border-rule tall:mt-8">
-          {[
-            "Agree or disagree, strongly or a little.",
-            "See who’s with you after each answer.",
-            "Get your closest five, and five to argue with.",
-          ].map((line, k) => (
-            <li key={k} data-enter="step" className="flex gap-4 border-b border-rule py-2.5 tall:py-4">
-              <span className="eyebrow w-5 shrink-0 pt-[0.4em] tabular-nums">{["i", "ii", "iii"][k]}</span>
-              <span className="font-display text-[1.15rem] leading-snug text-ink tall:text-[1.3rem]">{line}</span>
+        {/* Rules are their own elements, not borders, so the entrance can draw them across. */}
+        <ol className="mt-5 tall:mt-8">
+          {STEPS.map((line, k) => (
+            <li key={k} className="relative flex gap-4 py-2.5 tall:py-4">
+              {k === 0 && <span aria-hidden data-enter="rule" className="absolute inset-x-0 top-0 h-px origin-left bg-rule" />}
+              <span data-enter={`step-${k}`} className="eyebrow w-5 shrink-0 pt-[0.4em] tabular-nums">
+                {["i", "ii", "iii"][k]}
+              </span>
+              <span data-enter={`step-${k}`} className="font-display text-[1.15rem] leading-snug text-ink tall:text-[1.3rem]">
+                {line}
+              </span>
+              <span aria-hidden data-enter="rule" className="absolute inset-x-0 bottom-0 h-px origin-left bg-rule" />
             </li>
           ))}
         </ol>

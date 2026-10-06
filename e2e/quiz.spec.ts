@@ -78,22 +78,24 @@ test("take the quiz, open a match, come back, and see everyone ranked for you", 
   await snap(page, "q8-ranked-for-you");
 });
 
-test("opened from the gallery, the intro enters with its question mark, then settles", async ({ page }) => {
+const opacityOf = (page: Page, selector: string) =>
+  page.locator(selector).last().evaluate((el) => Number(getComputedStyle(el).opacity));
+
+test("opened from the gallery, the intro enters by roll call, then settles", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("link", { name: /Which of them think like you\?/ }).click();
-  const big = page.locator("[data-bigq]");
-  const opacity = () => big.evaluate((el) => Number(getComputedStyle(el).opacity));
-  const mark = page.locator("[data-qmark]");
 
-  await page.waitForTimeout(650);
-  expect(await opacity()).toBeGreaterThan(0.9);
-  await snap(page, "q2a-question-mark");
-  await page.waitForTimeout(700);
-  await snap(page, "q2b-question-flying");
+  // Faces first; the title waits its turn.
+  await page.waitForTimeout(250);
+  expect(await opacityOf(page, "[data-enter='word']")).toBe(0);
+  await snap(page, "q2a-roll-call-faces");
+  await page.waitForTimeout(550);
+  await snap(page, "q2b-roll-call-title");
 
-  await page.waitForTimeout(1700);
-  expect(await opacity()).toBe(0);
-  expect(await mark.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(1);
+  await page.waitForTimeout(1400);
+  expect(await opacityOf(page, "[data-pile] .portrait")).toBe(1);
+  expect(await opacityOf(page, "[data-enter='word']")).toBe(1);
+  expect(await opacityOf(page, "[data-enter='rule']")).toBe(1);
   await expect(page.getByRole("button", { name: "Begin" })).toHaveCSS("opacity", "1");
   await snap(page, "q2c-settled");
 
@@ -101,12 +103,13 @@ test("opened from the gallery, the intro enters with its question mark, then set
   await page.getByRole("button", { name: "Begin" }).click();
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page.getByRole("heading", { name: "Who thinks like you?" })).toBeVisible();
-  await expect(big).toHaveCount(0);
+  expect(await opacityOf(page, "[data-enter='word']")).toBe(1);
 });
 
 test("loaded directly, the intro shows at rest", async ({ page }) => {
   await page.goto("/quiz", { waitUntil: "networkidle" });
-  await expect(page.locator("[data-bigq]")).toHaveCount(0);
+  expect(await opacityOf(page, "[data-pile] .portrait")).toBe(1);
+  expect(await opacityOf(page, "[data-enter='word']")).toBe(1);
   await expect(page.getByRole("button", { name: "Begin" })).toHaveCSS("opacity", "1");
 });
 
