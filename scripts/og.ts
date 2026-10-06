@@ -62,12 +62,16 @@ function home() {
   );
 }
 
-/** Slack crops the wide image to a small square thumbnail, so it gets just the wall of faces, square. */
+/** Slack crops the wide image to a small square thumbnail, so it gets a square: title above, faces below. */
 function slackHome() {
-  const wall = "socrates confucius descartes kant plato laozi spinoza marx aristotle avicenna hume arendt nietzsche beauvoir thomas-aquinas zhuangzi".split(" ");
+  const wall = "socrates confucius descartes kant plato laozi spinoza marx".split(" ");
   const tiles = wall.map((s) => `<i class="ph" style="background-color:${tint(s)};background-image:url(${face(s)})"></i>`).join("");
   return shell(
-    `<div class="abs" style="inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:5px;background:#f7f5f0">${tiles}</div>`,
+    `<div class="abs" style="left:0;right:0;top:0;height:410px;padding:48px 56px 0;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:16px">${mark(52)}<div class="kick" style="color:#5d5a63">Quick reference</div></div>
+      <div style="padding-bottom:34px"><div class="d" style="font-size:136px;line-height:.95;white-space:nowrap">Philosophers</div>
+      <div style="font-size:30px;line-height:1.3;color:#46434c;margin-top:16px">Sixty-one philosophers with skimmable facts about each of them.</div></div></div>
+    <div class="abs" style="left:0;right:0;bottom:0;height:390px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:5px;background:#f7f5f0">${tiles}</div>`,
     "#f7f5f0",
     "#17161b",
   ).replace("</style>", "body{width:800px;height:800px}</style>");
