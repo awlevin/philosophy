@@ -84,7 +84,6 @@ export function Gallery({ sections, view, timeline, gridSearch, eagerFirst, defe
                 {s.era && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--era)]" />}
                 <h2 className="font-display text-[1.4rem] font-semibold text-ink">{s.title}</h2>
                 {s.range && <span className="text-[0.75rem] font-medium text-[var(--era-ink)]">{s.range}</span>}
-                <span className="ml-auto text-[0.75rem] font-semibold text-[var(--era-ink,var(--ink-2))] tabular-nums">{s.items.length}</span>
               </div>
               {/* A little air under the sticky band, so the first row never sits flush against it. */}
               <ol className="py-1.5">
@@ -107,7 +106,6 @@ function SectionHeading({ s }: { s: Section }) {
     <div className="flex items-baseline gap-2.5 pt-7 pb-3 sm:pt-10 sm:pb-5">
       <h2 className="font-display text-[1.75rem] leading-none font-bold text-[var(--era-ink,var(--ink))] sm:text-[2.25rem]">{s.title}</h2>
       {s.range && <span className="text-[0.75rem] text-muted sm:text-[0.8rem]">{s.range}</span>}
-      <span className="ml-auto text-[0.75rem] font-semibold text-[var(--era-ink,var(--ink-2))] tabular-nums">{s.items.length}</span>
     </div>
   );
 }
