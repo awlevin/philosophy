@@ -85,7 +85,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
       <header className="mx-auto max-w-[1400px] px-4 pt-8 pb-3 sm:px-8 sm:pt-16 sm:pb-10">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <p className="eyebrow">A cheat sheet</p>
+            <p className="eyebrow">Quick Reference</p>
             <h1 className="mt-2 font-display text-[2.875rem] leading-[0.95] font-semibold tracking-[-0.01em] text-ink sm:mt-3 sm:text-[5.5rem]">
               Philosophers
             </h1>
