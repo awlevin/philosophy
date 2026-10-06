@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Screens with room to spare. Below this (a phone with Safari's toolbars up is ~660px), full-screen
+   steps like the quiz tighten up so they fit without scrolling. */
+@custom-variant tall (@media (min-height: 760px));
+
 @theme {
   --font-display: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --font-sans: "Instrument Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -304,14 +308,16 @@ body {
   }
 }
 
-/* Museum-label small caps */
-.eyebrow {
-  font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
+/* Museum-label small caps. In the components layer, so a color utility (text-accent) can override it. */
+@layer components {
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 }
 
 /* ---------- Portraits ---------- */

@@ -74,7 +74,7 @@ export function Quiz() {
       transition={{ duration: 0.25 }}
       style={present ? undefined : { pointerEvents: "none" }}
     >
-      <div ref={scroller} className="h-full overflow-x-hidden overflow-y-auto overscroll-contain">
+      <div ref={scroller} data-quiz-scroller className="h-full overflow-x-hidden overflow-y-auto overscroll-contain">
         {run ? (
           <Questions run={run} setRun={setRun} onFinish={finish} onLeave={close} />
         ) : ranking ? (
@@ -89,7 +89,7 @@ export function Quiz() {
 
 function QuizNav({ left, center, right }: { left: ReactNode; center?: ReactNode; right?: ReactNode }) {
   return (
-    <nav className="sticky top-0 z-10 -mx-4 flex h-16 items-center justify-between gap-3 bg-paper/90 px-4 backdrop-blur-md sm:-mx-8 sm:h-20 sm:px-8">
+    <nav className="sticky top-0 z-10 -mx-4 flex h-12 items-center justify-between gap-3 bg-paper/90 px-4 backdrop-blur-md tall:h-16 sm:-mx-8 sm:px-8 sm:tall:h-20">
       <div className="flex min-w-0 flex-1 items-center">{left}</div>
       {center}
       <div className="flex flex-1 items-center justify-end gap-1">
@@ -119,29 +119,29 @@ function Intro({ onStart, onClose }: { onStart: () => void; onClose: () => void 
   return (
     <div className="mx-auto flex min-h-full max-w-xl flex-col px-4 sm:px-8">
       <QuizNav left={<BackButton onClick={onClose}>All philosophers</BackButton>} />
-      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease }} className="flex-1 pt-4 sm:pt-10">
-        <FacePile people={INTRO_FACES} faceClass="h-14 w-14 ring-[3px] ring-paper" />
-        <p className="eyebrow mt-8">Quiz · {N} statements</p>
-        <h1 className="mt-3 font-display text-[3rem] leading-[0.98] font-semibold tracking-[-0.01em] text-ink sm:text-[4rem]">
+      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease }} className="flex-1 pt-2 tall:pt-4 sm:tall:pt-10">
+        <FacePile people={INTRO_FACES} faceClass="h-12 w-12 ring-[3px] ring-paper tall:h-14 tall:w-14" />
+        <p className="eyebrow mt-6 tall:mt-8">Quiz · {N} statements</p>
+        <h1 className="mt-2.5 font-display text-[2.5rem] leading-[0.98] font-semibold tracking-[-0.01em] text-ink tall:mt-3 tall:text-[3rem] sm:text-[4rem]">
           Who thinks like you?
         </h1>
-        <p className="mt-4 font-display text-[1.35rem] leading-snug text-ink-2 italic">
+        <p className="mt-3 font-display text-[1.2rem] leading-snug text-ink-2 italic tall:mt-4 tall:text-[1.35rem]">
           React to {N} big ideas. We’ll rank all {philosophers.length} philosophers by how often they’d side with you.
         </p>
-        <ol className="mt-8 border-t border-rule">
+        <ol className="mt-5 border-t border-rule tall:mt-8">
           {[
             "Agree or disagree, strongly or a little.",
             "See who’s with you after each answer.",
             "Get your closest five, and five to argue with.",
           ].map((line, k) => (
-            <li key={k} className="flex gap-4 border-b border-rule py-4">
+            <li key={k} className="flex gap-4 border-b border-rule py-2.5 tall:py-4">
               <span className="eyebrow w-5 shrink-0 pt-[0.4em] tabular-nums">{["i", "ii", "iii"][k]}</span>
-              <span className="font-display text-[1.3rem] leading-snug text-ink">{line}</span>
+              <span className="font-display text-[1.15rem] leading-snug text-ink tall:text-[1.3rem]">{line}</span>
             </li>
           ))}
         </ol>
       </m.div>
-      <div className="sticky bottom-0 -mx-4 bg-gradient-to-t from-paper via-paper to-paper/0 px-4 pt-6 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:px-0 sm:pt-10 sm:pb-16">
+      <div className="sticky bottom-0 -mx-4 bg-gradient-to-t from-paper via-paper to-paper/0 px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] tall:pt-6 tall:pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:px-0 sm:tall:pt-10 sm:tall:pb-16">
         <button type="button" onClick={onStart} className={`${primary} w-full`}>
           Begin
           <ArrowRight className="h-[18px] w-[18px]" />
@@ -213,12 +213,17 @@ function Questions({
         center={<Progress i={run.i} />}
       />
 
-      <m.div key={statement.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease }} className="pt-8 sm:pt-16">
+      <m.div key={statement.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease }} className="pt-3 tall:pt-8 sm:tall:pt-16">
         <p className="eyebrow flex items-center gap-2">
           <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
           {statement.question}
         </p>
-        <h1 className="mt-3 font-display text-[2.5rem] leading-[1.06] font-semibold tracking-[-0.005em] text-balance text-ink sm:text-[3.5rem]">
+        {/* Steps down once answered, making room for who's with you without scrolling. */}
+        <h1
+          className={`mt-2.5 font-display leading-[1.06] font-semibold tracking-[-0.005em] text-balance text-ink transition-[font-size] duration-300 ease-out tall:mt-3 ${
+            revealed ? "text-[1.6rem] tall:text-[2.1rem] sm:tall:text-[2.75rem]" : "text-[2.25rem] tall:text-[2.5rem] sm:tall:text-[3.5rem]"
+          }`}
+        >
           {statement.text}
         </h1>
       </m.div>
@@ -228,8 +233,8 @@ function Questions({
 
       {revealed && <Reveal key={`reveal-${statement.id}`} statement={statement} a={a} />}
 
-      <div className="min-h-8 flex-1" />
-      <footer className="sticky bottom-0 -mx-4 mt-6 flex items-center justify-between gap-3 border-t border-rule bg-paper/95 px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:-mx-8 sm:px-8 sm:pb-4">
+      <div className="min-h-1 flex-1 tall:min-h-8" />
+      <footer className="sticky bottom-0 -mx-4 mt-2 flex tall:mt-6 items-center justify-between gap-3 border-t border-rule bg-paper/95 px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:-mx-8 sm:px-8 sm:pb-4">
         <button type="button" onClick={back} className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 text-[0.9rem] font-medium text-ink-2 hover:text-ink">
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -282,8 +287,8 @@ const OPTIONS: { v: Exclude<Answer, null>; label: string; caption: string; size:
 function Scale({ value, onChoose }: { value: Answer | undefined; onChoose: (v: Exclude<Answer, null>) => void }) {
   const answered = value != null;
   return (
-    <div role="group" aria-label="How much do you agree?" className="mx-auto mt-10 w-full max-w-md sm:mt-14 sm:max-w-lg">
-      <div aria-hidden className="flex justify-between px-1 pb-4">
+    <div role="group" aria-label="How much do you agree?" className="mx-auto mt-4 w-full max-w-md tall:mt-10 sm:max-w-lg sm:tall:mt-14">
+      <div aria-hidden className="flex justify-between px-1 pb-2.5 tall:pb-4">
         <span className="eyebrow text-disagree">Disagree</span>
         <span className="eyebrow text-accent">Agree</span>
       </div>
@@ -292,7 +297,7 @@ function Scale({ value, onChoose }: { value: Answer | undefined; onChoose: (v: E
           const on = value === o.v;
           const tone = TONE[o.tone];
           return (
-            <div key={o.v} className="flex w-16 flex-col items-center gap-2.5 sm:w-24">
+            <div key={o.v} className="flex w-16 flex-col items-center gap-2 tall:gap-2.5 sm:w-24">
               <div className="grid h-14 place-items-center sm:h-[4.5rem]">
                 <button
                   type="button"
@@ -339,31 +344,31 @@ function Reveal({ statement, a }: { statement: Statement; a: Exclude<Answer, nul
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease }}
-      className="mt-8 scroll-mb-24 rounded-2xl bg-[var(--sheet)] p-5 shadow-[var(--shadow)] sm:mt-12 sm:p-6"
+      className="mt-3 scroll-mb-24 rounded-2xl bg-[var(--sheet)] p-4 shadow-[var(--shadow)] tall:mt-8 tall:p-5 sm:tall:mt-12 sm:tall:p-6"
     >
       <p className="eyebrow">Where this idea comes from</p>
-      <div className="mt-3 flex items-center gap-3.5">
-        <Thumb p={src} className="h-14 w-14 shrink-0 rounded-lg" sizes="56px" />
+      <div className="mt-2 flex items-center gap-3 tall:mt-3 tall:gap-3.5">
+        <Thumb p={src} className="h-11 w-11 shrink-0 rounded-lg tall:h-14 tall:w-14" sizes="56px" />
         <div className="min-w-0">
-          <p className="font-display text-[1.4rem] leading-tight font-semibold text-ink">{src.name}</p>
+          <p className="font-display text-[1.2rem] leading-tight font-semibold text-ink tall:text-[1.4rem]">{src.name}</p>
           <p className="mt-0.5 text-[0.72rem] tracking-[0.04em] text-muted tabular-nums">
             {src.aka && <span className="italic">{src.aka} · </span>}
             {lifespan(src)}
           </p>
         </div>
       </div>
-      <p className="mt-3 font-display text-[1.3rem] leading-snug text-ink-2 italic">{statement.line}</p>
-      <div className="mt-5 grid grid-cols-2 gap-4 border-t border-rule pt-4">
+      <p className="mt-2 font-display text-[1.1rem] leading-snug text-ink-2 italic tall:mt-3 tall:text-[1.3rem]">{statement.line}</p>
+      <div className="mt-3 grid grid-cols-2 gap-4 border-t border-rule pt-3 tall:mt-5 tall:pt-4">
         {columns.map((c) => (
           <div key={c.label} className="min-w-0">
             <p className={`eyebrow ${TONE[c.tone].text}`}>
               {c.label} · {c.people.length}
             </p>
-            <div className="mt-2.5 flex min-h-9 items-center">
-              <FacePile people={c.people.slice(0, 4)} faceClass="h-9 w-9 ring-2 ring-[var(--sheet)]" />
+            <div className="mt-2 flex min-h-8 items-center tall:mt-2.5 tall:min-h-9">
+              <FacePile people={c.people.slice(0, 4)} faceClass="h-8 w-8 ring-2 ring-[var(--sheet)] tall:h-9 tall:w-9" />
               {c.people.length > 4 && <span className="ml-1 text-[0.75rem] font-semibold text-muted tabular-nums">+{c.people.length - 4}</span>}
             </div>
-            <p className="mt-2 text-[0.8rem] leading-snug text-ink-2">{names(c.people)}</p>
+            <p className="mt-1.5 text-[0.78rem] leading-snug text-ink-2 tall:mt-2 tall:text-[0.8rem]">{names(c.people)}</p>
           </div>
         ))}
       </div>
