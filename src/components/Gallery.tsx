@@ -20,11 +20,14 @@ type Props = {
   onPeek?: (p: Philosopher) => void;
   returningSlug: string | null;
   onReturned: () => void;
+  /** In For-you order: each face's quiz match, shown in place of dates. */
+  matchOf?: (p: Philosopher) => number | undefined;
 };
 
-export function Gallery({ sections, view, timeline, gridSearch, eagerFirst, deferImages, peeking, onPeek, returningSlug, onReturned }: Props) {
+export function Gallery({ sections, view, timeline, gridSearch, eagerFirst, deferImages, peeking, onPeek, returningSlug, onReturned, matchOf }: Props) {
   const item = (p: Philosopher, i: number) => ({
     p,
+    match: matchOf?.(p),
     gridSearch,
     deferImage: deferImages,
     peeking: peeking === p.slug,

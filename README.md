@@ -37,10 +37,18 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
   and order are mirrored in the URL, e.g. `/?era=ancient,medieval&question=live&sort=alpha&q=th`.
   Chips on a detail page ("See others like …") filter the gallery; the tapped chip flies into the
   bar, and "Back to …" returns to the page.
+- **Quiz** — `/quiz` (one quiet card under the home header leads there): react to 14 statements on a
+  five-step scale, see after each who's with you and who isn't, then get your closest five and five
+  to argue with. Statements and each philosopher's stance on them live in
+  [`src/data/quiz.ts`](src/data/quiz.ts); `scripts/check-data.ts` makes sure every source line is
+  quoted verbatim from that philosopher's facts or takes, and that everyone has at least two stances.
+  Scoring is in `src/lib/quiz.ts`. The last finished run is kept in `localStorage`; with it, the
+  home card shows your closest three, Order gains "For you" (`?sort=match`: closest ten, in between,
+  furthest ten, with each match %), and detail pages show "You & …".
 - **Detail navigation** — prev/next buttons, ← / → keys, swipe sideways on touch screens, pull down from
   the top to close (`src/lib/usePullToDismiss.ts`), Esc to close.
-- **Prerendering** — `npm run build` renders `/` and all 61 `/p/:slug` pages to static HTML
-  (`dist/index.html`, `dist/p/{slug}.html`) and hydrates on load, so text paints before the JS
+- **Prerendering** — `npm run build` renders `/`, `/quiz` and all 61 `/p/:slug` pages to static HTML
+  (`dist/index.html`, `dist/quiz.html`, `dist/p/{slug}.html`) and hydrates on load, so text paints before the JS
   arrives. Other paths fall back to the SPA (`vercel.json` on Vercel, `public/_redirects` on Netlify).
 
 ## Deploying to Vercel

@@ -54,6 +54,13 @@ export function initials(name: string): string {
   return pick.map((w) => w[0]).join("");
 }
 
+/** "Kant", "Kant and Hume", "Kant, Hume and Mill"; past `max`, "Kant, Hume, Mill and 4 more". */
+export function listNames(names: string[], max = Infinity): string {
+  if (names.length > max) return `${names.slice(0, max).join(", ")} and ${names.length - max} more`;
+  if (names.length < 2) return names.join("");
+  return `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
+}
+
 /** Strip diacritics + lowercase, for search. */
 export function fold(s: string): string {
   return s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();

@@ -18,10 +18,12 @@ type Props = {
   onPeek?: (p: Philosopher) => void;
   returning?: boolean;
   onReturned?: () => void;
+  /** Quiz match (0–100), shown in place of dates in For-you order. */
+  match?: number;
   ref?: Ref<HTMLLIElement>;
 };
 
-export function PhilosopherRow({ p, gridSearch, timeline, deferImage, peeking, onPeek, returning, onReturned, ref }: Props) {
+export function PhilosopherRow({ p, gridSearch, timeline, deferImage, peeking, onPeek, returning, onReturned, match, ref }: Props) {
   return (
     <m.li
       ref={ref}
@@ -64,7 +66,9 @@ export function PhilosopherRow({ p, gridSearch, timeline, deferImage, peeking, o
             {p.name}
           </m.span>
           <span className="mt-0.5 block truncate text-[0.75rem] text-muted">
-            {p.tradition[0]} · {lifespan(p)}
+            {match != null && <span className="font-semibold text-accent tabular-nums">{match}% match · </span>}
+            {p.tradition[0]}
+            {match == null && ` · ${lifespan(p)}`}
           </span>
         </span>
         {!timeline && (

@@ -22,11 +22,22 @@ type Props = {
   /** Raised above the closing detail overlay while it morphs back into place. */
   returning?: boolean;
   onReturned?: () => void;
+  /** Quiz match (0–100), shown in place of dates in For-you order. */
+  match?: number;
   ref?: Ref<HTMLLIElement>;
 };
 
-export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, peeking, onPeek, classic, returning, onReturned, ref }: Props) {
+export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, peeking, onPeek, classic, returning, onReturned, match, ref }: Props) {
   const short = shortName(p);
+  const sub =
+    match != null ? (
+      <span className="font-semibold text-accent">{match}% match</span>
+    ) : (
+      <>
+        {p.aka && <span className="italic">{p.aka} · </span>}
+        {lifespan(p)}
+      </>
+    );
   if (classic) {
     return (
       <Shell p={p} returning={returning} onReturned={onReturned} ref={ref}>
@@ -43,10 +54,7 @@ export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, pe
             >
               {p.name}
             </m.h2>
-            <p className="mt-1 text-[0.72rem] tracking-[0.04em] text-muted tabular-nums">
-              {p.aka && <span className="italic">{p.aka} · </span>}
-              {lifespan(p)}
-            </p>
+            <p className="mt-1 text-[0.72rem] tracking-[0.04em] text-muted tabular-nums">{sub}</p>
           </div>
         </Link>
       </Shell>
@@ -85,10 +93,9 @@ export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, pe
             <span className="sm:hidden">{short}</span>
             <span className="max-sm:hidden">{p.name}</span>
           </m.h2>
-          <p className="mt-1 text-[0.7rem] tracking-[0.04em] text-muted tabular-nums max-sm:hidden">
-            {p.aka && <span className="italic">{p.aka} · </span>}
-            {lifespan(p)}
-          </p>
+          <p className="mt-1 text-[0.7rem] tracking-[0.04em] text-muted tabular-nums max-sm:hidden">{sub}</p>
+          {/* Phones show names only, but in For-you order the match is the point. */}
+          {match != null && <p className="text-[0.62rem] font-semibold text-accent tabular-nums sm:hidden">{match}%</p>}
         </div>
       </Link>
     </Shell>

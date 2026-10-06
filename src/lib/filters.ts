@@ -9,7 +9,8 @@ import {
 } from "../data/philosophers";
 import { fold, sortName } from "./format";
 
-export type SortMode = "chrono" | "alpha";
+/** By time, A–Z, or closest match first (once the quiz is taken). */
+export type SortMode = "chrono" | "alpha" | "match";
 
 export type Filters = {
   eras: Era[];
@@ -50,6 +51,8 @@ export const eraCodec = codec(ERAS, slugify);
 export const traditionCodec = codec(TRADITIONS, slugify);
 export const questionCodec = codec(QUESTIONS, (q) => QUESTION_KEYS[q]);
 
+const SORTS: readonly SortMode[] = ["chrono", "alpha", "match"];
+
 export function parseFilters(search: string): Filters {
   const sp = new URLSearchParams(search);
   return {
@@ -57,7 +60,7 @@ export function parseFilters(search: string): Filters {
     traditions: traditionCodec.decode(sp.get("tradition")),
     questions: questionCodec.decode(sp.get("question")),
     q: sp.get("q") ?? "",
-    sort: sp.get("sort") === "alpha" ? "alpha" : "chrono",
+    sort: SORTS.find((s) => s === sp.get("sort")) ?? "chrono",
   };
 }
 
@@ -68,7 +71,7 @@ export function serializeFilters(f: Filters): string {
   set("tradition", traditionCodec.encode(f.traditions));
   set("question", questionCodec.encode(f.questions));
   set("q", f.q);
-  if (f.sort === "alpha") sp.set("sort", "alpha");
+  if (f.sort !== "chrono") sp.set("sort", f.sort);
   // Keep commas readable in the address bar.
   const s = sp.toString().replace(/%2C/g, ",");
   return s ? `?${s}` : "";
@@ -142,8 +145,11 @@ export function onlyToken(t: FilterToken): Filters {
 /** Query string of a gallery showing just this one value. */
 export const tokenSearch = (t: FilterToken) => serializeFilters(onlyToken(t));
 
-/** OR within a group, AND across groups; name search matches name + aka, diacritics-insensitive. */
-export function applyFilters(list: Philosopher[], f: Filters): Philosopher[] {
+/**
+ * OR within a group, AND across groups; name search matches name + aka, diacritics-insensitive.
+ * "match" order needs each philosopher's quiz rank; unranked ones keep time order at the end.
+ */
+export function applyFilters(list: Philosopher[], f: Filters, rankOf?: (p: Philosopher) => number | undefined): Philosopher[] {
   const q = fold(f.q.trim());
   const out = list.filter(
     (p) =>
@@ -154,6 +160,8 @@ export function applyFilters(list: Philosopher[], f: Filters): Philosopher[] {
   );
   if (f.sort === "alpha") {
     out.sort((a, b) => sortName(a).localeCompare(sortName(b), "en", { sensitivity: "base" }));
+  } else if (f.sort === "match" && rankOf) {
+    out.sort((a, b) => (rankOf(a) ?? Infinity) - (rankOf(b) ?? Infinity));
   }
   return out;
 }

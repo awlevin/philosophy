@@ -1,5 +1,5 @@
 /**
- * Prerender "/" and every "/p/:slug" into dist/ so pages paint before JS loads
+ * Prerender "/", "/quiz" and every "/p/:slug" into dist/ so pages paint before JS loads
  * (and are linkable/crawlable). Runs after `vite build` + the SSR build.
  */
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -34,6 +34,11 @@ await writeFile(
   page("/", "Philosophers — A Cheat Sheet", "Sixty-one philosophers from Thales to Foucault, each in a handful of skimmable facts."),
 );
 
+await writeFile(
+  path.join(DIST, "quiz.html"),
+  page("/quiz", "Who thinks like you? — Philosophers", "React to fourteen big ideas and see which of sixty-one philosophers would side with you, and which would argue."),
+);
+
 await mkdir(path.join(DIST, "p"), { recursive: true });
 for (const p of philosophers as { slug: string; name: string; facts: string[] }[]) {
   await writeFile(
@@ -43,4 +48,4 @@ for (const p of philosophers as { slug: string; name: string; facts: string[] }[
 }
 
 await rm(SERVER, { recursive: true, force: true });
-console.log(`Prerendered ${philosophers.length + 1} pages.`);
+console.log(`Prerendered ${philosophers.length + 2} pages.`);

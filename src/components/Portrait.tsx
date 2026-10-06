@@ -26,6 +26,8 @@ type Props = {
   /** Corner radius in px. Set as a style (not a class) so it morphs cleanly between shapes. */
   radius?: number;
   layoutTransition?: Transition;
+  /** Morph to and from this philosopher's card. Off when there's no card to come from (quiz results). */
+  shared?: boolean;
 };
 
 /** Square, face-centered portrait on its era's tint. Shares a layoutId between grid card and detail page. */
@@ -40,11 +42,12 @@ export function Portrait({
   className = "",
   radius = 0,
   layoutTransition = morph,
+  shared = true,
 }: Props) {
   const { src } = p.portrait;
   return (
     <m.div
-      layoutId={portraitId(p.slug)}
+      layoutId={shared ? portraitId(p.slug) : undefined}
       layoutCrossfade={false}
       transition={{ layout: layoutTransition }}
       style={{ borderRadius: radius, ...eraVars(p.era) }}

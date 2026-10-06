@@ -36,6 +36,8 @@ type Props = {
   raised?: boolean;
   /** A menu opened (so the gallery can put its peek sheet away). */
   onMenuOpen?: () => void;
+  /** The quiz has been taken, so "For you" joins the orders. */
+  forYou?: boolean;
 };
 
 type MenuKey = "era" | "tradition" | "question" | "order" | "view";
@@ -52,6 +54,7 @@ const TAPS: { value: TapMode; label: string; hint: string }[] = [
 const ORDERS: { value: SortMode; label: string }[] = [
   { value: "chrono", label: "By time" },
   { value: "alpha", label: "A–Z" },
+  { value: "match", label: "For you" },
 ];
 
 /** How many philosophers carry each value, for the counts beside every option. */
@@ -67,7 +70,8 @@ const COUNT = new Map(
  * Sticky search bar with a menu per facet (Era, Tradition, Big question), order and view.
  * Larger screens get popovers under each button; phones get a row of pills that open bottom sheets.
  */
-export function FilterBar({ filters, onChange, view, onView, shown, total, arrivedKey, raised, onMenuOpen }: Props) {
+export function FilterBar({ filters, onChange, view, onView, shown, total, arrivedKey, raised, onMenuOpen, forYou }: Props) {
+  const orders = forYou ? ORDERS : ORDERS.filter((o) => o.value !== "match");
   const [menu, setMenu] = useState<MenuKey | null>(null);
   const [tap, setTap] = useTapMode();
   const sheet = !useMedia("(min-width: 768px)");
@@ -162,10 +166,10 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
     },
   ];
 
-  const orderLabel = ORDERS.find((o) => o.value === filters.sort)!.label;
+  const orderLabel = orders.find((o) => o.value === filters.sort)!.label;
   const orderMenu = (
     <Menu open={menu === "order"} onClose={close} title="Order" sheet={sheet} align="right" width={200}>
-      {ORDERS.map((o) => (
+      {orders.map((o) => (
         <OptionRow
           key={o.value}
           kind="radio"

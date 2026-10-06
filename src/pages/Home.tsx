@@ -1,15 +1,18 @@
 import { AnimatePresence, m } from "framer-motion";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { FacePile } from "../components/FacePile";
 import { FilterBar } from "../components/FilterBar";
 import { Gallery } from "../components/Gallery";
 import { ArrowLeft, ArrowRight } from "../components/Icons";
 import { PeekSheet } from "../components/PeekSheet";
 import { Thumb } from "../components/Portrait";
+import { QuizCallout } from "../components/QuizCallout";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
 import { EMPTY_FILTERS, activeCount, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
 import { ease } from "../lib/motion";
+import { useRanking } from "../lib/quiz";
 import { toSections } from "../lib/sections";
 import { useTapMode, useViewMode } from "../lib/view";
 import type { GalleryState } from "./Detail";
@@ -26,10 +29,20 @@ type Props = {
 export function Home({ search, covered, returningSlug, onReturned }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
-  const filters = useMemo(() => parseFilters(search), [search]);
-  const list = useMemo(() => applyFilters(philosophers, filters), [filters]);
+  const ranking = useRanking();
+  // For-you order needs a finished quiz; without one (a shared link, say) it reads as time order.
+  const filters = useMemo(() => {
+    const f = parseFilters(search);
+    return f.sort === "match" && !ranking ? { ...f, sort: "chrono" as const } : f;
+  }, [search, ranking]);
+  const rank = useMemo(
+    () => (ranking ? { of: (p: Philosopher) => ranking.bySlug.get(p.slug)?.rank, total: ranking.list.length } : undefined),
+    [ranking],
+  );
+  const list = useMemo(() => applyFilters(philosophers, filters, rank?.of), [filters, rank]);
   const hidden = useMemo(() => philosophers.filter((p) => !list.includes(p)), [list]);
-  const sections = useMemo(() => toSections(list, filters.sort), [list, filters.sort]);
+  const sections = useMemo(() => toSections(list, filters.sort, rank), [list, filters.sort, rank]);
+  const matchOf = filters.sort === "match" && ranking ? (p: Philosopher) => ranking.bySlug.get(p.slug)?.pct : undefined;
   const [view, setView] = useViewMode();
   // On touch screens a tap opens the page, unless the viewer chose to peek first. While filtering
   // it always peeks, for what the filter is about: each face's take on a filtered question,
@@ -95,6 +108,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
           </div>
           <ThemeToggle />
         </div>
+        <QuizCallout gridSearch={search} />
       </header>
 
       <FilterBar
@@ -107,6 +121,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
         total={philosophers.length}
         arrivedKey={arrival.chip}
         raised={!!cameFrom && returningSlug === cameFrom.slug}
+        forYou={!!ranking}
       />
 
       <main
@@ -124,6 +139,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
           onPeek={peeks ? (p) => setPeek(p.slug) : undefined}
           returningSlug={returningSlug}
           onReturned={onReturned}
+          matchOf={matchOf}
         />
 
         {list.length > 0 && hidden.length > 0 && (
@@ -195,12 +211,8 @@ function HiddenRow({ hidden, onShowAll }: { hidden: Philosopher[]; onShowAll: ()
       animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
       className="group mt-12 flex w-full items-center gap-4 rounded-2xl bg-paper-2 py-3.5 pr-4 pl-4 text-left transition-colors hover:bg-chip sm:mx-auto sm:max-w-md"
     >
-      <span className="flex shrink-0">
-        {faces.map((p) => (
-          <Thumb key={p.slug} p={p} className="-mr-3 h-10 w-10 rounded-full ring-2 ring-paper-2" />
-        ))}
-      </span>
-      <span className="ml-3 min-w-0 flex-1">
+      <FacePile people={faces} faceClass="h-10 w-10 ring-2 ring-paper-2" />
+      <span className="min-w-0 flex-1">
         <span className="block text-[0.95rem] font-medium text-ink">{hidden.length} others hidden</span>
         <span className="block text-[0.8rem] text-muted">Clear filters to see all {philosophers.length}</span>
       </span>

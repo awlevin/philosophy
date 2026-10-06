@@ -1,7 +1,7 @@
-import { animate, m, useIsPresent, useMotionValue, useTransform, type PanInfo, type Variants } from "framer-motion";
+import { animate, m, useMotionValue, useTransform, type PanInfo, type Variants } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Link, useLocation, useNavigate, useNavigationType } from "react-router";
-import { ArrowLeft, ArrowRight } from "../components/Icons";
+import { ArrowLeft, ArrowRight, Check, Close } from "../components/Icons";
 import { Portrait } from "../components/Portrait";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
@@ -18,7 +18,10 @@ import {
   type FilterToken,
 } from "../lib/filters";
 import { eraVars } from "../lib/era";
-import { lifespan } from "../lib/format";
+import { lifespan, shortName } from "../lib/format";
+import { useRanking } from "../lib/quiz";
+import type { QuizState } from "./Quiz";
+import { useLockPageScroll } from "../lib/useLockPageScroll";
 import { usePullToDismiss } from "../lib/usePullToDismiss";
 import { useViewMode } from "../lib/view";
 import { EXITING_LAYER, PEEK_LEAD, ease, grow, morph, nameId, type SheetRect } from "../lib/motion";
@@ -32,6 +35,8 @@ export type DetailState = {
   dir?: -1 | 1;
   /** Opened from the peek sheet, which was here: the page grows out of it, so nothing flies in from the card. */
   fromPeek?: SheetRect;
+  /** Opened from the quiz results: the page fades in over them, and closing goes back to them. */
+  fromQuiz?: boolean;
 };
 
 /** History state of a gallery reached by tapping a chip on a detail page. */
@@ -78,24 +83,13 @@ export function Detail({ slug }: { slug: string }) {
   const dir = state.dir ?? 0;
 
   const close = () => {
-    if (state.fromGrid) navigate(-1);
+    if (state.fromGrid || state.fromQuiz) navigate(-1);
     else navigate({ pathname: "/", search: state.gridSearch ?? "" });
   };
   const go = (to: Philosopher, d: -1 | 1) =>
     navigate(`/p/${to.slug}`, { replace: true, state: { ...state, dir: d } satisfies DetailState });
 
-  // Lock the page behind the overlay while it's open. Closing hands the page back at once (the
-  // overlay stays mounted to animate out), so the gallery scrolls during the morph, not after it.
-  const present = useIsPresent();
-  useEffect(() => {
-    if (!present) return;
-    const el = document.documentElement;
-    const prevOverflow = el.style.overflow;
-    el.style.overflow = "hidden";
-    return () => {
-      el.style.overflow = prevOverflow;
-    };
-  }, [present]);
+  const present = useLockPageScroll();
 
   // On every philosopher change: reset the overlay scroll, and quietly scroll the grid underneath
   // so this philosopher's card is on screen — then closing always morphs back to a visible card.
@@ -144,6 +138,8 @@ export function Detail({ slug }: { slug: string }) {
   // Only on the way in: coming back to this entry later (or reloading it) there is no sheet to grow from.
   const sheet = useNavigationType() === "PUSH" && !dir ? state.fromPeek : undefined;
   const fromPeek = !!sheet;
+  // From the quiz there is no card on screen to morph from or back into.
+  const fromQuiz = !!state.fromQuiz;
   const layoutTransition = dir || fromPeek ? instant : morph;
   // From the peek sheet, the page grows out of the sheet's place while its contents rise in one
   // after another. Their delays count from when the growth starts.
@@ -248,8 +244,8 @@ export function Detail({ slug }: { slug: string }) {
         {p ? (
           <m.article
             key={p.slug}
-            initial={dir ? { opacity: 0, x: dir * 56 } : false}
-            animate={{ opacity: 1, x: 0 }}
+            initial={dir ? { opacity: 0, x: dir * 56 } : fromQuiz ? { opacity: 0, y: 14 } : false}
+            animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 0.4, ease }}
             drag={touch ? "x" : false}
             dragDirectionLock
@@ -272,6 +268,7 @@ export function Detail({ slug }: { slug: string }) {
                     radius={view === "classic" ? 4 : 16}
                     className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
                     layoutTransition={layoutTransition}
+                    shared={!fromQuiz}
                   />
                   <m.p
                     initial={{ opacity: 0 }}
@@ -298,7 +295,7 @@ export function Detail({ slug }: { slug: string }) {
                 </m.p>
 
                 <m.h1
-                  layoutId={nameId(p.slug)}
+                  layoutId={fromQuiz ? undefined : nameId(p.slug)}
                   layoutCrossfade={false}
                   initial={nameRise?.initial}
                   animate={nameRise?.animate}
@@ -318,6 +315,7 @@ export function Detail({ slug }: { slug: string }) {
                 >
                   {p.aka && <p className="mt-1 font-display text-[1.5rem] text-ink-2 italic">{p.aka}</p>}
                   <p className="mt-3 text-[0.95rem] tracking-[0.06em] text-ink-2 tabular-nums">{lifespan(p)}</p>
+                  <YouAnd p={p} gridSearch={state.gridSearch ?? ""} />
                   <p className="eyebrow mt-6">See others like {p.name}</p>
                   <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label={`See others like ${p.name}`}>
                     {similar.map(({ t, count }) => (
@@ -490,6 +488,67 @@ function SideArrow({ side, label, onClick }: { side: "left" | "right"; label: st
     >
       {side === "left" ? <ArrowLeft /> : <ArrowRight />}
     </m.button>
+  );
+}
+
+/** After the quiz: how close this philosopher sits to the reader, and on what. */
+function YouAnd({ p, gridSearch }: { p: Philosopher; gridSearch: string }) {
+  const ranking = useRanking();
+  const match = ranking?.bySlug.get(p.slug);
+  if (!ranking || !match) return null;
+  const short = shortName(p);
+  // Up to four reasons: some shared, some not, when both exist.
+  const all = [...match.meet.map((r) => ({ ok: true, r })), ...match.split.map((r) => ({ ok: false, r }))];
+  const first = [...all.filter((x) => x.ok).slice(0, 2), ...all.filter((x) => !x.ok).slice(0, 2)];
+  const marks = [...first, ...all.filter((x) => !first.includes(x))].slice(0, 4);
+  const results = (className: string) => (
+    <Link
+      to="/quiz"
+      state={{ gridSearch } satisfies QuizState}
+      className={`inline-flex min-h-11 items-center gap-1.5 text-[0.85rem] font-medium text-accent ${className}`}
+    >
+      Your results
+      <ArrowRight className="h-4 w-4" />
+    </Link>
+  );
+  return (
+    <m.section
+      aria-label={`You and ${short}`}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease }}
+      className="mt-6 rounded-2xl bg-paper-2 p-4 sm:p-5"
+    >
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span className="font-display text-[2.6rem] leading-none font-semibold text-accent tabular-nums">{match.pct}%</span>
+        <div className="min-w-0 flex-1">
+          <p className="eyebrow">You &amp; {short}</p>
+          <p className="mt-1 text-[0.85rem] text-ink-2">
+            No. {match.rank} of {ranking.list.length} for you · sided with you on {match.agree} of {match.n}
+          </p>
+        </div>
+        {/* Beside the score on wider screens; under the reasons on phones, where the row is tight. */}
+        {results("max-sm:hidden")}
+      </div>
+      {marks.length > 0 && (
+        <ul className="mt-3 grid gap-x-6 gap-y-2 border-t border-rule pt-3 sm:grid-cols-2">
+          {marks.map(({ ok, r }) => (
+            <li key={r.statement.id} className="flex items-start gap-2.5 text-[0.875rem] leading-snug text-ink">
+              {ok ? (
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" strokeWidth={2.25} />
+              ) : (
+                <Close className="mt-0.5 h-4 w-4 shrink-0 text-disagree" strokeWidth={2.25} />
+              )}
+              <span>
+                <span className="sr-only">{ok ? "You both say: " : ""}</span>
+                {ok ? r.text : `They say: ${r.text}`}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {results("-mb-2 mt-1 sm:hidden")}
+    </m.section>
   );
 }
 
