@@ -5,6 +5,8 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import type { Philosopher } from "../src/data/types";
+import { lifespan } from "../src/lib/format";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -22,28 +24,68 @@ if (cssLink) {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
-function page(url: string, title: string, description: string) {
+const SITE = "https://philosophy-virid.vercel.app";
+
+/** At most 160 characters, cut at a word break. */
+function clip(s: string, max = 160) {
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1).replace(/\s+\S*$/, "") + "…";
+}
+
+function page(url: string, title: string, description: string, image: string, imageAlt: string) {
+  const d = esc(description);
+  const social = [
+    `<link rel="canonical" href="${SITE}${url === "/" ? "" : url}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="Philosophers" />`,
+    `<meta property="og:title" content="${esc(title)}" />`,
+    `<meta property="og:description" content="${d}" />`,
+    `<meta property="og:url" content="${SITE}${url === "/" ? "" : url}" />`,
+    `<meta property="og:image" content="${SITE}${image}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="${esc(imageAlt)}" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+  ].join("\n    ");
   return template
     .replace(/<title>.*?<\/title>/, `<title>${esc(title)}</title>`)
-    .replace(/<meta name="description" content="[^"]*"/, `<meta name="description" content="${esc(description)}"`)
+    .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${d}" />\n    ${social}`)
     .replace('<div id="root"></div>', `<div id="root">${render(url)}</div>`);
 }
 
 await writeFile(
   path.join(DIST, "index.html"),
-  page("/", "Philosophers — A Cheat Sheet", "Sixty-one philosophers from Thales to Foucault, each in a handful of skimmable facts."),
+  page(
+    "/",
+    "Philosophers Quick Reference",
+    "Sixty-one philosophers with skimmable facts about each of them.",
+    "/og/home.jpg",
+    "A wall of philosopher portraits beside the title Philosophers",
+  ),
 );
 
 await writeFile(
   path.join(DIST, "quiz.html"),
-  page("/quiz", "Who thinks like you? — Philosophers", "React to fourteen big ideas and see which of sixty-one philosophers would side with you, and which would argue."),
+  page(
+      "/quiz",
+      "Who thinks like you? — Philosophers",
+      "React to 14 statements. See which of 61 philosophers you agree with most.",
+      "/og/quiz.jpg",
+      "The quiz statement “You can’t be truly certain of anything.” above an agree and disagree scale",
+    ),
 );
 
 await mkdir(path.join(DIST, "p"), { recursive: true });
-for (const p of philosophers as { slug: string; name: string; facts: string[] }[]) {
+for (const p of philosophers as Philosopher[]) {
   await writeFile(
     path.join(DIST, "p", `${p.slug}.html`),
-    page(`/p/${p.slug}`, `${p.name} — Philosophers`, `${p.name}: ${p.facts.slice(0, 2).join(" ")}`),
+    page(
+      `/p/${p.slug}`,
+      `${p.name} (${lifespan(p)}) — Philosophers`,
+      clip(p.facts.slice(0, 2).join(" ")),
+      `/og/p/${p.slug}.jpg`,
+      `Portrait of ${p.name}`,
+    ),
   );
 }
 

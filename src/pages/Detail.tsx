@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent 
 import { Link, useLocation, useNavigate, useNavigationType } from "react-router";
 import { ArrowLeft, ArrowRight, Check, Close } from "../components/Icons";
 import { Portrait } from "../components/Portrait";
+import { ShareButton } from "../components/ShareButton";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
 import {
@@ -102,9 +103,9 @@ export function Detail({ slug }: { slug: string }) {
         window.scrollTo({ top: window.scrollY + r.top - window.innerHeight / 2 + r.height / 2, behavior: "instant" });
       }
     }
-    if (p) document.title = `${p.name} — Philosophers`;
+    if (p) document.title = `${p.name} (${lifespan(p)}) — Philosophers`;
     return () => {
-      document.title = "Philosophers — A Cheat Sheet";
+      document.title = "Philosophers Quick Reference";
     };
   }, [slug, p]);
 
@@ -239,6 +240,7 @@ export function Detail({ slug }: { slug: string }) {
                   {i + 1} / {n}
                 </span>
               )}
+              {p && <ShareButton title={`${p.name} — Philosophers`} text={p.facts[0]} path={`/p/${p.slug}`} />}
               <ThemeToggle />
             </div>
           </div>

@@ -1,4 +1,4 @@
-# Philosophers — a cheat sheet
+# Philosophers Quick Reference
 
 Sixty-one philosophers, Thales to Foucault, as a scannable wall of faces (or a timeline list). Open
 one and the card morphs into a museum-placard page of 4–6 big, skimmable facts.

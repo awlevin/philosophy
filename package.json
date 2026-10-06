@@ -8,6 +8,7 @@
     "build": "tsx scripts/check-data.ts && tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-server && tsx scripts/prerender.ts",
     "preview": "vite preview",
     "typecheck": "tsc -b",
+    "og": "tsx scripts/og.ts",
     "fetch-portraits": "tsx scripts/fetch-portraits.ts",
     "e2e": "playwright test"
   },

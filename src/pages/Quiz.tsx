@@ -52,7 +52,7 @@ export function Quiz() {
   useEffect(() => {
     document.title = "Who thinks like you? — Philosophers";
     return () => {
-      document.title = "Philosophers — A Cheat Sheet";
+      document.title = "Philosophers Quick Reference";
     };
   }, []);
 

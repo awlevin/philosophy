@@ -61,6 +61,9 @@ export const List = (p: SVGProps<SVGSVGElement>) => (
     <path d="M10 6.5h10M10 12h10M10 17.5h10" />
   </svg>
 );
+export const Share = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M12 15V4M8 8l4-4 4 4M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" /></svg>
+);
 export const Check = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}><path d="m5 12 5 5 9-10" /></svg>
 );
