@@ -136,7 +136,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
           eagerFirst={!search && !covered}
           deferImages={deferImages}
           peeking={peeked ? peeked.slug : null}
-          onPeek={peeks ? (p) => setPeek(p.slug) : undefined}
+          onPeek={peeks ? (p) => setPeek((cur) => (cur === p.slug ? null : p.slug)) : undefined}
           returningSlug={returningSlug}
           onReturned={onReturned}
           matchOf={matchOf}

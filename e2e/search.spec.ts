@@ -6,11 +6,19 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("search waits for a pause in typing, then filters; the clear button empties it", async ({ page }) => {
+  // Our own clock, so "a pause" doesn't depend on how fast the machine types.
+  await page.clock.install();
+  await page.goto("/", { waitUntil: "networkidle" });
   const box = page.getByRole("searchbox", { name: "Search by name" });
-  await box.pressSequentially("kant", { delay: 40 });
-  // Mid-typing the URL hasn't caught up yet; after a pause it has.
-  await expect(page).not.toHaveURL(/q=kant/);
-  await expect(page).toHaveURL(/q=kant/);
+  for (const key of "kant") {
+    await box.press(key);
+    await page.clock.runFor(100);
+  }
+  await expect(box).toHaveValue("kant");
+  await expect(page).not.toHaveURL(/q=/);
+  await page.clock.runFor(100);
+  await expect(page).toHaveURL(/q=kant$/);
+  await page.clock.resume();
   await expect(page.locator("[data-slug]")).toHaveCount(1);
   await snap(page, "s1-search-typed");
 

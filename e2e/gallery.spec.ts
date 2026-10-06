@@ -116,15 +116,20 @@ test("Classic brings back the original look, everywhere, and opens pages directl
   await expect(page.locator("html")).toHaveAttribute("data-look", "classic");
 });
 
-test("on touch, a second tap on a peeking face opens its page", async ({ page }) => {
+test("on touch, a second tap on a peeking face puts the peek away", async ({ page }) => {
   test.skip(!isTouch(), "peek is for touch screens");
   await page.goto(RULED, { waitUntil: "networkidle" });
   const card = page.locator('[data-slug="plato"] a');
   await card.scrollIntoViewIfNeeded();
   await card.click();
-  await expect(page.getByRole("dialog", { name: "Plato, preview" })).toBeVisible();
+  const peek = page.getByRole("dialog", { name: "Plato, preview" });
+  await expect(peek).toBeVisible();
   await card.click();
-  await expect(page).toHaveURL(/\/p\/plato$/);
+  await expect(peek).toBeHidden();
+  await expect(page).toHaveURL(/question=ruled$/);
+  // …and a third tap peeks again.
+  await card.click();
+  await expect(peek).toBeVisible();
 });
 
 test("on touch, opening a filter menu puts the peek sheet away", async ({ page }) => {
@@ -156,10 +161,14 @@ test("on touch, opening from the peek grows the page out of the sheet, never a b
       return o;
     };
     const frames: number[] = [];
-    Object.assign(window, { frames_: frames });
+    let cardGone = 0;
+    Object.assign(window, { frames_: frames, cardGone_: () => cardGone });
     const sheet = document.querySelector('[aria-label$=", preview"] p.font-display');
     const tick = () => {
       const pg = document.querySelector('[aria-modal="true"]');
+      // The card stays whole while the gallery still shows around the growing page.
+      const face = document.querySelector('[data-slug="hobbes"] .portrait');
+      if (face && getComputedStyle(face).visibility === "hidden" && pg && getComputedStyle(pg).clipPath !== "none") cardGone++;
       const page = ["h1", ".portrait", "article .eyebrow"].map((s) => shown(pg?.querySelector(s)));
       frames.push(Math.max(sheet?.isConnected ? shown(sheet) : 0, ...page));
       if (frames.length < 60) requestAnimationFrame(tick);
@@ -178,6 +187,7 @@ test("on touch, opening from the peek grows the page out of the sheet, never a b
   const frames = await page.evaluate(() => (window as unknown as { frames_: number[] }).frames_);
   expect(frames).toHaveLength(60);
   expect(Math.min(...frames)).toBeGreaterThan(0.25);
+  expect(await page.evaluate(() => (window as unknown as { cardGone_: () => number }).cardGone_())).toBe(0);
 });
 
 test("in the list, a selected first row stays distinct from its section band", async ({ page }) => {

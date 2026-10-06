@@ -146,8 +146,11 @@ export function Detail({ slug }: { slug: string }) {
   const lead = fromPeek ? PEEK_LEAD : 0;
   const [grewFrom] = useState(sheet);
   const growth = useMotionValue(grewFrom ? 0 : 1);
+  // The card keeps its portrait until the page has covered the gallery: taking over the shared
+  // portrait hides the card's, which would leave a hole in the gallery still showing around the page.
+  const [grown, setGrown] = useState(!grewFrom);
   useEffect(() => {
-    if (grewFrom) return animate(growth, 1, grow).stop;
+    if (grewFrom) return animate(growth, 1, { ...grow, onComplete: () => setGrown(true) }).stop;
   }, [grewFrom, growth]);
   const clipPath = useTransform(growth, (g) => {
     const k = Math.max(0, 1 - g);
@@ -258,7 +261,12 @@ export function Detail({ slug }: { slug: string }) {
           >
             <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14 lg:gap-20">
               <div>
-                <m.div className="md:sticky md:top-24" {...(fromPeek && rise(lead))}>
+                <m.div
+                  className="md:sticky md:top-24"
+                  {...(fromPeek && rise(lead))}
+                  // Closed before it took over the card's portrait: nothing morphs home, so it fades.
+                  exit={grown ? undefined : fadeOut}
+                >
                   <Portrait
                     p={p}
                     eager
@@ -268,7 +276,7 @@ export function Detail({ slug }: { slug: string }) {
                     radius={view === "classic" ? 4 : 16}
                     className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
                     layoutTransition={layoutTransition}
-                    shared={!fromQuiz}
+                    shared={!fromQuiz && grown}
                   />
                   <m.p
                     initial={{ opacity: 0 }}

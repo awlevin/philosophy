@@ -50,7 +50,7 @@ const VIEWS: { value: ViewMode; label: string; hint: string; icon: ReactNode }[]
 ];
 const TAPS: { value: TapMode; label: string; hint: string }[] = [
   { value: "open", label: "Open the page", hint: "Straight to the full page, except while filtering" },
-  { value: "peek", label: "Peek first", hint: "A quick look; tap again to open" },
+  { value: "peek", label: "Peek first", hint: "A quick look; open it from there" },
 ];
 const ORDERS: { value: SortMode; label: string }[] = [
   { value: "chrono", label: "By time" },
