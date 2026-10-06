@@ -5,7 +5,6 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "has": [{ "type": "header", "key": "user-agent", "value": "(?i).*slackbot.*" }], "destination": "/slack.html" },
     { "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
