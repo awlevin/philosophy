@@ -2,7 +2,7 @@
 
 @theme {
   --font-display: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Instrument Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --color-paper: var(--paper);
   --color-paper-2: var(--paper-2);
@@ -16,64 +16,109 @@
 }
 
 /* ---------- Theme tokens ---------- */
+/*
+ * Each era has a color (dots, bars, rails), an ink (text on paper, 4.5:1+) and a tint
+ * (portrait grounds, section bands). Components read them as var(--era-<key>[-ink|-tint]).
+ */
 :root {
   color-scheme: light;
-  --paper: #f4efe6;
-  --paper-2: #ebe4d8;
-  --ink: #1d1a16;
-  --ink-2: #3a342c;
-  --muted: #6a6054;
-  --rule: #d8cfc1;
-  --accent: #8b5a2b;
-  --accent-ink: #fbf7f0;
-  --chip: #e6dece;
-  /* Portrait treatment: desaturate, then tint toward warm sepia. */
-  --portrait-filter: grayscale(1) contrast(1.06) brightness(1.02);
-  --portrait-tint: #b48a5a;
-  --portrait-tint-blend: multiply;
-  --portrait-tint-opacity: 0.28;
-  --portrait-bg: #ddd3c3;
-  --shadow: 0 1px 2px rgb(60 40 20 / 0.06), 0 8px 24px -12px rgb(60 40 20 / 0.25);
+  --paper: #f7f5f0;
+  --paper-2: #ebe8e1;
+  --ink: #17161b;
+  --ink-2: #46434c;
+  --muted: #5d5a63;
+  --rule: #e1ddd5;
+  --accent: #a3361e;
+  --accent-ink: #ffffff;
+  --chip: #ebe8e1;
+  --sheet: #ffffff;
+  --scrim: rgb(20 18 24 / 0.32);
+  --shadow: 0 1px 2px rgb(20 18 24 / 0.06), 0 8px 24px -12px rgb(20 18 24 / 0.22);
+  --shadow-lift: 0 2px 6px rgb(20 18 24 / 0.08), 0 24px 48px -12px rgb(20 18 24 / 0.35);
+
+  --era-ancient: #c4472c;
+  --era-ancient-ink: #a3361e;
+  --era-ancient-tint: #f4dbd2;
+  --era-medieval: #3358c4;
+  --era-medieval-ink: #2847a3;
+  --era-medieval-tint: #dbe3f7;
+  --era-early-modern: #23855a;
+  --era-early-modern-ink: #1a6845;
+  --era-early-modern-tint: #d5ecdf;
+  --era-modern: #dc9b1b;
+  --era-modern-ink: #845600;
+  --era-modern-tint: #f8e8c3;
+  --era-contemporary: #9b45bf;
+  --era-contemporary-ink: #78318f;
+  --era-contemporary-tint: #ecdcf4;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --paper: #131210;
-    --paper-2: #1c1a17;
-    --ink: #ede6da;
-    --ink-2: #cfc6b8;
-    --muted: #978d80;
-    --rule: #34302a;
-    --accent: #d1a36b;
-    --accent-ink: #1a140d;
-    --chip: #24211d;
-    --portrait-filter: grayscale(1) contrast(1.1) brightness(0.86);
-    --portrait-tint: #c9925a;
-    --portrait-tint-blend: soft-light;
-    --portrait-tint-opacity: 0.55;
-    --portrait-bg: #2a2621;
+    --paper: #121215;
+    --paper-2: #1d1d22;
+    --ink: #f1efe9;
+    --ink-2: #cfccd4;
+    --muted: #9c98a3;
+    --rule: #2c2b32;
+    --accent: #f0a48c;
+    --accent-ink: #1a0f0b;
+    --chip: #232228;
+    --sheet: #1b1b20;
+    --scrim: rgb(0 0 0 / 0.5);
     --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -12px rgb(0 0 0 / 0.6);
+    --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.3), 0 24px 48px -12px rgb(0 0 0 / 0.7);
+
+    --era-ancient: #e0674a;
+    --era-ancient-ink: #f2a28c;
+    --era-ancient-tint: #3a2019;
+    --era-medieval: #6f8ff0;
+    --era-medieval-ink: #a9bcf7;
+    --era-medieval-tint: #1c2440;
+    --era-early-modern: #3fae7c;
+    --era-early-modern-ink: #8fd6b2;
+    --era-early-modern-tint: #15301f;
+    --era-modern: #e8b04a;
+    --era-modern-ink: #f2cd85;
+    --era-modern-tint: #362a12;
+    --era-contemporary: #bb72dd;
+    --era-contemporary-ink: #dcb0ef;
+    --era-contemporary-tint: #2d1a38;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #131210;
-  --paper-2: #1c1a17;
-  --ink: #ede6da;
-  --ink-2: #cfc6b8;
-  --muted: #978d80;
-  --rule: #34302a;
-  --accent: #d1a36b;
-  --accent-ink: #1a140d;
-  --chip: #24211d;
-  --portrait-filter: grayscale(1) contrast(1.1) brightness(0.86);
-  --portrait-tint: #c9925a;
-  --portrait-tint-blend: soft-light;
-  --portrait-tint-opacity: 0.55;
-  --portrait-bg: #2a2621;
+  --paper: #121215;
+  --paper-2: #1d1d22;
+  --ink: #f1efe9;
+  --ink-2: #cfccd4;
+  --muted: #9c98a3;
+  --rule: #2c2b32;
+  --accent: #f0a48c;
+  --accent-ink: #1a0f0b;
+  --chip: #232228;
+  --sheet: #1b1b20;
+  --scrim: rgb(0 0 0 / 0.5);
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -12px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.3), 0 24px 48px -12px rgb(0 0 0 / 0.7);
+
+  --era-ancient: #e0674a;
+  --era-ancient-ink: #f2a28c;
+  --era-ancient-tint: #3a2019;
+  --era-medieval: #6f8ff0;
+  --era-medieval-ink: #a9bcf7;
+  --era-medieval-tint: #1c2440;
+  --era-early-modern: #3fae7c;
+  --era-early-modern-ink: #8fd6b2;
+  --era-early-modern-tint: #15301f;
+  --era-modern: #e8b04a;
+  --era-modern-ink: #f2cd85;
+  --era-modern-tint: #362a12;
+  --era-contemporary: #bb72dd;
+  --era-contemporary-ink: #dcb0ef;
+  --era-contemporary-tint: #2d1a38;
 }
 
 /* ---------- Base ---------- */
@@ -131,11 +176,12 @@ body {
   color: var(--muted);
 }
 
-/* ---------- Portrait treatment ---------- */
+/* ---------- Portraits ---------- */
+/* Full color on the era's tint (set as --portrait-bg on the element or an ancestor). */
 .portrait {
   position: relative;
   overflow: hidden;
-  background: var(--portrait-bg);
+  background: var(--portrait-bg, var(--paper-2));
   isolation: isolate;
 }
 .portrait img {
@@ -144,33 +190,6 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: var(--portrait-filter);
-  transition: filter 400ms ease;
-}
-.portrait::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--portrait-tint);
-  mix-blend-mode: var(--portrait-tint-blend);
-  opacity: var(--portrait-tint-opacity);
-  pointer-events: none;
-  transition: opacity 400ms ease;
-}
-/* A hint of the original color on hover (real pointers only: touch keeps :hover stuck after a tap) */
-@media (hover: hover) {
-  .card:hover .portrait img {
-    filter: grayscale(0.35) contrast(1.04);
-  }
-  .card:hover .portrait::after {
-    opacity: calc(var(--portrait-tint-opacity) * 0.5);
-  }
-}
-.card:focus-visible .portrait img {
-  filter: grayscale(0.35) contrast(1.04);
-}
-.card:focus-visible .portrait::after {
-  opacity: calc(var(--portrait-tint-opacity) * 0.5);
 }
 
 /* Horizontal chip rows fade at the edges when they overflow */

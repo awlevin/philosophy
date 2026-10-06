@@ -37,3 +37,19 @@ export const Moon = (p: SVGProps<SVGSVGElement>) => (
 export const Sliders = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
 );
+export const Grid = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
+    <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
+    <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
+    <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
+  </svg>
+);
+export const List = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <circle cx="5.5" cy="6.5" r="1.3" />
+    <circle cx="5.5" cy="12" r="1.3" />
+    <circle cx="5.5" cy="17.5" r="1.3" />
+    <path d="M10 6.5h10M10 12h10M10 17.5h10" />
+  </svg>
+);

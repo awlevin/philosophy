@@ -1,16 +1,10 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { openFromGallery, snap } from "./helpers";
 
-/** Snapshots of the flow for eyeballing, kept with the test output. */
-const snap = (page: Page, name: string) => page.screenshot({ path: `test-results/shots/${test.info().project.name}/${name}.png` });
-
-async function openPlatoFromGrid(page: Page) {
+const openPlatoFromGrid = async (page: import("@playwright/test").Page) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  const card = page.locator('a[href="/p/plato"]');
-  await card.scrollIntoViewIfNeeded();
-  await card.click();
-  await expect(page).toHaveURL(/\/p\/plato$/);
-  await page.waitForTimeout(1200);
-}
+  await openFromGallery(page, "plato", "Plato");
+};
 
 test("tapping a detail chip lands on a gallery that clearly says it is filtered", async ({ page }) => {
   await openPlatoFromGrid(page);

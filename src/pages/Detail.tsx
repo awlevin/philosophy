@@ -17,6 +17,7 @@ import {
   tokenSearch,
   type FilterToken,
 } from "../lib/filters";
+import { eraVars } from "../lib/era";
 import { lifespan } from "../lib/format";
 import { ease, morph, nameId } from "../lib/motion";
 
@@ -193,7 +194,7 @@ export function Detail({ slug }: { slug: string }) {
             dragElastic={0.2}
             dragSnapToOrigin
             onDragEnd={onDragEnd}
-            style={{ touchAction: "pan-y" }}
+            style={{ touchAction: "pan-y", ...eraVars(p.era) }}
             className="mx-auto max-w-[1280px] px-4 pt-2 pb-16 sm:px-8 md:pt-6"
           >
             <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14 lg:gap-20">
@@ -205,7 +206,8 @@ export function Detail({ slug }: { slug: string }) {
                     priority
                     withGridPlaceholder={!!state.fromGrid}
                     sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 92vw"
-                    className="mx-auto w-full max-w-[460px] rounded-[4px] shadow-[var(--shadow)] md:max-w-none"
+                    radius={16}
+                    className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
                     layoutTransition={layoutTransition}
                   />
                   <m.p
@@ -227,6 +229,7 @@ export function Detail({ slug }: { slug: string }) {
                   exit={fadeOut}
                   transition={{ delay: dir ? 0 : 0.15, duration: 0.45, ease }}
                   className="eyebrow"
+                  style={{ color: "var(--era-ink)" }}
                 >
                   {p.era} · {p.tradition.join(" / ")}
                 </m.p>
@@ -272,7 +275,7 @@ export function Detail({ slug }: { slug: string }) {
                       variants={factItem}
                       className="flex gap-4 border-b border-rule py-5 sm:gap-6 sm:py-6"
                     >
-                      <span className="eyebrow w-5 shrink-0 pt-[0.9em] text-right tabular-nums sm:w-6" aria-hidden>
+                      <span className="eyebrow w-5 shrink-0 pt-[0.9em] text-right tabular-nums sm:w-6" style={{ color: "var(--era-ink)" }} aria-hidden>
                         {toRoman(k + 1)}
                       </span>
                       <p className="font-display text-[clamp(1.75rem,1.25rem+1.5vw,2.5rem)] leading-[1.14] font-medium text-pretty text-ink">
@@ -338,6 +341,7 @@ function SimilarChip({
 }) {
   const body = (
     <>
+      {t.group === "era" && <span className={`h-2 w-2 rounded-full ${launching ? "bg-paper" : "bg-[var(--era)]"}`} />}
       <span>{t.value}</span>
       <span className={`tabular-nums ${launching ? "text-paper/60" : "text-muted"}`}>{count}</span>
     </>

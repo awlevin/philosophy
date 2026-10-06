@@ -2,8 +2,9 @@ import { m } from "framer-motion";
 import type { Ref } from "react";
 import { Link } from "react-router";
 import type { Philosopher } from "../data/philosophers";
-import { lifespan } from "../lib/format";
+import { lifespan, shortName } from "../lib/format";
 import { ease, morph, nameId } from "../lib/motion";
+import { peekInstead } from "../lib/peek";
 import { GRID_SIZES, Portrait } from "./Portrait";
 
 type Props = {
@@ -12,13 +13,17 @@ type Props = {
   eager?: boolean;
   priority?: boolean;
   deferImage?: boolean;
+  /** Its peek sheet is open. */
+  peeking?: boolean;
+  onPeek: (p: Philosopher) => void;
   /** Raised above the closing detail overlay while it morphs back into place. */
   returning?: boolean;
   onReturned?: () => void;
   ref?: Ref<HTMLLIElement>;
 };
 
-export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, returning, onReturned, ref }: Props) {
+export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, peeking, onPeek, returning, onReturned, ref }: Props) {
+  const short = shortName(p);
   return (
     <m.li
       ref={ref}
@@ -34,9 +39,10 @@ export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, re
       <Link
         to={`/p/${p.slug}`}
         state={{ gridSearch, fromGrid: true }}
-        className="card group block rounded-[3px] outline-offset-4"
+        onClick={(e) => peekInstead(e, () => onPeek(p))}
+        className="group block rounded-[10px] outline-offset-4"
       >
-        <div className="transition-transform duration-500 ease-out group-hover:-translate-y-1">
+        <div className="transition-transform duration-500 ease-out sm:group-hover:-translate-y-1">
           <Portrait
             p={p}
             eager={eager}
@@ -44,19 +50,24 @@ export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, re
             decorative
             defer={deferImage}
             sizes={GRID_SIZES}
-            className="rounded-[3px] shadow-[var(--shadow)]"
+            radius={10}
+            className={`shadow-[var(--shadow)] transition-shadow ${peeking ? "ring-[2.5px] ring-[var(--era)] ring-offset-2 ring-offset-paper" : ""}`}
           />
         </div>
-        <div className="pt-3 pr-1">
+        <div className="pt-1.5 text-center sm:pt-3 sm:pr-1 sm:text-left">
+          {/* Phones show the short name; morph only when it reads the same as the detail page's title. */}
           <m.h2
-            layoutId={nameId(p.slug)}
+            layoutId={short === p.name ? nameId(p.slug) : undefined}
             layoutCrossfade={false}
             transition={{ layout: morph }}
-            className="origin-top-left font-display text-[1.125rem] leading-[1.15] font-semibold text-ink sm:text-[1.2rem]"
+            className={`origin-top-left leading-tight font-semibold text-ink max-sm:truncate sm:font-display sm:text-[1.08rem] sm:leading-[1.15] ${
+              short.length > 11 ? "text-[0.64rem]" : "text-[0.72rem]"
+            }`}
           >
-            {p.name}
+            <span className="sm:hidden">{short}</span>
+            <span className="max-sm:hidden">{p.name}</span>
           </m.h2>
-          <p className="mt-1 text-[0.72rem] tracking-[0.04em] text-muted tabular-nums">
+          <p className="mt-1 text-[0.7rem] tracking-[0.04em] text-muted tabular-nums max-sm:hidden">
             {p.aka && <span className="italic">{p.aka} · </span>}
             {lifespan(p)}
           </p>

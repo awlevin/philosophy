@@ -5,7 +5,7 @@ export function Monogram({ name }: { name: string }) {
   const text = initials(name);
   return (
     <svg viewBox="0 0 200 200" role="img" aria-label={`${name} (no portrait available)`} className="h-full w-full">
-      <rect width="200" height="200" fill="var(--portrait-bg)" />
+      <rect width="200" height="200" fill="var(--portrait-bg, var(--paper-2))" />
       <circle cx="100" cy="100" r="74" fill="none" stroke="var(--accent)" strokeWidth="1" opacity="0.7" />
       <circle cx="100" cy="100" r="68" fill="none" stroke="var(--accent)" strokeWidth="0.5" opacity="0.5" />
       <g opacity="0.55">

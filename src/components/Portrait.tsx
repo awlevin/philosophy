@@ -1,12 +1,13 @@
 import { m } from "framer-motion";
 import type { Transition } from "framer-motion";
 import type { Philosopher } from "../data/philosophers";
+import { eraVars } from "../lib/era";
 import { morph, portraitId } from "../lib/motion";
 import { Monogram } from "./Monogram";
 
 /** `sizes` for grid cards. Also used for the detail page's placeholder so it hits the same cached file. */
 export const GRID_SIZES =
-  "(min-width: 1280px) 15vw, (min-width: 1024px) 18vw, (min-width: 768px) 23vw, (min-width: 640px) 31vw, 46vw";
+  "(min-width: 1280px) 12vw, (min-width: 1024px) 14vw, (min-width: 768px) 16vw, (min-width: 640px) 19vw, 23vw";
 
 type Props = {
   p: Philosopher;
@@ -22,10 +23,12 @@ type Props = {
   /** Show the grid-sized image underneath while the larger one loads (no blank frame mid-morph). */
   withGridPlaceholder?: boolean;
   className?: string;
+  /** Corner radius in px. Set as a style (not a class) so it morphs cleanly between shapes. */
+  radius?: number;
   layoutTransition?: Transition;
 };
 
-/** Square, face-centered, tinted portrait. Shares a layoutId between grid card and detail page. */
+/** Square, face-centered portrait on its era's tint. Shares a layoutId between grid card and detail page. */
 export function Portrait({
   p,
   sizes,
@@ -35,6 +38,7 @@ export function Portrait({
   defer,
   withGridPlaceholder,
   className = "",
+  radius = 0,
   layoutTransition = morph,
 }: Props) {
   const { src } = p.portrait;
@@ -43,6 +47,7 @@ export function Portrait({
       layoutId={portraitId(p.slug)}
       layoutCrossfade={false}
       transition={{ layout: layoutTransition }}
+      style={{ borderRadius: radius, ...eraVars(p.era) }}
       className={`portrait aspect-square ${className}`}
     >
       {!src ? (
@@ -64,10 +69,10 @@ export function Portrait({
 }
 
 /** Small portrait with no shared layout (avatars, face piles), so it never steals a card's morph. */
-export function Thumb({ p, className = "" }: { p: Philosopher; className?: string }) {
+export function Thumb({ p, className = "", sizes = "64px" }: { p: Philosopher; className?: string; sizes?: string }) {
   return (
-    <div className={`portrait aspect-square ${className}`}>
-      {p.portrait.src ? <Img p={p} sizes="64px" alt="" /> : <Monogram name={p.name} />}
+    <div className={`portrait aspect-square ${className}`} style={eraVars(p.era)}>
+      {p.portrait.src ? <Img p={p} sizes={sizes} alt="" /> : <Monogram name={p.name} />}
     </div>
   );
 }

@@ -1,14 +1,18 @@
 import { AnimatePresence, m } from "framer-motion";
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { FilterBar } from "../components/FilterBar";
+import { Gallery } from "../components/Gallery";
 import { ArrowLeft, ArrowRight } from "../components/Icons";
-import { PhilosopherCard } from "../components/PhilosopherCard";
+import { PeekSheet } from "../components/PeekSheet";
 import { Thumb } from "../components/Portrait";
+import { Rail } from "../components/Rail";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
 import { EMPTY_FILTERS, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
 import { ease } from "../lib/motion";
+import { toSections } from "../lib/sections";
+import { useViewMode } from "../lib/view";
 import type { GalleryState } from "./Detail";
 
 type Props = {
@@ -26,6 +30,17 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
   const filters = useMemo(() => parseFilters(search), [search]);
   const list = useMemo(() => applyFilters(philosophers, filters), [filters]);
   const hidden = useMemo(() => philosophers.filter((p) => !list.includes(p)), [list]);
+  const sections = useMemo(() => toSections(list, filters.sort), [list, filters.sort]);
+  const [view, setView] = useViewMode();
+  // The rail earns its place only when there is a long way to scroll.
+  const showRail = list.length > 12 && sections.length >= 3;
+
+  const [peek, setPeek] = useState<string | null>(null);
+  const closePeek = useCallback(() => setPeek(null), []);
+  const peeked = peek && list.some((p) => p.slug === peek) ? bySlug.get(peek) : undefined;
+  useEffect(() => {
+    if (covered) setPeek(null);
+  }, [covered]);
 
   // Reached by tapping a chip on a detail page. Changing filters here replaces the entry without
   // this state, so "Back to …" goes away once the view is no longer the one that chip produced.
@@ -65,14 +80,14 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
 
   return (
     <div inert={covered} aria-hidden={covered || undefined}>
-      <header className="mx-auto max-w-[1400px] px-4 pt-10 pb-8 sm:px-8 sm:pt-16 sm:pb-12">
+      <header className="mx-auto max-w-[1400px] px-4 pt-8 pb-3 sm:px-8 sm:pt-16 sm:pb-10">
         <div className="flex items-start justify-between gap-6">
           <div>
             <p className="eyebrow">A cheat sheet in sixty-one faces</p>
-            <h1 className="mt-3 font-display text-[3.25rem] leading-[0.95] font-medium tracking-[-0.01em] text-ink sm:text-[5.5rem]">
+            <h1 className="mt-2 font-display text-[2.875rem] leading-[0.95] font-semibold tracking-[-0.01em] text-ink sm:mt-3 sm:text-[5.5rem]">
               Philosophers
             </h1>
-            <p className="mt-4 max-w-xl font-display text-[1.25rem] leading-snug text-ink-2 italic sm:text-[1.5rem]">
+            <p className="mt-4 max-w-xl font-display text-[1.5rem] leading-snug text-ink-2 italic max-sm:hidden">
               From Thales to Foucault — who asked what, and the one thing to remember about each.
             </p>
           </div>
@@ -83,29 +98,31 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
       <FilterBar
         filters={filters}
         onChange={setFilters}
+        view={view}
+        onView={setView}
         shown={list.length}
         total={philosophers.length}
         arrivedKey={arrival.chip}
         raised={!!cameFrom && returningSlug === cameFrom.slug}
       />
 
-      <main id="grid" className="mx-auto max-w-[1400px] px-4 pt-8 pb-24 sm:px-8 sm:pt-10">
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          <AnimatePresence mode="popLayout" initial={false}>
-            {list.map((p, i) => (
-                <PhilosopherCard
-                  key={p.slug}
-                  p={p}
-                  gridSearch={search}
-                  eager={i < 2 && !search && !covered}
-                  priority={i < 2 && !search && !covered}
-                  deferImage={deferImages}
-                  returning={returningSlug === p.slug}
-                  onReturned={onReturned}
-                />
-            ))}
-          </AnimatePresence>
-        </ul>
+      <main
+        id="grid"
+        className={`mx-auto px-4 pb-24 sm:px-8 ${view === "list" ? "max-w-3xl pt-3" : "max-w-[1400px]"} ${showRail ? "pr-10 sm:pr-16" : ""}`}
+      >
+        <Gallery
+          sections={sections}
+          railGutter={showRail}
+          view={view}
+          timeline={filters.sort === "chrono"}
+          gridSearch={search}
+          eagerFirst={!search && !covered}
+          deferImages={deferImages}
+          peeking={peeked ? peeked.slug : null}
+          onPeek={(p) => setPeek(p.slug)}
+          returningSlug={returningSlug}
+          onReturned={onReturned}
+        />
 
         {list.length > 0 && hidden.length > 0 && (
           <HiddenRow hidden={hidden} onShowAll={clearFilters} />
@@ -125,8 +142,14 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
         )}
       </main>
 
+      {showRail && !covered && <Rail sections={sections} timeline={filters.sort === "chrono"} />}
+
       <AnimatePresence>
-        {cameFrom && (
+        {peeked && <PeekSheet key="peek" p={peeked} gridSearch={search} onClose={closePeek} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {cameFrom && !peeked && (
           <m.button
             key="back"
             type="button"

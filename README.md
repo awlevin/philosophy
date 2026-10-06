@@ -1,7 +1,7 @@
 # Philosophers — a cheat sheet
 
-Sixty-one philosophers, Thales to Foucault, as a scannable grid of faces. Click one and the card
-morphs into a museum-placard page of 4–6 big, skimmable facts.
+Sixty-one philosophers, Thales to Foucault, as a scannable wall of faces (or a timeline list). Open
+one and the card morphs into a museum-placard page of 4–6 big, skimmable facts.
 
 Vite · React · TypeScript · Tailwind · Framer Motion. Static site, no backend.
 
@@ -21,9 +21,17 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
 - **Routes** — `/` is the grid; `/p/:slug` is a detail page. The grid stays mounted underneath the
   detail page, so the portrait and name share a Framer Motion `layoutId` and morph card → page and
   back again (including on the browser back button), and the grid keeps its scroll and filters.
-- **Filters** — Era / Tradition / Big Question chips (OR within a group, AND across groups), name
-  search (diacritic-insensitive), chronological or A–Z sort. All of it is mirrored in the URL,
-  e.g. `/?era=ancient,medieval&question=live&sort=alpha&q=th`.
+- **Gallery** — two views, Faces (default) or List, grouped by era (by time) or by initial (A–Z).
+  The choice of view is remembered per device (`src/lib/view.ts`). A rail on the right edge jumps
+  or scrubs between sections. On touch screens a tap opens a peek sheet (face, dates, one fact);
+  "Open" or a swipe up goes to the full page.
+- **Color** — each era has a color, an ink and a tint (`--era-*` tokens in `src/index.css`, scoped
+  to an element with `eraVars()` from `src/lib/era.ts`). Portraits sit on their era's tint.
+- **Filters** — the "View & filter" panel holds view, order, and Era / Tradition / Big Question
+  chips (OR within a group, AND across groups); name search is diacritic-insensitive. Filters and
+  order are mirrored in the URL, e.g. `/?era=ancient,medieval&question=live&sort=alpha&q=th`.
+  Chips on a detail page ("See others like …") filter the gallery; the tapped chip flies into the
+  bar, and "Back to …" returns to the page.
 - **Detail navigation** — prev/next buttons, ← / → keys, swipe on touch screens, Esc to close.
 - **Prerendering** — `npm run build` renders `/` and all 61 `/p/:slug` pages to static HTML
   (`dist/index.html`, `dist/p/{slug}.html`) and hydrates on load, so text paints before the JS

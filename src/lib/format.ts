@@ -23,6 +23,28 @@ export function sortName(p: Philosopher): string {
   return SORT_NAME[p.slug] ?? p.name.split(" ").at(-1)!;
 }
 
+/** Born year alone, for timeline rows: "624 BCE", "354 CE", "1711". */
+export function bornLabel(p: Pick<Philosopher, "born">): string {
+  if (p.born < 0) return `${-p.born} BCE`;
+  return p.born < 1000 ? `${p.born} CE` : String(p.born);
+}
+
+const SHORT_NAME: Record<string, string> = {
+  buddha: "Buddha",
+  augustine: "Augustine",
+  "zeno-of-citium": "Zeno",
+  "marcus-aurelius": "Marcus",
+  "al-ghazali": "Al-Ghazali",
+  "wang-yangming": "Wang Yangming",
+  "zhu-xi": "Zhu Xi",
+  "william-james": "William James",
+};
+
+/** The name people know them by, for tight labels: "Plato", "Kant", "Buddha". */
+export function shortName(p: Philosopher): string {
+  return SHORT_NAME[p.slug] ?? p.name.split(" ").at(-1)!;
+}
+
 const PARTICLES = new Set(["de", "of", "von", "van", "the"]);
 
 /** "Nāgārjuna" → "N", "Michel de Montaigne" → "MM". */
