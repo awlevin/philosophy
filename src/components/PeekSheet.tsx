@@ -1,10 +1,10 @@
-import { m } from "framer-motion";
+import { m, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import type { BigQuestion, Philosopher } from "../data/philosophers";
 import { eraVars } from "../lib/era";
 import { homeland, lifespan, shortName } from "../lib/format";
-import { grow, type SheetRect } from "../lib/motion";
+import { HANDOFF, grow, peekSlide, ramp, type SheetRect } from "../lib/motion";
 import type { DetailState } from "../pages/Detail";
 import { ArrowRight, Close } from "./Icons";
 import { Thumb } from "./Portrait";
@@ -32,6 +32,7 @@ export function PeekSheet({
   const takes = questions.flatMap((q) => (p.takes?.[q] ? [{ q, take: p.takes[q] }] : []));
   const navigate = useNavigate();
   const sheet = useRef<HTMLDivElement>(null);
+  const peekOut = useTransform(peekSlide, (s) => 1 - ramp(s, HANDOFF.peekOut));
   // Set on "Open": where the sheet is, for the page to grow out of.
   const [opening, setOpening] = useState<SheetRect | null>(null);
   const open = () => {
@@ -47,6 +48,7 @@ export function PeekSheet({
       left: r.left,
       radii: [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius].map(px) as SheetRect["radii"],
     };
+    peekSlide.jump(0);
     setOpening(rect);
     // One frame for the exit to pick up `opening` before the sheet unmounts.
     requestAnimationFrame(() =>
@@ -89,20 +91,19 @@ export function PeekSheet({
     >
       <m.div
         aria-hidden
-        exit={opening ? { opacity: 0, transition: { duration: 0.16, ease: "easeOut" } } : undefined}
+        // The page's surface takes its place, the same color and shape, so it can go at once.
+        exit={opening ? { opacity: 0, transition: { duration: 0 } } : undefined}
         className="absolute inset-0 rounded-[inherit] bg-[var(--sheet)] shadow-[var(--shadow-lift)]"
       >
         {/* Fills in below when the sheet is pulled up past its resting place. */}
         <span className="absolute inset-x-0 top-full h-[50vh] bg-[var(--sheet)] sm:hidden" />
       </m.div>
-      {/* On "Open" the contents ride up with the growing page's top edge as they fade. */}
+      {/* On "Open" the contents ride up with the page's top edge, fading as it slides (see HANDOFF). */}
       <m.div
+        data-peek-content
         className="relative"
-        exit={
-          opening
-            ? { y: -opening.top, opacity: 0, transition: { y: grow, opacity: { duration: 0.2, ease: "easeOut" } } }
-            : undefined
-        }
+        style={opening ? { opacity: peekOut } : undefined}
+        exit={opening ? { y: -opening.top, transition: { y: grow } } : undefined}
       >
         <div aria-hidden className="mx-auto mb-3 h-1 w-9 rounded-full bg-rule" />
         <div className="flex items-center gap-3.5">

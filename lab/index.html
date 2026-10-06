@@ -1,0 +1,317 @@
+<title>Motion Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Instrument+Sans:wght@400;500;600&display=swap"
+/>
+<style>
+  /* Layout: the phone screen on the left, the handoff controls beside it (stacked on phones). */
+  :root {
+    --paper: #f7f5f0;
+    --paper-2: #ebe8e1;
+    --ink: #1c1b18;
+    --muted: #77736a;
+    --rule: #dcd8cf;
+    --accent: #b5462c;
+    --peek: #1f6b4e;
+    --page: #b5462c;
+    --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+    --sans: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #121215; --paper-2: #1d1d22; --ink: #ecebe6; --muted: #8f8c85; --rule: #2c2c33;
+      --accent: #e0805f; --peek: #5fb48f; --page: #e0805f; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #121215; --paper-2: #1d1d22; --ink: #ecebe6; --muted: #8f8c85; --rule: #2c2c33;
+    --accent: #e0805f; --peek: #5fb48f; --page: #e0805f; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font: 15px/1.5 var(--sans); padding-inline: 16px; padding-block: 20px 40px; }
+  .wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 18px; }
+  header { display: grid; gap: 4px; }
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  h1 { font: 600 2.4rem/1 var(--display); margin: 0; text-wrap: balance; }
+  h2 { font: 600 1.35rem/1.1 var(--display); margin: 0; }
+  .lede { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 720px) { .layout { grid-template-columns: minmax(0, 1fr); } .screen-col { max-width: 340px; margin: 0 auto; width: 100%; } }
+  .screen-col { display: grid; gap: 10px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+  @media (max-width: 720px) { .screen-col { position: static; } }
+  canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 390 / 844; border-radius: 16px; border: 1px solid var(--rule); background: var(--paper-2); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font: 500 13.5px/1 var(--sans); color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 999px; padding: 9px 13px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .transport { display: flex; align-items: center; gap: 8px; }
+  .play { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 0; background: var(--ink); color: var(--paper); display: grid; place-items: center; cursor: pointer; }
+  .step { width: 40px; height: 40px; flex: none; border-radius: 50%; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font: 600 16px var(--sans); cursor: pointer; }
+  .readout { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
+  input[type="range"] { width: 100%; min-width: 0; margin: 0; }
+  #scrub { accent-color: var(--ink); }
+
+  .panel { display: grid; gap: 22px; }
+  .group { display: grid; gap: 12px; padding: 16px; border-radius: 16px; background: var(--paper-2); }
+  .group h2 { display: flex; align-items: center; gap: 10px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .control { display: grid; gap: 4px; }
+  .control label { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; }
+  .control output { font-variant-numeric: tabular-nums; color: var(--muted); }
+  .peek input { accent-color: var(--peek); }
+  .page input { accent-color: var(--page); }
+
+  .chart { display: block; width: 100%; height: auto; }
+  .chart text { fill: var(--muted); font: 11px var(--sans); }
+  .chart .axis { stroke: var(--rule); }
+  .chart .peek { stroke: var(--peek); }
+  .chart .page { stroke: var(--page); }
+  .chart .head { stroke: var(--ink); }
+
+  .values { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--paper-2); padding: 8px 10px; border-radius: 8px; user-select: all; }
+  .copy { font: 500 13.5px var(--sans); border: 1px solid var(--rule); border-radius: 999px; background: transparent; color: var(--ink); padding: 8px 14px; cursor: pointer; }
+  .note { color: var(--muted); font-size: 13px; margin: 0; max-width: 64ch; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Philosophers · Peek → page</span>
+    <h1>Motion Lab</h1>
+    <p class="lede">
+      Tap Hobbes, then “Open Hobbes”: the page slides up out of the peek sheet. Set when the peek’s text fades out and
+      the page’s contents fade in, measured in how far the page has slid, and watch the result frame by frame.
+    </p>
+  </header>
+
+  <div class="layout">
+    <div class="screen-col">
+      <canvas id="screen" width="390" height="844" aria-label="The transition, frame by frame"></canvas>
+      <div class="transport">
+        <button class="play" id="play" aria-label="Play">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" id="playIcon"><path d="M4 2.5v11l9-5.5z" fill="currentColor" /></svg>
+        </button>
+        <button class="step" id="back" aria-label="Back one frame">‹</button>
+        <button class="step" id="fwd" aria-label="Forward one frame">›</button>
+        <span class="readout" id="time">frame 0</span>
+      </div>
+      <input type="range" id="scrub" min="0" max="35" value="0" step="1" aria-label="Frame" />
+      <div class="chips" role="group" aria-label="Speed" id="speeds"></div>
+    </div>
+
+    <div class="panel">
+      <div class="group peek">
+        <h2><span class="swatch" style="background: var(--peek)"></span>Peek’s text fades out</h2>
+        <div class="control">
+          <label for="peekStart">Starts at <output id="peekStartOut"></output></label>
+          <input type="range" id="peekStart" min="0" max="100" step="1" />
+        </div>
+        <div class="control">
+          <label for="peekEnd">Gone by <output id="peekEndOut"></output></label>
+          <input type="range" id="peekEnd" min="0" max="100" step="1" />
+        </div>
+      </div>
+
+      <div class="group page">
+        <h2><span class="swatch" style="background: var(--page)"></span>Page’s contents fade in</h2>
+        <div class="control">
+          <label for="pageStart">Starts at <output id="pageStartOut"></output></label>
+          <input type="range" id="pageStart" min="0" max="100" step="1" />
+        </div>
+        <div class="control">
+          <label for="pageEnd">Fully in by <output id="pageEndOut"></output></label>
+          <input type="range" id="pageEnd" min="0" max="100" step="1" />
+        </div>
+      </div>
+
+      <svg class="chart" id="chart" viewBox="0 0 400 130" role="img" aria-label="Both fades over the slide"></svg>
+
+      <div class="values">
+        <code id="values"></code>
+        <button class="copy" id="copy">Copy</button>
+        <button class="copy" id="reset">Back to what’s live</button>
+      </div>
+      <p class="note">
+        Percentages are of the slide, from the sheet’s place (0%) to the top of the screen (100%); times beside them are
+        when the slide gets there. The layers were recorded in Chromium from the preview build and are composited here,
+        so the fades match what the app would draw with these values.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const FRAMES = 36;
+  const FPS = 60;
+  const LIVE = { peekStart: 10, peekEnd: 40, pageStart: 20, pageEnd: 70 };
+  const SPEEDS = [1, 0.5, 0.25, 0.1];
+  const $ = (id) => document.getElementById(id);
+  const read = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+  let slid = new Array(FRAMES).fill(0);
+  let speed = read("lab2-speed", 0.25);
+  let v = { ...LIVE, ...read("lab3-values", {}) };
+  let frame = 0;
+  let playing = false;
+  let clock = 0;
+  let last = 0;
+  let hold = 0;
+
+  // Frames (data URIs from frames.json) decode on demand and stay cached; a frame draws once its
+  // three layers are in.
+  let data = null;
+  const cache = new Map();
+  const img = (layer, n) => {
+    const key = `${layer}/${n}`;
+    if (!cache.has(key)) {
+      const i = new Image();
+      i.decoding = "async";
+      i.onload = () => draw();
+      i.src = data[layer][n];
+      cache.set(key, i);
+    }
+    return cache.get(key);
+  };
+  const layers = (n) => [img("base", n), img("page", n), img("peek", n)];
+  const preload = () => { if (data) for (let n = 0; n < FRAMES; n++) layers(n); };
+
+  const ramp = (x, a, b) => (b <= a ? (x >= a ? 1 : 0) : Math.min(1, Math.max(0, (x - a) / (b - a))));
+  const peekAlpha = (s) => 1 - ramp(s, v.peekStart / 100, v.peekEnd / 100);
+  const pageAlpha = (s) => ramp(s, v.pageStart / 100, v.pageEnd / 100);
+
+  const ctx = $("screen").getContext("2d");
+  function draw() {
+    if (!data) return;
+    const [base, page, peek] = layers(frame);
+    if (![base, page, peek].every((i) => i.complete && i.naturalWidth)) return;
+    const s = slid[frame];
+    ctx.globalAlpha = 1;
+    ctx.drawImage(base, 0, 0, 390, 844);
+    ctx.globalAlpha = pageAlpha(s);
+    ctx.drawImage(page, 0, 0, 390, 844);
+    ctx.globalAlpha = peekAlpha(s);
+    ctx.drawImage(peek, 0, 0, 390, 844);
+    $("time").textContent = `frame ${frame} · ${Math.round((frame * 1000) / FPS)} ms · slid ${Math.round(s * 100)}%`;
+    $("scrub").value = String(frame);
+    chartHead();
+  }
+
+  // When the slide first reaches a fraction, in ms after "Open".
+  const msAt = (pct) => {
+    const n = slid.findIndex((s) => s >= pct / 100 - 1e-9);
+    return Math.round(((n < 0 ? FRAMES - 1 : n) * 1000) / FPS);
+  };
+
+  const X0 = 30, X1 = 376, Y0 = 18, Y1 = 98;
+  const px = (pct) => X0 + ((X1 - X0) * pct) / 100;
+  function chart() {
+    const pts = (f) => Array.from({ length: 101 }, (_, i) => `${px(i)},${Y1 - (Y1 - Y0) * f(i / 100)}`).join(" ");
+    $("chart").innerHTML = `
+      <line class="axis" x1="${X0}" y1="${Y1}" x2="${X1}" y2="${Y1}" />
+      <line class="axis" x1="${X0}" y1="${Y0}" x2="${X0}" y2="${Y1}" />
+      <text x="${X0 - 6}" y="${Y0 + 4}" text-anchor="end">1</text>
+      <text x="${X0 - 6}" y="${Y1 + 4}" text-anchor="end">0</text>
+      ${[0, 25, 50, 75, 100].map((p) => `<text x="${px(p)}" y="${Y1 + 16}" text-anchor="middle">${p}%</text>`).join("")}
+      <text x="${(X0 + X1) / 2}" y="${Y1 + 30}" text-anchor="middle">how far the page has slid</text>
+      <polyline class="peek" fill="none" stroke-width="2.5" points="${pts(peekAlpha)}" />
+      <polyline class="page" fill="none" stroke-width="2.5" stroke-dasharray="5 4" points="${pts(pageAlpha)}" />
+      <line class="head" id="head" x1="0" y1="${Y0 - 6}" x2="0" y2="${Y1}" stroke-width="1.5" />`;
+    chartHead();
+  }
+  function chartHead() {
+    const h = document.getElementById("head");
+    if (!h) return;
+    const x = px(slid[frame] * 100);
+    h.setAttribute("x1", x);
+    h.setAttribute("x2", x);
+  }
+
+  const CONTROLS = [
+    ["peekStart", "peekEnd"],
+    ["pageStart", "pageEnd"],
+  ];
+  function syncControls() {
+    for (const [a, b] of CONTROLS) {
+      for (const k of [a, b]) {
+        $(k).value = String(v[k]);
+        $(`${k}Out`).textContent = `${v[k]}% · ${msAt(v[k])} ms`;
+      }
+    }
+    $("values").textContent = `peekOut ${v.peekStart}–${v.peekEnd}%, pageIn ${v.pageStart}–${v.pageEnd}%`;
+    chart();
+    draw();
+  }
+  for (const [a, b] of CONTROLS) {
+    $(a).addEventListener("input", () => { v[a] = +$(a).value; if (v[b] < v[a]) v[b] = v[a]; save("lab3-values", v); syncControls(); });
+    $(b).addEventListener("input", () => { v[b] = +$(b).value; if (v[a] > v[b]) v[a] = v[b]; save("lab3-values", v); syncControls(); });
+  }
+  $("reset").addEventListener("click", () => { v = { ...LIVE }; save("lab3-values", v); syncControls(); });
+  $("copy").addEventListener("click", async () => {
+    const text = $("values").textContent;
+    try { await navigator.clipboard.writeText(text); $("copy").textContent = "Copied"; }
+    catch { getSelection().selectAllChildren($("values")); $("copy").textContent = "Selected"; }
+    setTimeout(() => ($("copy").textContent = "Copy"), 1400);
+  });
+
+  function chips(el, items, label, on, pick) {
+    el.replaceChildren(...items.map((it) => {
+      const b = document.createElement("button");
+      b.className = "chip";
+      b.textContent = label(it);
+      b.setAttribute("aria-pressed", String(on(it)));
+      b.addEventListener("click", () => pick(it));
+      return b;
+    }));
+  }
+  const renderSpeeds = () => chips($("speeds"), SPEEDS, (s) => ({ 1: "1×", 0.5: "½×", 0.25: "¼×", 0.1: "⅒×" })[s], (s) => s === speed, (s) => { speed = s; save("lab2-speed", s); renderSpeeds(); });
+
+  const show = (n) => { frame = Math.max(0, Math.min(FRAMES - 1, n)); clock = frame / FPS; draw(); };
+  function setPlaying(on) {
+    playing = on;
+    $("play").setAttribute("aria-label", on ? "Pause" : "Play");
+    $("playIcon").innerHTML = on ? '<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z" fill="currentColor" />' : '<path d="M4 2.5v11l9-5.5z" fill="currentColor" />';
+    last = performance.now();
+    if (on) requestAnimationFrame(tick);
+  }
+  function tick(now) {
+    if (!playing) return;
+    const dt = now - last;
+    last = now;
+    if (hold > 0) { hold -= dt; if (hold <= 0) show(0); }
+    else {
+      clock += (dt / 1000) * speed;
+      const n = Math.floor(clock * FPS);
+      if (n >= FRAMES - 1) { show(FRAMES - 1); hold = 800; }
+      else if (n !== frame) show(n);
+    }
+    requestAnimationFrame(tick);
+  }
+  $("play").addEventListener("click", () => setPlaying(!playing));
+  $("back").addEventListener("click", () => { setPlaying(false); show(frame - 1); });
+  $("fwd").addEventListener("click", () => { setPlaying(false); show(frame + 1); });
+  $("scrub").addEventListener("input", () => { setPlaying(false); show(+$("scrub").value); });
+  document.addEventListener("keydown", (e) => {
+    if (e.target instanceof HTMLInputElement) return;
+    if (e.key === " ") { e.preventDefault(); setPlaying(!playing); }
+    else if (e.key === "ArrowLeft") { setPlaying(false); show(frame - 1); }
+    else if (e.key === "ArrowRight") { setPlaying(false); show(frame + 1); }
+  });
+
+  renderSpeeds();
+  $("scrub").max = String(FRAMES - 1);
+  fetch("frames.json")
+    .then((r) => r.json())
+    .then((d) => {
+      data = d;
+      slid = d.slid.slice(0, FRAMES);
+      preload();
+      syncControls();
+      show(8);
+    });
+</script>

@@ -143,7 +143,7 @@ test("on touch, opening a filter menu puts the peek sheet away", async ({ page }
   await expect(page.getByRole("dialog", { name: "Era" })).toBeVisible();
 });
 
-test("on touch, opening from the peek grows the page out of the sheet, never a blank screen", async ({ page }) => {
+test("on touch, opening from the peek slides the page up, handing the sheet's text over to the page's", async ({ page }) => {
   test.skip(!isTouch(), "peek is for touch screens");
   await page.goto(RULED, { waitUntil: "networkidle" });
   const card = page.locator('[data-slug="hobbes"] a');
@@ -152,26 +152,30 @@ test("on touch, opening from the peek grows the page out of the sheet, never a b
   const peek = page.getByRole("dialog", { name: "Thomas Hobbes, preview" });
   await expect(peek).toBeVisible();
   await page.waitForTimeout(500);
-  // Every frame from the tap until the page settles, how visible the most visible text is: the
-  // sheet's, leaving, or the page's, arriving.
+  // Every frame from the tap until the page settles: how far the page has slid, how visible the
+  // sheet's text and the page's contents are, and whether the tapped card kept its portrait.
   await page.evaluate(() => {
-    const shown = (el: Element | null | undefined) => {
+    const shown = (el: Element | null) => {
       let o = el ? 1 : 0;
       for (let e = el; e; e = e.parentElement) o *= parseFloat(getComputedStyle(e).opacity);
       return o;
     };
-    const frames: number[] = [];
+    const frames: { slid: number; peek: number; page: number }[] = [];
     let cardGone = 0;
     Object.assign(window, { frames_: frames, cardGone_: () => cardGone });
-    const sheet = document.querySelector('[aria-label$=", preview"] p.font-display');
+    const sheet = document.querySelector('[aria-label$=", preview"]')!;
+    const start = sheet.getBoundingClientRect().top;
+    const text = sheet.querySelector("[data-peek-content]")!;
     const tick = () => {
       const pg = document.querySelector('[aria-modal="true"]');
-      // The card stays whole while the gallery still shows around the growing page.
-      const face = document.querySelector('[data-slug="hobbes"] .portrait');
-      if (face && getComputedStyle(face).visibility === "hidden" && pg && getComputedStyle(pg).clipPath !== "none") cardGone++;
-      const page = ["h1", ".portrait", "article .eyebrow"].map((s) => shown(pg?.querySelector(s)));
-      frames.push(Math.max(sheet?.isConnected ? shown(sheet) : 0, ...page));
-      if (frames.length < 60) requestAnimationFrame(tick);
+      if (pg) {
+        const top = pg.getBoundingClientRect().top;
+        const face = document.querySelector('[data-slug="hobbes"] .portrait');
+        // The card stays whole while the gallery still shows above the sliding page.
+        if (top > 0.5 && face && getComputedStyle(face).visibility === "hidden") cardGone++;
+        frames.push({ slid: 1 - top / start, peek: text.isConnected ? shown(text) : 0, page: shown(pg.querySelector("[data-page-content]")) });
+      }
+      if (frames.length < 50) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   });
@@ -184,9 +188,17 @@ test("on touch, opening from the peek grows the page out of the sheet, never a b
   }
   await expect(page).toHaveURL(/\/p\/hobbes$/);
   await expect(page.getByRole("heading", { name: "Thomas Hobbes", level: 1 })).toBeInViewport();
-  const frames = await page.evaluate(() => (window as unknown as { frames_: number[] }).frames_);
-  expect(frames).toHaveLength(60);
-  expect(Math.min(...frames)).toBeGreaterThan(0.25);
+  const frames = await page.evaluate(() => (window as unknown as { frames_: { slid: number; peek: number; page: number }[] }).frames_);
+  expect(frames).toHaveLength(50);
+  // Each fade follows the slide: the sheet's text goes over 10–40% of it, the page's contents come
+  // in over 20–70%, so one is always there to read.
+  const ramp = (x: number, a: number, b: number) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+  for (const f of frames) {
+    if (f.peek > 0) expect(f.peek).toBeCloseTo(1 - ramp(f.slid, 0.1, 0.4), 1);
+    expect(f.page).toBeCloseTo(ramp(f.slid, 0.2, 0.7), 1);
+    expect(Math.max(f.peek, f.page)).toBeGreaterThan(0.2);
+  }
+  expect(frames.at(-1)!.page).toBe(1);
   expect(await page.evaluate(() => (window as unknown as { cardGone_: () => number }).cardGone_())).toBe(0);
 });
 
@@ -262,4 +274,28 @@ test("on touch, closing a page opened from the peek flies its portrait home to t
   const widths = await page.evaluate(() => (window as unknown as { widths_: number[] }).widths_);
   expect(Math.max(...widths)).toBeGreaterThan(200);
   expect(widths.at(-1)).toBeLessThan(100);
+});
+
+test("on touch, the page slides up from the peek without a frame out of place", async ({ page }) => {
+  test.skip(!isTouch(), "peek is for touch screens");
+  // Frame by frame on a stopped clock: where a frame lands relative to the page's first renders
+  // decides whether a stray one shows, so step them exactly.
+  await page.clock.install();
+  await page.goto(RULED, { waitUntil: "networkidle" });
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1500);
+  const card = page.locator('[data-slug="hobbes"] a');
+  await card.scrollIntoViewIfNeeded();
+  await card.click({ noWaitAfter: true });
+  await page.clock.runFor(900);
+  await page.getByRole("button", { name: "Open Hobbes" }).click({ noWaitAfter: true });
+  const tops: number[] = [];
+  for (let i = 0; i < 40; i++) {
+    await page.clock.runFor(1000 / 60);
+    const top = await page.evaluate(() => document.querySelector('[aria-modal="true"]')?.getBoundingClientRect().top);
+    if (top !== undefined) tops.push(top);
+  }
+  // It starts where the sheet was and only ever moves up.
+  expect(tops[0]).toBeGreaterThan(400);
+  for (let i = 1; i < tops.length; i++) expect(tops[i], `frame ${i}`).toBeLessThanOrEqual(tops[i - 1] + 0.5);
+  expect(tops.at(-1)).toBe(0);
 });

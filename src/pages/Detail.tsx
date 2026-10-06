@@ -25,7 +25,7 @@ import type { QuizState } from "./Quiz";
 import { useLockPageScroll } from "../lib/useLockPageScroll";
 import { usePullToDismiss } from "../lib/usePullToDismiss";
 import { useViewMode } from "../lib/view";
-import { EXITING_LAYER, PEEK_LEAD, ease, grow, morph, nameId, type SheetRect } from "../lib/motion";
+import { EXITING_LAYER, HANDOFF, ease, grow, morph, nameId, peekSlide, ramp, type SheetRect } from "../lib/motion";
 
 export type DetailState = {
   /** Query string of the grid we came from, so it stays filtered underneath. */
@@ -62,12 +62,6 @@ const factItem: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
 };
 const fadeOut = { opacity: 0, transition: { duration: 0.15 } };
-/** Rises into place, `delay` seconds in (opening from the peek sheet, where nothing morphs). */
-const rise = (delay: number) => ({
-  initial: { opacity: 0, y: 14 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease, delay },
-});
 
 export function Detail({ slug }: { slug: string }) {
   const navigate = useNavigate();
@@ -142,9 +136,10 @@ export function Detail({ slug }: { slug: string }) {
   // From the quiz there is no card on screen to morph from or back into.
   const fromQuiz = !!state.fromQuiz;
   const layoutTransition = dir || fromPeek ? instant : morph;
-  // From the peek sheet, the page grows out of the sheet's place while its contents rise in one
-  // after another. Their delays count from when the growth starts.
-  const lead = fromPeek ? PEEK_LEAD : 0;
+  // From the peek sheet, the page slides up from the sheet's place, like the sheet being pushed up to
+  // fill the screen. Its contents fade in by how far it has slid (HANDOFF), not on their own clocks,
+  // so they can't lag the slide on a phone slow to paint the page.
+  const still = fromPeek;
   const [grewFrom] = useState(sheet);
   const growth = useMotionValue(grewFrom ? 0 : 1);
   const [grown, setGrown] = useState(!grewFrom);
@@ -161,17 +156,29 @@ export function Detail({ slug }: { slug: string }) {
       delete root.dataset.pageGrowing;
     };
   }, [grown, present]);
+  const left = (g: number) => Math.max(0, 1 - g);
+  const contentIn = useTransform(growth, (g) => (grewFrom ? ramp(g, HANDOFF.pageIn) : 1));
+  // CSS `translate`, not framer's `y`: framer briefly sets `transform: none` on an element to measure
+  // its layout, and a re-render right after mount would paint one frame of the page unslid.
+  const slide = useTransform(growth, (g) => (grewFrom && g < 1 ? `0 ${grewFrom.top * left(g)}px` : "none"));
+  // A phone's sheet spans the screen and sits on its bottom edge: only its top corners round, and
+  // it keeps its shadow. A floating sheet (larger screens) is also narrower, so it's cut to shape.
+  const flush = !!grewFrom && !grewFrom.left && !grewFrom.right && !grewFrom.bottom;
+  const corner = useTransform(growth, (g) => (flush ? grewFrom.radii[0] * left(g) : 0));
   const clipPath = useTransform(growth, (g) => {
-    const k = Math.max(0, 1 - g);
-    if (!grewFrom || k < 0.001) return "none";
-    const { top, right, bottom, left, radii } = grewFrom;
+    const k = left(g);
+    if (!grewFrom || flush || k < 0.001) return "none";
+    const { top, right, bottom, left: l, radii } = grewFrom;
     const [a, b, c, d] = radii.map((r) => r * k);
-    return `inset(${top * k}px ${right * k}px ${bottom * k}px ${left * k}px round ${a}px ${b}px ${c}px ${d}px)`;
+    return `inset(0px ${right * k}px ${(top + bottom) * k}px ${l * k}px round ${a}px ${b}px ${c}px ${d}px)`;
   });
-  // Nothing morphs in from a card, so the name rises in with the rest.
-  const nameRise = fromPeek ? rise(0.18 + lead) : undefined;
   // The growing surface starts in the sheet's color and turns into the page's.
   const sheetTint = useTransform(growth, [0, 1], [1, 0]);
+
+  // The sheet's own text fades by how far this has slid (see HANDOFF).
+  useEffect(() => {
+    if (grewFrom) return growth.on("change", (g) => peekSlide.set(Math.min(1, g)));
+  }, [grewFrom, growth]);
 
   // Tapping a chip filters the gallery to that value. The chip takes a shared layoutId for a frame
   // first, so the gallery's pinned chip can fly from exactly where it was tapped.
@@ -198,7 +205,14 @@ export function Detail({ slug }: { slug: string }) {
       // Keeps the overlay mounted while children run their exit animations.
       exit={{ opacity: 1, transition: { duration: 0.45 } }}
       // …and lets touches and wheels through to the gallery meanwhile, sinking under the bar.
-      style={{ clipPath, ...(!present && { pointerEvents: "none", zIndex: EXITING_LAYER }) }}
+      style={{
+        translate: slide,
+        clipPath,
+        borderTopLeftRadius: corner,
+        borderTopRightRadius: corner,
+        ...(!grown && { overflow: "hidden", boxShadow: "var(--shadow-lift)" }),
+        ...(!present && { pointerEvents: "none", zIndex: EXITING_LAYER }),
+      }}
     >
       <m.div style={{ opacity: backdrop }} className="absolute inset-0">
         <m.div
@@ -222,15 +236,16 @@ export function Detail({ slug }: { slug: string }) {
 
       <m.div
         ref={scroller}
+        data-page-content
         layoutScroll
-        style={{ y: pull, scale: pullScale, borderRadius: pullRadius, transformOrigin: "50% 20%" }}
+        style={{ y: pull, scale: pullScale, borderRadius: pullRadius, transformOrigin: "50% 20%", opacity: contentIn }}
         className="relative h-full overflow-x-hidden overflow-y-auto overscroll-contain"
       >
         <m.nav
-          initial={{ opacity: 0 }}
+          initial={still ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={fadeOut}
-          transition={{ duration: 0.3, delay: 0.1 + lead }}
+          transition={{ duration: 0.3, delay: 0.1 }}
           className="sticky top-0 z-10 bg-gradient-to-b from-paper via-paper/90 to-transparent"
         >
           <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-3 sm:px-8 sm:py-5">
@@ -271,7 +286,7 @@ export function Detail({ slug }: { slug: string }) {
           >
             <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14 lg:gap-20">
               <div>
-                <m.div className="md:sticky md:top-24" {...(fromPeek && rise(lead))}>
+                <div className="md:sticky md:top-24">
                   <Portrait
                     p={p}
                     eager
@@ -284,23 +299,23 @@ export function Detail({ slug }: { slug: string }) {
                     shared={!fromQuiz}
                   />
                   <m.p
-                    initial={{ opacity: 0 }}
+                    initial={still ? false : { opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={fadeOut}
-                    transition={{ delay: 0.35 + lead, duration: 0.4 }}
+                    transition={{ delay: 0.35, duration: 0.4 }}
                     className="mx-auto mt-3 max-w-[460px] text-[0.7rem] leading-relaxed text-muted md:max-w-none"
                   >
                     <Credit p={p} />
                   </m.p>
-                </m.div>
+                </div>
               </div>
 
               <div className="min-w-0">
                 <m.p
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={still ? false : { opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={fadeOut}
-                  transition={{ delay: dir ? 0 : 0.15 + lead, duration: 0.45, ease }}
+                  transition={{ delay: dir ? 0 : 0.15, duration: 0.45, ease }}
                   className="eyebrow"
                   style={{ color: "var(--era-ink)" }}
                 >
@@ -310,28 +325,26 @@ export function Detail({ slug }: { slug: string }) {
                 <m.h1
                   layoutId={fromQuiz ? undefined : nameId(p.slug)}
                   layoutCrossfade={false}
-                  initial={nameRise?.initial}
-                  animate={nameRise?.animate}
                   // Fades when the card shows a short name, so there is nothing to morph into.
                   exit={fadeOut}
-                  transition={{ ...nameRise?.transition, layout: layoutTransition }}
+                  transition={{ layout: layoutTransition }}
                   className="mt-3 origin-top-left font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.01em] text-balance text-ink sm:text-[3.75rem] lg:text-[4.5rem]"
                 >
                   {p.name}
                 </m.h1>
 
                 <m.div
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={still ? false : { opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={fadeOut}
-                  transition={{ delay: dir ? 0.03 : 0.2 + (fromPeek ? 0.04 + lead : 0), duration: 0.45, ease }}
+                  transition={{ delay: dir ? 0.03 : 0.2, duration: 0.45, ease }}
                 >
                   {p.aka && <p className="mt-1 font-display text-[1.5rem] text-ink-2 italic">{p.aka}</p>}
                   <p className="mt-3 text-[0.95rem] tracking-[0.06em] text-ink-2 tabular-nums">{lifespan(p)}</p>
                   <p className="mt-1 text-[0.95rem] text-ink-2">
                     {p.origin.traditional ? "By tradition born in" : "Born in"} {birthplace(p)}
                   </p>
-                  <YouAnd p={p} gridSearch={state.gridSearch ?? ""} />
+                  <YouAnd p={p} gridSearch={state.gridSearch ?? ""} still={still} />
                   <p className="eyebrow mt-6">See others like {p.name}</p>
                   <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label={`See others like ${p.name}`}>
                     {similar.map(({ t, count }) => (
@@ -345,8 +358,8 @@ export function Detail({ slug }: { slug: string }) {
                 <m.ol
                   className="mt-10 border-t border-rule md:mt-12"
                   variants={factList}
-                  custom={dir ? 0.06 : 0.3 + (fromPeek ? 0.04 + lead : 0)}
-                  initial="hidden"
+                  custom={dir ? 0.06 : 0.3}
+                  initial={still ? false : "hidden"}
                   animate="show"
                   exit={fadeOut}
                 >
@@ -370,10 +383,10 @@ export function Detail({ slug }: { slug: string }) {
 
             <m.nav
               aria-label="Chronological navigation"
-              initial={{ opacity: 0 }}
+              initial={still ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={fadeOut}
-              transition={{ delay: dir ? 0 : 0.5 + lead, duration: 0.4 }}
+              transition={{ delay: dir ? 0 : 0.5, duration: 0.4 }}
               className="mt-14 grid grid-cols-2 gap-4 sm:gap-8"
             >
               <PagerLink p={prev} label="Earlier" side="left" onClick={() => go(prev, -1)} />
@@ -508,7 +521,7 @@ function SideArrow({ side, label, onClick }: { side: "left" | "right"; label: st
 }
 
 /** After the quiz: how close this philosopher sits to the reader, and on what. */
-function YouAnd({ p, gridSearch }: { p: Philosopher; gridSearch: string }) {
+function YouAnd({ p, gridSearch, still }: { p: Philosopher; gridSearch: string; still: boolean }) {
   const ranking = useRanking();
   const match = ranking?.bySlug.get(p.slug);
   if (!ranking || !match) return null;
@@ -530,7 +543,7 @@ function YouAnd({ p, gridSearch }: { p: Philosopher; gridSearch: string }) {
   return (
     <m.section
       aria-label={`You and ${short}`}
-      initial={{ opacity: 0, y: 6 }}
+      initial={still ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease }}
       className="mt-6 rounded-2xl bg-paper-2 p-4 sm:p-5"

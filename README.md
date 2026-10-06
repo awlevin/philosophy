@@ -12,6 +12,7 @@ npm run build            # typecheck, client build, SSR build, prerender every r
 npm run preview
 npm run fetch-portraits  # (re)download portraits from Wikidata / Wikimedia Commons
 npm run e2e              # Playwright, phone + desktop-dark (screens in test-results/shots); BASE_URL=… to test a deploy
+npm run lab              # Peek → page frame by frame, as layers for the motion lab (lab/index.html → lab-out/site)
 ```
 
 ## How it's put together
@@ -29,6 +30,8 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
   The choice of view is remembered per device (`src/lib/view.ts`). In Faces and List, on touch screens a tap opens a peek sheet (face, dates, and their take on any
   filtered question, else a fact); "Open" or a swipe up goes to the full page; tapping the face again puts the peek away. Peeking is
   on while filtering; otherwise a tap opens the page unless "When you tap a face" under Show as is set to "Peek first".
+  Opening from the peek slides the page up from the sheet's place; the sheet's text fades out and the page's
+  contents fade in by how far it has slid (`HANDOFF` in `src/lib/motion.ts`, tuned with `npm run lab`).
 - **Color** — each era has a color, an ink and a tint (`--era-*` tokens in `src/index.css`, scoped
   to an element with `eraVars()` from `src/lib/era.ts`). Portraits sit on their era's tint.
 - **Filters** — a menu per facet (Era, Tradition, Big question) with counts, plus Order and the
