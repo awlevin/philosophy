@@ -18,6 +18,9 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
 
 - **Data** — everything lives in [`src/data/philosophers.ts`](src/data/philosophers.ts), typed by
   [`src/data/types.ts`](src/data/types.ts) (Era, Tradition, Big Question taxonomies included).
+  Each philosopher has a one-line `take` for every Big Question they're tagged with, shown in the
+  peek sheet while that question is filtered; `scripts/check-data.ts` (first step of the build)
+  keeps takes and tags in sync.
 - **Routes** — `/` is the grid; `/p/:slug` is a detail page. The grid stays mounted underneath the
   detail page, so the portrait and name share a Framer Motion `layoutId` and morph card → page and
   back again (including on the browser back button), and the grid keeps its scroll and filters.

@@ -161,3 +161,16 @@ test("on touch, peeking can be turned off so a tap opens the page even while fil
   await card.click();
   await expect(page).toHaveURL(/\/p\/plato$/);
 });
+
+test("on touch, every question has takes: e.g. what is the mind?", async ({ page }) => {
+  test.skip(!isTouch(), "peek is for touch screens");
+  await page.goto("/?question=mind", { waitUntil: "networkidle" });
+  const card = page.locator('[data-slug="descartes"] a');
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
+  const peek = page.getByRole("dialog", { name: "René Descartes, preview" });
+  await expect(peek).toContainText("What is the mind?");
+  await expect(peek).toContainText("A thinking, nonphysical substance");
+  await page.waitForTimeout(400);
+  await snap(page, "g11-peek-mind");
+});

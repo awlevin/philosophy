@@ -3,10 +3,10 @@
  * - A take answers a question the philosopher is tagged with.
  * - Every philosopher tagged with a finished question has a take for it.
  */
-import { philosophers, type BigQuestion } from "../src/data/philosophers";
+import { QUESTIONS, philosophers, type BigQuestion } from "../src/data/philosophers";
 
-/** Questions whose takes are written for everyone tagged with them. Add each as it's finished. */
-const FINISHED: BigQuestion[] = ["How should we be ruled?"];
+/** Questions whose takes are written for everyone tagged with them. */
+const FINISHED: readonly BigQuestion[] = QUESTIONS;
 
 const problems: string[] = [];
 for (const p of philosophers) {

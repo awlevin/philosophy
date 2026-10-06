@@ -15,6 +15,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Greek"],
     questions: ["What exists?"],
+    takes: {
+      "What exists?": "Everything is ultimately water, the one living stuff all things come from.",
+    },
     facts: [
       "Often called the first philosopher of the Western tradition.",
       "Held that the basic stuff of everything is water.",
@@ -33,6 +36,8 @@ const data: Philosopher[] = [
     tradition: ["Chinese"],
     questions: ["How should I live?", "What exists?", "How should we be ruled?"],
     takes: {
+      "How should I live?": "Simply and humbly, without striving; yield like water, which wears away the hard.",
+      "What exists?": "Beneath all things is the Dao: a nameless source that brings everything forth without acting.",
       "How should we be ruled?": "Govern least: the sage ruler acts through non-action, and the people settle into order themselves.",
     },
     facts: [
@@ -53,6 +58,7 @@ const data: Philosopher[] = [
     tradition: ["Chinese"],
     questions: ["How should I live?", "How should we be ruled?"],
     takes: {
+      "How should I live?": "Cultivate virtue through ritual, learning and family care; don't do to others what you wouldn't want.",
       "How should we be ruled?": "Through virtue and ritual, not laws and punishments: a ruler leads by moral example.",
     },
     facts: [
@@ -72,6 +78,10 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Greek"],
     questions: ["What exists?", "What can I know?"],
+    takes: {
+      "What exists?": "A world of ceaseless change, held in order by the logos; fire is its basic form.",
+      "What can I know?": "The logos is open to all, but most never grasp it; the senses mislead those without understanding.",
+    },
     facts: [
       "Everything flows: the world is constant change.",
       "Plato’s paraphrase: you can’t step into the same river twice.",
@@ -89,6 +99,10 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Greek"],
     questions: ["What exists?", "What can I know?"],
+    takes: {
+      "What exists?": "Only what is: one, eternal, unchanging being. Change and plurality are illusions.",
+      "What can I know?": "Reason alone reveals the truth; the senses show only the illusion of change.",
+    },
     facts: [
       "Argued that change and motion are illusions.",
       "What is cannot come from, or become, what is not.",
@@ -107,6 +121,11 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Indian"],
     questions: ["How should I live?", "What is the mind?", "What exists?"],
+    takes: {
+      "How should I live?": "Follow the Middle Way and the Eightfold Path, letting go of craving to end suffering.",
+      "What is the mind?": "No fixed self: a stream of changing sensations, perceptions and consciousness.",
+      "What exists?": "No permanent self or substance, only impermanent processes arising in dependence on each other.",
+    },
     facts: [
       "Traditionally a prince who left palace life to end suffering.",
       "“Buddha” means “the awakened one.”",
@@ -124,6 +143,10 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Greek"],
     questions: ["How should I live?", "What can I know?"],
+    takes: {
+      "How should I live?": "Examine your life, and care for your soul above wealth or reputation.",
+      "What can I know?": "That he knows nothing; wisdom begins with recognizing your own ignorance.",
+    },
     facts: [
       "Wrote nothing. We know him through Plato and Xenophon.",
       "Taught by asking questions until your beliefs fell apart.",
@@ -142,6 +165,7 @@ const data: Philosopher[] = [
     tradition: ["Chinese"],
     questions: ["How should I live?", "How should we be ruled?"],
     takes: {
+      "How should I live?": "Care for everyone impartially; do what benefits the most people, and skip wasteful luxury.",
       "How should we be ruled?": "By the most capable, chosen on merit, who care for all alike and spend nothing on war or luxury.",
     },
     facts: [
@@ -161,7 +185,10 @@ const data: Philosopher[] = [
     tradition: ["Greek"],
     questions: ["What exists?", "What can I know?", "How should we be ruled?", "What is beautiful?"],
     takes: {
+      "What exists?": "Beyond changing things are the eternal Forms, the truly real; physical things are their shadows.",
+      "What can I know?": "True knowledge is of the Forms, recollected through reason; the senses give only opinion.",
       "How should we be ruled?": "By philosopher-kings: only those who know the Good are fit to rule.",
+      "What is beautiful?": "Beauty itself is a Form; beautiful things draw the soul upward toward it.",
     },
     facts: [
       "Student of Socrates, teacher of Aristotle.",
@@ -181,6 +208,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Greek", "Roman/Hellenistic"],
     questions: ["How should I live?"],
+    takes: {
+      "How should I live?": "By nature, with nothing more than you need; scorn convention, comfort and shame.",
+    },
     facts: [
       "The great Cynic: live simply, shamelessly, according to nature.",
       "Lived in a large ceramic jar in Athens.",
@@ -199,7 +229,12 @@ const data: Philosopher[] = [
     tradition: ["Greek"],
     questions: ["What exists?", "What can I know?", "How should I live?", "How should we be ruled?", "What is beautiful?", "What is logic & language?"],
     takes: {
+      "What exists?": "Individual substances, each matter shaped by form; forms exist in things, not apart from them.",
+      "What can I know?": "Knowledge starts in the senses; reason then grasps universal causes and first principles.",
+      "How should I live?": "Build good character by practice, aiming at the mean; that's how a human life flourishes.",
       "How should we be ruled?": "Under a mixed constitution anchored by a large middle class, aimed at citizens’ flourishing.",
+      "What is beautiful?": "Order, proportion and definiteness; tragedy moves us through pity and fear to catharsis.",
+      "What is logic & language?": "Logic is the tool of all reasoning: in a syllogism, conclusions follow necessarily from premises.",
     },
     facts: [
       "Studied at Plato’s Academy for about twenty years.",
@@ -220,7 +255,9 @@ const data: Philosopher[] = [
     tradition: ["Chinese"],
     questions: ["How should I live?", "How should we be ruled?", "What is the mind?"],
     takes: {
+      "How should I live?": "Nurture the seeds of goodness you were born with: compassion, shame, respect and judgment.",
       "How should we be ruled?": "With benevolence, for the people’s welfare; a tyrant forfeits Heaven’s mandate and may be overthrown.",
+      "What is the mind?": "The heart-mind holds innate sprouts of goodness that grow if nurtured.",
     },
     facts: [
       "Revered as Confucianism’s “Second Sage.”",
@@ -239,6 +276,11 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Chinese"],
     questions: ["How should I live?", "What can I know?", "What exists?"],
+    takes: {
+      "How should I live?": "Go along with the flow of things; free yourself from fixed ideas of useful and useless.",
+      "What can I know?": "Every view depends on a standpoint; certainty is out of reach, so hold views lightly.",
+      "What exists?": "Things flow into one another in the endless transformation of the Dao; the boundaries are ours.",
+    },
     facts: [
       "Dreamed he was a butterfly — then wondered who was dreaming whom.",
       "With Laozi, a founding voice of Daoism.",
@@ -256,6 +298,10 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Roman/Hellenistic", "Greek"],
     questions: ["How should I live?", "What exists?"],
+    takes: {
+      "How should I live?": "Seek quiet pleasure: friendship, simple food, and freedom from fear of death and gods.",
+      "What exists?": "Only atoms and void; everything, the soul included, is atoms combining and coming apart.",
+    },
     facts: [
       "The goal of life is pleasure: chiefly, freedom from pain and fear.",
       "Advised simple food, close friends, and modest desires.",
@@ -273,6 +319,10 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Roman/Hellenistic"],
     questions: ["How should I live?", "What exists?"],
+    takes: {
+      "How should I live?": "In agreement with nature and reason; virtue is the only good.",
+      "What exists?": "Only bodies; the cosmos is one living whole, pervaded by divine reason, the logos.",
+    },
     facts: [
       "Founded Stoicism in Athens around 300 BCE.",
       "Taught at the Stoa Poikile, the “Painted Porch” — hence “Stoic.”",
@@ -290,6 +340,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Roman/Hellenistic"],
     questions: ["How should I live?"],
+    takes: {
+      "How should I live?": "Use your time well, master your passions, and rehearse for loss and death.",
+    },
     facts: [
       "Stoic writer, statesman, and tutor to the young Nero.",
       "“We suffer more often in imagination than in reality.”",
@@ -307,6 +360,9 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Roman/Hellenistic"],
     questions: ["How should I live?"],
+    takes: {
+      "How should I live?": "Focus on what you control, your own judgments and choices, and accept the rest.",
+    },
     facts: [
       "Born a slave; later freed, he became a Stoic teacher.",
       "Focus only on what’s up to you; let the rest go.",
@@ -325,6 +381,7 @@ const data: Philosopher[] = [
     tradition: ["Roman/Hellenistic"],
     questions: ["How should I live?", "How should we be ruled?"],
     takes: {
+      "How should I live?": "Do your duty calmly, accept what nature sends, and treat others as kin.",
       "How should we be ruled?": "By just, self-restrained rulers who serve the common good and respect their subjects’ freedom.",
     },
     facts: [
@@ -344,6 +401,11 @@ const data: Philosopher[] = [
     era: "Ancient",
     tradition: ["Indian"],
     questions: ["What exists?", "What can I know?", "What is logic & language?"],
+    takes: {
+      "What exists?": "Nothing exists on its own; all things are empty, arising only in dependence on others.",
+      "What can I know?": "No view captures ultimate reality; pushed far enough, every concept undoes itself.",
+      "What is logic & language?": "Reasoning through every option shows that each view, taken as final, undoes itself.",
+    },
     facts: [
       "Founded the Madhyamaka, or “Middle Way,” school of Buddhism.",
       "All things are empty: nothing exists independently of everything else.",
@@ -362,6 +424,9 @@ const data: Philosopher[] = [
     tradition: ["Roman/Hellenistic"],
     questions: ["How should I live?", "What exists?", "What is the mind?", "How should we be ruled?"],
     takes: {
+      "How should I live?": "Love God first; “our heart is restless until it rests in You.”",
+      "What exists?": "An eternal, unchanging God and a world He made from nothing; evil is only an absence of good.",
+      "What is the mind?": "An immaterial soul made in God's image, certain of itself through memory, understanding and will.",
       "How should we be ruled?": "Earthly states keep only a fragile peace; true justice belongs to the City of God.",
     },
     facts: [
@@ -382,6 +447,11 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Roman/Hellenistic", "Scholastic"],
     questions: ["How should I live?", "What exists?", "What is logic & language?"],
+    takes: {
+      "How should I live?": "Fortune's gifts don't last; true happiness is the highest good, which is God.",
+      "What exists?": "An eternal God who sees all of time at once, and a world ordered by His providence.",
+      "What is logic & language?": "He carried Aristotle's logic into Latin, framing medieval debates on universals.",
+    },
     facts: [
       "Roman statesman serving Theodoric, the Ostrogothic king of Italy.",
       "Wrote The Consolation of Philosophy in prison, awaiting execution.",
@@ -399,6 +469,11 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Indian"],
     questions: ["What exists?", "What can I know?", "What is the mind?"],
+    takes: {
+      "What exists?": "Only Brahman, pure consciousness, is real; the world of many things is appearance (maya).",
+      "What can I know?": "Ordinary knowledge is caught in appearances; liberating knowledge is realizing that self and Brahman are one.",
+      "What is the mind?": "The true self (atman) is pure consciousness, one with Brahman; the thinking mind is only its instrument.",
+    },
     facts: [
       "Leading teacher of Advaita Vedānta, “non-dual” Hindu philosophy.",
       "Brahman alone is real; the world of many things is appearance.",
@@ -417,6 +492,12 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Islamic"],
     questions: ["What exists?", "What is the mind?", "What can I know?", "What is logic & language?"],
+    takes: {
+      "What exists?": "God is the one Necessary Existent; everything else exists only because something makes it exist.",
+      "What is the mind?": "An immaterial soul: a person floating in the void, senses cut off, would still know they exist.",
+      "What can I know?": "The intellect grasps universal truths, illuminated by an Active Intellect beyond us.",
+      "What is logic & language?": "Logic studies concepts and judgments; he built a rich logic of necessity and time.",
+    },
     facts: [
       "Persian polymath, known in Arabic as Ibn Sīnā.",
       "His Canon of Medicine was taught in Europe for centuries.",
@@ -434,6 +515,11 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Islamic"],
     questions: ["What can I know?", "What exists?", "How should I live?"],
+    takes: {
+      "What can I know?": "Reason has limits; real certainty is a light from God, found in mystical experience.",
+      "What exists?": "God alone truly acts; nature has no necessary causes, only the regular habits of His will.",
+      "How should I live?": "Purify the heart, loosen worldly attachments, and seek nearness to God.",
+    },
     facts: [
       "Wrote The Incoherence of the Philosophers, attacking Avicenna’s ideas.",
       "Fire doesn’t burn cotton by necessity; God makes it happen.",
@@ -451,6 +537,11 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Islamic"],
     questions: ["What can I know?", "What exists?", "What is the mind?"],
+    takes: {
+      "What can I know?": "Reason reaches truth by demonstration; rightly read, it never conflicts with revelation.",
+      "What exists?": "An eternal world of necessary causes, set in motion by God as its first mover.",
+      "What is the mind?": "There's a single intellect shared by all humanity; each of us takes part in it.",
+    },
     facts: [
       "Andalusian judge and physician, known in Arabic as Ibn Rushd.",
       "Medieval Europe simply called him “the Commentator” on Aristotle.",
@@ -468,6 +559,11 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Chinese"],
     questions: ["What exists?", "What can I know?", "How should I live?"],
+    takes: {
+      "What exists?": "Everything combines li, the one principle in all things, with qi, the matter that makes them differ.",
+      "What can I know?": "Investigate things: study the principle in each until, one day, the whole becomes clear.",
+      "How should I live?": "Cultivate reverence and study principle until you see what's right, then do it.",
+    },
     facts: [
       "Synthesized Neo-Confucianism, China’s orthodoxy for centuries.",
       "Everything is li (principle) given form by qi (vital energy).",
@@ -484,6 +580,11 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Jewish"],
     questions: ["What exists?", "What can I know?", "How should I live?"],
+    takes: {
+      "What exists?": "One God, beyond all description (we can say only what He is not), and a created world.",
+      "What can I know?": "Reason can know much, but not God's essence; we know Him only by what He is not.",
+      "How should I live?": "Keep the commandments and grow in virtue and understanding; knowing God is the highest aim.",
+    },
     facts: [
       "Wrote The Guide for the Perplexed, uniting Torah with Aristotle.",
       "We can say only what God is not.",
@@ -502,7 +603,10 @@ const data: Philosopher[] = [
     tradition: ["Scholastic"],
     questions: ["What exists?", "How should I live?", "How should we be ruled?", "What can I know?"],
     takes: {
+      "What exists?": "God, whose very essence is to exist, and creatures who receive their existence from Him.",
+      "How should I live?": "Virtuously, by reason and natural law; our final happiness is seeing God.",
       "How should we be ruled?": "By laws that serve the common good and follow natural law; an unjust law is no true law.",
+      "What can I know?": "Reason knows nature, and that God exists; revelation adds truths beyond its reach.",
     },
     facts: [
       "Fused Aristotle’s philosophy with Christian theology.",
@@ -522,6 +626,11 @@ const data: Philosopher[] = [
     era: "Medieval",
     tradition: ["Scholastic"],
     questions: ["What exists?", "What is logic & language?", "What can I know?"],
+    takes: {
+      "What exists?": "Only individual things; “universals” like humanity are just names and concepts.",
+      "What is logic & language?": "Words are signs for individual things; general terms name nothing beyond them.",
+      "What can I know?": "What experience and reason show; don't multiply entities beyond necessity.",
+    },
     facts: [
       "Ockham’s razor: don’t posit more things than you need.",
       "The famous “entities must not be multiplied” wording isn’t his.",
@@ -558,6 +667,11 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Chinese"],
     questions: ["What can I know?", "What is the mind?", "How should I live?"],
+    takes: {
+      "What can I know?": "Moral knowledge is already in the mind; true knowing is inseparable from acting.",
+      "What is the mind?": "The mind is principle itself; there's nothing outside the mind to look for.",
+      "How should I live?": "Follow the innate knowing of the good in your heart, and act on it at once.",
+    },
     facts: [
       "Ming dynasty official, general, and Neo-Confucian philosopher.",
       "Principle is found in the mind, not in external things.",
@@ -575,6 +689,10 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Renaissance"],
     questions: ["How should I live?", "What can I know?"],
+    takes: {
+      "How should I live?": "Know yourself, accept your nature and limits, and live with moderation and curiosity.",
+      "What can I know?": "“What do I know?” Very little for certain; suspend judgment, and study yourself.",
+    },
     facts: [
       "Made the essay a form; essai means “attempt.”",
       "His motto: “Que sais-je?” — “What do I know?”",
@@ -593,6 +711,7 @@ const data: Philosopher[] = [
     tradition: ["Empiricist", "Renaissance"],
     questions: ["What can I know?", "How should we be ruled?"],
     takes: {
+      "What can I know?": "What careful observation and experiment reveal, once the mind's “idols” are cleared away.",
       "How should we be ruled?": "By a strong crown, with organized science serving the public good, as in his New Atlantis.",
     },
     facts: [
@@ -614,6 +733,8 @@ const data: Philosopher[] = [
     questions: ["How should we be ruled?", "What is the mind?", "What exists?"],
     takes: {
       "How should we be ruled?": "By an absolute sovereign: we give up freedom for peace, or live in a war of all against all.",
+      "What is the mind?": "Motions in the body and brain; thinking is a kind of calculation.",
+      "What exists?": "Only matter in motion; even thoughts and spirits are bodies.",
     },
     facts: [
       "Without government, life is “solitary, poor, nasty, brutish, and short.”",
@@ -632,6 +753,11 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Rationalist"],
     questions: ["What can I know?", "What is the mind?", "What exists?"],
+    takes: {
+      "What can I know?": "Whatever survives radical doubt, starting with “I think, therefore I am.”",
+      "What is the mind?": "A thinking, nonphysical substance, distinct from the body yet joined to it.",
+      "What exists?": "Two kinds of substance, thinking mind and extended matter, both created by God.",
+    },
     facts: [
       "“I think, therefore I am.”",
       "Doubted everything he could, to find what was certain.",
@@ -649,6 +775,11 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Rationalist"],
     questions: ["What exists?", "How should I live?", "What is the mind?"],
+    takes: {
+      "What exists?": "One substance, God or Nature; minds and bodies are two aspects of it.",
+      "How should I live?": "Understand your emotions and the world's necessity; freedom and joy come from knowledge.",
+      "What is the mind?": "The idea of the body: mind and body are one thing, seen in two ways.",
+    },
     facts: [
       "God and Nature are one and the same substance.",
       "Free will is an illusion; freedom is understanding necessity.",
@@ -667,7 +798,9 @@ const data: Philosopher[] = [
     tradition: ["Empiricist", "Enlightenment"],
     questions: ["What can I know?", "How should we be ruled?", "What is the mind?"],
     takes: {
+      "What can I know?": "Only what experience supplies; the mind starts blank, and our knowledge has limits.",
       "How should we be ruled?": "By consent, to protect life, liberty, and property; a government that violates them may be resisted.",
+      "What is the mind?": "A blank slate filled by experience; personal identity rests on continuity of consciousness.",
     },
     facts: [
       "The mind starts as a blank slate, written on by experience.",
@@ -686,6 +819,11 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Rationalist"],
     questions: ["What exists?", "What is logic & language?", "What is the mind?"],
+    takes: {
+      "What exists?": "Monads: simple, mindlike units, each mirroring the universe, in a harmony set by God.",
+      "What is logic & language?": "He dreamed of a universal symbolic language, so disputes could be settled by calculating.",
+      "What is the mind?": "A monad: a simple substance full of perceptions, many of them unconscious.",
+    },
     facts: [
       "Invented calculus independently of Newton, sparking a bitter feud.",
       "Ours is the best of all possible worlds.",
@@ -704,6 +842,11 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Empiricist"],
     questions: ["What exists?", "What can I know?", "What is the mind?"],
+    takes: {
+      "What exists?": "Only minds and their ideas; matter existing beyond all perception is a fiction.",
+      "What can I know?": "Our own ideas and the minds that perceive them; there's nothing beyond perception to know.",
+      "What is the mind?": "An active spirit that perceives ideas; minds are the only real substances.",
+    },
     facts: [
       "To be is to be perceived.",
       "Denied matter: only minds and their ideas exist.",
@@ -721,6 +864,10 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Empiricist"],
     questions: ["What can I know?", "How should I live?"],
+    takes: {
+      "What can I know?": "Little for certain; cause and effect, and the self, are habits of the mind, not things we observe.",
+      "How should I live?": "Reason serves the passions; cultivate sympathy, good habits and a sociable life.",
+    },
     facts: [
       "We never see causation, only one thing following another.",
       "Expecting the future to resemble the past is habit, not logic.",
@@ -740,6 +887,7 @@ const data: Philosopher[] = [
     questions: ["How should we be ruled?", "How should I live?"],
     takes: {
       "How should we be ruled?": "By the general will: free citizens should make, together, the laws they live under.",
+      "How should I live?": "Stay close to nature and your conscience; resist society's vanity and false needs.",
     },
     facts: [
       "“Man is born free, and everywhere he is in chains.”",
@@ -758,6 +906,12 @@ const data: Philosopher[] = [
     era: "Early Modern",
     tradition: ["Enlightenment", "German Idealism"],
     questions: ["What can I know?", "How should I live?", "What is beautiful?", "What is the mind?"],
+    takes: {
+      "What can I know?": "Only things as they appear to us, shaped by the mind's own forms; things in themselves stay hidden.",
+      "How should I live?": "Act only on rules you could will for everyone; treat people as ends, never merely as means.",
+      "What is beautiful?": "What pleases freely, without desire, yet as if everyone should agree.",
+      "What is the mind?": "Not a blank slate: the mind shapes all experience through space, time and its categories.",
+    },
     facts: [
       "Act only on rules you could will everyone to follow.",
       "Treat people as ends, never merely as means.",
@@ -778,6 +932,7 @@ const data: Philosopher[] = [
     questions: ["How should we be ruled?", "How should I live?"],
     takes: {
       "How should we be ruled?": "By rational, equal citizens, which means educating women and ending inherited privilege.",
+      "How should I live?": "Develop your own reason and virtue, woman or man; there's no real virtue without freedom.",
     },
     facts: [
       "Wrote A Vindication of the Rights of Woman (1792).",
@@ -797,7 +952,10 @@ const data: Philosopher[] = [
     tradition: ["German Idealism"],
     questions: ["What exists?", "How should we be ruled?", "What is the mind?", "What is beautiful?"],
     takes: {
+      "What exists?": "Reality is Spirit: reason working itself out through nature and history.",
       "How should we be ruled?": "The rational state, a constitutional monarchy, is where individual freedom becomes real.",
+      "What is the mind?": "Spirit coming to know itself, through recognition by others and through history.",
+      "What is beautiful?": "Spirit shining through sensuous form; art is one way the absolute comes to know itself.",
     },
     facts: [
       "History is Spirit coming to know itself, step by step.",
@@ -817,6 +975,12 @@ const data: Philosopher[] = [
     era: "Modern",
     tradition: ["German Idealism"],
     questions: ["What exists?", "How should I live?", "What is beautiful?", "What is the mind?"],
+    takes: {
+      "What exists?": "Behind the world of appearances is the Will, a blind and ceaseless striving.",
+      "How should I live?": "Life is suffering driven by the Will; ease it through art, compassion and renunciation.",
+      "What is beautiful?": "In beauty we escape the Will for a moment; music expresses the Will itself.",
+      "What is the mind?": "The intellect is a servant of the Will, the blind striving within us.",
+    },
     facts: [
       "Reality is a blind, endless striving he called the Will.",
       "Life swings like a pendulum between pain and boredom.",
@@ -836,7 +1000,9 @@ const data: Philosopher[] = [
     tradition: ["Empiricist"],
     questions: ["How should I live?", "How should we be ruled?", "What is logic & language?"],
     takes: {
+      "How should I live?": "Pursue happiness, especially the higher pleasures of the mind, and promote it for everyone.",
       "How should we be ruled?": "By representative democracy that limits liberty only to prevent harm to others.",
+      "What is logic & language?": "All reasoning, even mathematics, rests on induction from experience.",
     },
     facts: [
       "Actions are right insofar as they promote happiness.",
@@ -856,6 +1022,10 @@ const data: Philosopher[] = [
     era: "Modern",
     tradition: ["Existentialist"],
     questions: ["How should I live?", "What is the mind?"],
+    takes: {
+      "How should I live?": "Become yourself through passionate commitment, ultimately a leap of faith.",
+      "What is the mind?": "A self is a relation that relates itself to itself: a task, not a thing.",
+    },
     facts: [
       "Often called the father of existentialism.",
       "“Life can only be understood backwards; but it must be lived forwards.”",
@@ -876,6 +1046,7 @@ const data: Philosopher[] = [
     questions: ["How should we be ruled?", "What exists?"],
     takes: {
       "How should we be ruled?": "Workers should take power; in a classless society, the state eventually withers away.",
+      "What exists?": "The material world; ideas and institutions grow out of how people produce their lives.",
     },
     facts: [
       "History is the history of class struggle.",
@@ -895,6 +1066,11 @@ const data: Philosopher[] = [
     era: "Modern",
     tradition: ["Pragmatist"],
     questions: ["What can I know?", "What is the mind?", "How should I live?"],
+    takes: {
+      "What can I know?": "Truth is what works: ideas become true as they prove themselves in experience.",
+      "What is the mind?": "A stream of consciousness: always flowing, always selecting.",
+      "How should I live?": "Choose beliefs that make life worth living, and act as if what you do makes a difference.",
+    },
     facts: [
       "Pragmatism: an idea’s truth lies in its practical consequences.",
       "Popularized the phrase “stream of consciousness.”",
@@ -912,6 +1088,11 @@ const data: Philosopher[] = [
     era: "Modern",
     tradition: ["Existentialist", "Continental/Critical"],
     questions: ["How should I live?", "What is beautiful?", "What can I know?"],
+    takes: {
+      "How should I live?": "Create your own values and affirm life, enough to want it all again, forever.",
+      "What is beautiful?": "Art makes existence bearable; it lives from the tension of Apollonian order and Dionysian frenzy.",
+      "What can I know?": "There are no facts, only interpretations, each from some perspective.",
+    },
     facts: [
       "“God is dead … and we have killed him.”",
       "Urged us to create our own values.",
@@ -930,6 +1111,10 @@ const data: Philosopher[] = [
     era: "Modern",
     tradition: ["Analytic"],
     questions: ["What is logic & language?", "What exists?"],
+    takes: {
+      "What is logic & language?": "He founded modern logic; words have a sense as well as a reference.",
+      "What exists?": "Besides physical and mental things, a third realm of abstract objects: numbers and thoughts.",
+    },
     facts: [
       "Founded modern logic with his Begriffsschrift (1879).",
       "Sense vs. reference: “morning star” and “evening star” both name Venus.",
@@ -947,6 +1132,10 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Phenomenology"],
     questions: ["What can I know?", "What is the mind?"],
+    takes: {
+      "What can I know?": "Set aside assumptions about the world and describe experience exactly as it presents itself.",
+      "What is the mind?": "Consciousness is always consciousness of something: intentionality is its defining mark.",
+    },
     facts: [
       "Founded phenomenology: the study of experience as it’s lived.",
       "Rallying cry: “To the things themselves!”",
@@ -966,6 +1155,9 @@ const data: Philosopher[] = [
     tradition: ["Analytic"],
     questions: ["What is logic & language?", "What can I know?", "What exists?", "How should we be ruled?"],
     takes: {
+      "What is logic & language?": "Grammar hides logical form; analysis reveals it, as in his theory of descriptions.",
+      "What can I know?": "Sense-data we're acquainted with, extended by logic and science; certainty is rare.",
+      "What exists?": "Logical atoms: simple facts out of which all the world's complex facts are built.",
       "How should we be ruled?": "Democratically, with power dispersed and checked; he also urged world government to end war.",
     },
     facts: [
@@ -985,6 +1177,11 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Analytic"],
     questions: ["What is logic & language?", "What is the mind?", "What can I know?"],
+    takes: {
+      "What is logic & language?": "Early: language pictures facts. Later: meaning is use, within shared language-games.",
+      "What is the mind?": "Not a private inner theater; mental words get their meaning from shared public life.",
+      "What can I know?": "Early: only what can be said clearly; the rest is silence. Later: doubt itself needs a background of certainty.",
+    },
     facts: [
       "“Whereof one cannot speak, thereof one must be silent.”",
       "Drafted the Tractatus as a soldier and prisoner in WWI.",
@@ -1002,6 +1199,11 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Phenomenology", "Existentialist"],
     questions: ["What exists?", "How should I live?", "What is the mind?"],
+    takes: {
+      "What exists?": "He asks what it means to be at all; absorbed in things, we forget the question of Being.",
+      "How should I live?": "Face your own death, and live authentically instead of as “one” does.",
+      "What is the mind?": "Not a mind looking out at a world: we are beings-in-the-world, already caught up in it.",
+    },
     facts: [
       "Being and Time (1927) asks what it means to be.",
       "We are “thrown” into a world we didn’t choose.",
@@ -1020,6 +1222,8 @@ const data: Philosopher[] = [
     tradition: ["Existentialist", "Phenomenology"],
     questions: ["How should I live?", "What is the mind?", "How should we be ruled?"],
     takes: {
+      "How should I live?": "Choose freely and own every choice; you are nothing but what you make of yourself.",
+      "What is the mind?": "Consciousness is a nothingness, sheer freedom, never a fixed thing.",
       "How should we be ruled?": "He came to call Marxism the philosophy of his time, and backed revolutionary socialist causes.",
     },
     facts: [
@@ -1041,6 +1245,7 @@ const data: Philosopher[] = [
     questions: ["How should we be ruled?", "How should I live?"],
     takes: {
       "How should we be ruled?": "Through citizens acting together in public, not by rulers commanding subjects.",
+      "How should I live?": "Think for yourself, act together with others, and never stop judging right from wrong.",
     },
     facts: [
       "Coined “the banality of evil,” reporting on Eichmann’s trial.",
@@ -1060,6 +1265,7 @@ const data: Philosopher[] = [
     tradition: ["Existentialist"],
     questions: ["How should I live?", "How should we be ruled?"],
     takes: {
+      "How should I live?": "Embrace your freedom and work for others' freedom; no one is free alone.",
       "How should we be ruled?": "Toward equal freedom for all: no one is truly free while others are kept oppressed.",
     },
     facts: [
@@ -1078,6 +1284,11 @@ const data: Philosopher[] = [
     era: "Contemporary",
     tradition: ["Analytic"],
     questions: ["What is logic & language?", "What exists?", "What can I know?"],
+    takes: {
+      "What is logic & language?": "No sharp line between truths of meaning and of fact; translation is never fully fixed.",
+      "What exists?": "“To be is to be the value of a variable”: whatever our best scientific theory requires.",
+      "What can I know?": "No belief is immune to revision; knowledge is a web, tested against experience as a whole.",
+    },
     facts: [
       "“Two Dogmas of Empiricism” attacked the analytic–synthetic divide.",
       "Beliefs face experience together, as a web.",
@@ -1097,6 +1308,7 @@ const data: Philosopher[] = [
     questions: ["How should we be ruled?", "How should I live?"],
     takes: {
       "How should we be ruled?": "By principles chosen behind a veil of ignorance: equal liberties, and inequality only if it helps the worst-off.",
+      "How should I live?": "He leaves the good life to each person; justice only sets fair terms for pursuing it.",
     },
     facts: [
       "A Theory of Justice (1971) revived political philosophy.",
@@ -1117,6 +1329,8 @@ const data: Philosopher[] = [
     questions: ["How should we be ruled?", "What can I know?", "What is the mind?"],
     takes: {
       "How should we be ruled?": "He asked less who should rule than how power works everywhere, and how it can be resisted.",
+      "What can I know?": "What counts as knowledge is shaped by power and by each era's unspoken rules.",
+      "What is the mind?": "The modern self is shaped by power: disciplines and norms produce the “soul.”",
     },
     facts: [
       "Power and knowledge are bound together.",
