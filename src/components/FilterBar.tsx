@@ -140,6 +140,14 @@ export function FilterBar({
   useBarHeight(bar);
 
   const tokens = activeTokens(filters);
+  // The arrived pill is mid-flight until it reports landing.
+  const [landed, setLanded] = useState<string>();
+  const flying =
+    sheet &&
+    landed !== arrivedKey &&
+    tokens.some(
+      (t) => tokenKey(t) === arrivedKey && pickedIn(filters, t.group) === 1,
+    );
   const phoneChips = tokens.some((t) => pickedIn(filters, t.group) > 1);
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   const clear = () => onChange({ ...EMPTY_FILTERS, sort: filters.sort });
@@ -415,7 +423,9 @@ export function FilterBar({
       </div>
 
       {/* Phones: facets and order as a scrolling row of pills. */}
-      <div className="scroll-row flex gap-2 overflow-x-auto px-4 pb-3 md:hidden">
+      {/* While a pill flies in from a detail page the row clips sideways only (and drops its fade mask),
+          so the flight is not cut off; afterwards it scrolls again. */}
+      <div className={`flex gap-2 px-4 pb-3 md:hidden ${flying ? "overflow-x-clip" : "scroll-row overflow-x-auto"}`}>
         {facets.map((f) => {
           const single =
             f.picked.length === 1
@@ -430,7 +440,8 @@ export function FilterBar({
               open={menu === f.key}
               onClick={() => openMenu(f.key)}
               token={single}
-              arrived={!!single && arrivedKey === tokenKey(single)}
+              arrived={sheet && !!single && arrivedKey === tokenKey(single)}
+              onLanded={() => setLanded(arrivedKey)}
               onRemove={() => set({ [GROUP_FIELD[f.key]]: [] })}
             />
           );
@@ -466,7 +477,10 @@ export function FilterBar({
               >
                 <ActiveChip
                   t={t}
-                  arrived={arrivedKey === tokenKey(t)}
+                  arrived={
+                    arrivedKey === tokenKey(t) &&
+                    !(sheet && pickedIn(filters, t.group) === 1)
+                  }
                   onRemove={() => onChange(withoutToken(filters, t))}
                 />
               </li>
@@ -536,6 +550,7 @@ function FacetButton({
   small,
   token,
   arrived,
+  onLanded,
   onRemove,
 }: {
   label: string;
@@ -546,6 +561,7 @@ function FacetButton({
   /** Phone pill with exactly one pick: it doubles as the active-filter chip, with its own remove button. */
   token?: FilterToken;
   arrived?: boolean;
+  onLanded?: () => void;
   onRemove?: () => void;
 }) {
   const on = picked.length > 0;
@@ -556,6 +572,7 @@ function FacetButton({
         token={token}
         open={open}
         arrived={!!arrived}
+        onLanded={onLanded}
         onClick={onClick}
         onRemove={onRemove}
       />
@@ -586,7 +603,7 @@ function FacetButton({
 
 /**
  * A phone facet pill with one pick: label and value open the menu, the cross removes the filter.
- * It sits in a scrolling row, which would clip a chip flying in from a detail page, so it only rings on arrival.
+ * Like ActiveChip, it takes the detail page chip's layoutId to fly in, then lets it go.
  */
 function ActivePill({
   label,
@@ -594,6 +611,7 @@ function ActivePill({
   open,
   arrived,
   onClick,
+  onLanded,
   onRemove,
 }: {
   label: string;
@@ -601,10 +619,20 @@ function ActivePill({
   open: boolean;
   arrived: boolean;
   onClick: () => void;
+  onLanded?: () => void;
   onRemove: () => void;
 }) {
+  const [flying, setFlying] = useState(arrived);
   return (
-    <div className="relative inline-flex h-9 shrink-0 items-center rounded-full bg-ink text-[0.85rem] text-paper">
+    <m.div
+      layoutId={flying ? filterChipId(token) : undefined}
+      transition={{ layout: morph }}
+      onLayoutAnimationComplete={() => {
+        setFlying(false);
+        onLanded?.();
+      }}
+      className="relative inline-flex h-9 shrink-0 items-center rounded-full bg-ink text-[0.85rem] text-paper"
+    >
       {arrived && (
         <m.span
           aria-hidden
@@ -633,7 +661,7 @@ function ActivePill({
       >
         <Close className="h-3.5 w-3.5 opacity-80" />
       </button>
-    </div>
+    </m.div>
   );
 }
 
