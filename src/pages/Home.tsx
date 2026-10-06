@@ -103,7 +103,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
               Philosophers
             </h1>
             <p className="mt-4 max-w-xl font-display text-[1.5rem] leading-snug text-ink-2 italic max-sm:hidden">
-              From Thales to Foucault — who asked what, and the one thing to remember about each.
+              The main ideas of history’s greatest philosophers.
             </p>
           </div>
           <ThemeToggle />
