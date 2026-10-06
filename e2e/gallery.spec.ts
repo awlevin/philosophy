@@ -236,3 +236,30 @@ test("on phones, text fields are at least 16px so iOS doesn't zoom in on focus",
   const find = page.getByRole("searchbox", { name: "Find a tradition" });
   expect(parseFloat(await find.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(16);
 });
+
+test("on touch, closing a page opened from the peek flies its portrait home to the card", async ({ page }) => {
+  test.skip(!isTouch(), "peek is for touch screens");
+  await page.goto(RULED, { waitUntil: "networkidle" });
+  const card = page.locator('[data-slug="hobbes"] a');
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
+  await page.getByRole("dialog", { name: "Thomas Hobbes, preview" }).getByRole("button", { name: "Open Hobbes" }).click();
+  await expect(page).toHaveURL(/\/p\/hobbes$/);
+  await page.waitForTimeout(1200);
+  // The card's portrait, frame by frame as the page closes: it starts out page-sized and shrinks home.
+  await page.evaluate(() => {
+    const widths: number[] = [];
+    Object.assign(window, { widths_: widths });
+    const tick = () => {
+      const face = document.querySelector('#grid [data-slug="hobbes"] .portrait');
+      widths.push(face ? face.getBoundingClientRect().width : 0);
+      if (widths.length < 40) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await page.getByRole("button", { name: "All philosophers" }).click();
+  await page.waitForTimeout(1000);
+  const widths = await page.evaluate(() => (window as unknown as { widths_: number[] }).widths_);
+  expect(Math.max(...widths)).toBeGreaterThan(200);
+  expect(widths.at(-1)).toBeLessThan(100);
+});

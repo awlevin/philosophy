@@ -256,6 +256,12 @@ body {
   color: var(--accent-ink);
 }
 
+/* While a page grows out of the peek sheet, the gallery still shows around it: keep the card's
+   portrait, which framer hides once the page's portrait shares its layoutId. */
+:root[data-page-growing] #grid .portrait {
+  visibility: visible !important;
+}
+
 /* In the base layer, so a component's own utilities (its radius, its own focus ring) win. */
 @layer base {
   :focus-visible {
