@@ -30,9 +30,12 @@ npm run fetch-portraits  # (re)download portraits from Wikidata / Wikimedia Comm
 
 ## Deploying to Vercel
 
+Live at https://philosophy-virid.vercel.app. The GitHub repo is connected to the Vercel project
+`philosophy`, so every push to `main` deploys to production.
+
 `vercel.json` is set up: Vite preset, `npm run build`, output `dist`, `cleanUrls` so
 `/p/plato` serves the prerendered `p/plato.html`, an SPA fallback, and long-lived caching for
-hashed assets. Import the GitHub repo in Vercel (or run `vercel --prod`) and it deploys as-is.
+hashed assets.
 
 ## Portraits
 
