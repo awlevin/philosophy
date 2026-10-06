@@ -9,10 +9,11 @@
     <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#121215" media="(prefers-color-scheme: dark)" />
     <script>
-      // Apply the saved theme before first paint to avoid a flash.
+      // Apply the saved theme and look before first paint to avoid a flash.
       try {
         var t = localStorage.getItem("theme");
         if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+        if (localStorage.getItem("view") === "classic") document.documentElement.dataset.look = "classic";
       } catch (e) {}
     </script>
   </head>

@@ -21,8 +21,9 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
 - **Routes** — `/` is the grid; `/p/:slug` is a detail page. The grid stays mounted underneath the
   detail page, so the portrait and name share a Framer Motion `layoutId` and morph card → page and
   back again (including on the browser back button), and the grid keeps its scroll and filters.
-- **Gallery** — two views, Faces (default) or List, grouped by era (by time) or by initial (A–Z).
-  The choice of view is remembered per device (`src/lib/view.ts`). On touch screens a tap opens a peek sheet (face, dates, one fact);
+- **Gallery** — three views: Faces (default), List, or Classic (the original flat, sepia grid,
+  set page-wide via `<html data-look="classic">`). Faces and List are grouped by era (by time) or by initial (A–Z).
+  The choice of view is remembered per device (`src/lib/view.ts`). In Faces and List, on touch screens a tap opens a peek sheet (face, dates, one fact);
   "Open" or a swipe up goes to the full page.
 - **Color** — each era has a color, an ink and a tint (`--era-*` tokens in `src/index.css`, scoped
   to an element with `eraVars()` from `src/lib/era.ts`). Portraits sit on their era's tint.

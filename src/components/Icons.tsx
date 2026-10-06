@@ -45,6 +45,14 @@ export const Grid = (p: SVGProps<SVGSVGElement>) => (
     <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
   </svg>
 );
+/** A framed portrait: the Classic look. */
+export const Frame = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <rect x="4" y="3.5" width="16" height="17" rx="1" />
+    <circle cx="12" cy="10" r="3" />
+    <path d="M7 18.5c.8-2.6 2.8-4 5-4s4.2 1.4 5 4" />
+  </svg>
+);
 export const List = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}>
     <circle cx="5.5" cy="6.5" r="1.3" />

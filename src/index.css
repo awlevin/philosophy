@@ -121,6 +121,113 @@
   --era-contemporary-tint: #2d1a38;
 }
 
+/* ---------- Classic look ("Show as: Classic") ---------- */
+/* The original sepia palette and toned portraits; era colors fold into it. */
+:root[data-look="classic"] {
+  color-scheme: light;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --paper: #f4efe6;
+  --paper-2: #ebe4d8;
+  --ink: #1d1a16;
+  --ink-2: #3a342c;
+  --muted: #6a6054;
+  --rule: #d8cfc1;
+  --accent: #8b5a2b;
+  --accent-ink: #fbf7f0;
+  --chip: #e6dece;
+  --sheet: #f4efe6;
+  --portrait-filter: grayscale(1) contrast(1.06) brightness(1.02);
+  --portrait-tint: #b48a5a;
+  --portrait-tint-blend: multiply;
+  --portrait-tint-opacity: 0.28;
+  --shadow: 0 1px 2px rgb(60 40 20 / 0.06), 0 8px 24px -12px rgb(60 40 20 / 0.25);
+  --era-ancient: #8b5a2b;
+  --era-ancient-ink: #3a342c;
+  --era-ancient-tint: #ddd3c3;
+  --era-medieval: #8b5a2b;
+  --era-medieval-ink: #3a342c;
+  --era-medieval-tint: #ddd3c3;
+  --era-early-modern: #8b5a2b;
+  --era-early-modern-ink: #3a342c;
+  --era-early-modern-tint: #ddd3c3;
+  --era-modern: #8b5a2b;
+  --era-modern-ink: #3a342c;
+  --era-modern-tint: #ddd3c3;
+  --era-contemporary: #8b5a2b;
+  --era-contemporary-ink: #3a342c;
+  --era-contemporary-tint: #ddd3c3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-look="classic"]:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #131210;
+    --paper-2: #1c1a17;
+    --ink: #ede6da;
+    --ink-2: #cfc6b8;
+    --muted: #978d80;
+    --rule: #34302a;
+    --accent: #d1a36b;
+    --accent-ink: #1a140d;
+    --chip: #24211d;
+    --sheet: #1c1a17;
+    --portrait-filter: grayscale(1) contrast(1.1) brightness(0.86);
+    --portrait-tint: #c9925a;
+    --portrait-tint-blend: soft-light;
+    --portrait-tint-opacity: 0.55;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -12px rgb(0 0 0 / 0.6);
+    --era-ancient: #d1a36b;
+    --era-ancient-ink: #cfc6b8;
+    --era-ancient-tint: #2a2621;
+    --era-medieval: #d1a36b;
+    --era-medieval-ink: #cfc6b8;
+    --era-medieval-tint: #2a2621;
+    --era-early-modern: #d1a36b;
+    --era-early-modern-ink: #cfc6b8;
+    --era-early-modern-tint: #2a2621;
+    --era-modern: #d1a36b;
+    --era-modern-ink: #cfc6b8;
+    --era-modern-tint: #2a2621;
+    --era-contemporary: #d1a36b;
+    --era-contemporary-ink: #cfc6b8;
+    --era-contemporary-tint: #2a2621;
+  }
+}
+
+:root[data-look="classic"][data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #131210;
+  --paper-2: #1c1a17;
+  --ink: #ede6da;
+  --ink-2: #cfc6b8;
+  --muted: #978d80;
+  --rule: #34302a;
+  --accent: #d1a36b;
+  --accent-ink: #1a140d;
+  --chip: #24211d;
+  --sheet: #1c1a17;
+  --portrait-filter: grayscale(1) contrast(1.1) brightness(0.86);
+  --portrait-tint: #c9925a;
+  --portrait-tint-blend: soft-light;
+  --portrait-tint-opacity: 0.55;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -12px rgb(0 0 0 / 0.6);
+  --era-ancient: #d1a36b;
+  --era-ancient-ink: #cfc6b8;
+  --era-ancient-tint: #2a2621;
+  --era-medieval: #d1a36b;
+  --era-medieval-ink: #cfc6b8;
+  --era-medieval-tint: #2a2621;
+  --era-early-modern: #d1a36b;
+  --era-early-modern-ink: #cfc6b8;
+  --era-early-modern-tint: #2a2621;
+  --era-modern: #d1a36b;
+  --era-modern-ink: #cfc6b8;
+  --era-modern-tint: #2a2621;
+  --era-contemporary: #d1a36b;
+  --era-contemporary-ink: #cfc6b8;
+  --era-contemporary-tint: #2a2621;
+}
+
 /* ---------- Base ---------- */
 html {
   scrollbar-gutter: stable;
@@ -190,6 +297,36 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Classic: desaturate, then tint toward warm sepia; a hint of color returns on hover. */
+:root[data-look="classic"] .portrait img {
+  filter: var(--portrait-filter);
+  transition: filter 400ms ease;
+}
+:root[data-look="classic"] .portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--portrait-tint);
+  mix-blend-mode: var(--portrait-tint-blend);
+  opacity: var(--portrait-tint-opacity);
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+@media (hover: hover) {
+  :root[data-look="classic"] .card:hover .portrait img {
+    filter: grayscale(0.35) contrast(1.04);
+  }
+  :root[data-look="classic"] .card:hover .portrait::after {
+    opacity: calc(var(--portrait-tint-opacity) * 0.5);
+  }
+}
+:root[data-look="classic"] .card:focus-visible .portrait img {
+  filter: grayscale(0.35) contrast(1.04);
+}
+:root[data-look="classic"] .card:focus-visible .portrait::after {
+  opacity: calc(var(--portrait-tint-opacity) * 0.5);
 }
 
 /* Horizontal chip rows fade at the edges when they overflow */

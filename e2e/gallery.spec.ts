@@ -47,3 +47,23 @@ test("on touch, a tap peeks; swipe down or close dismisses it", async ({ page })
   await peek.getByRole("button", { name: "Close preview" }).click();
   await expect(peek).toBeHidden();
 });
+
+test("Classic brings back the original look, everywhere, and opens pages directly", async ({ page }) => {
+  await page.getByRole("button", { name: "View and filter" }).click();
+  await page.getByRole("radio", { name: "Classic" }).click();
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-look", "classic");
+  await expect(page.getByRole("region", { name: "Ancient", exact: true })).toHaveCount(0);
+  await page.waitForTimeout(500);
+  await snap(page, "g7-classic");
+
+  const plato = page.locator('[data-slug="plato"] a');
+  await plato.scrollIntoViewIfNeeded();
+  await plato.click();
+  await expect(page).toHaveURL(/\/p\/plato$/);
+  await page.waitForTimeout(1200);
+  await snap(page, "g8-classic-detail");
+
+  await page.goto("/", { waitUntil: "networkidle" });
+  await expect(page.locator("html")).toHaveAttribute("data-look", "classic");
+});

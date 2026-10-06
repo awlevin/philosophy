@@ -16,7 +16,7 @@ import {
 } from "../lib/filters";
 import { ease, morph } from "../lib/motion";
 import type { ViewMode } from "../lib/view";
-import { Close, Grid, List, Search, Sliders } from "./Icons";
+import { Close, Frame, Grid, List, Search, Sliders } from "./Icons";
 import { Segmented } from "./Segmented";
 
 type Props = {
@@ -154,6 +154,7 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
                     options={[
                       { value: "faces", label: "Faces", icon: <Grid className="h-4 w-4" /> },
                       { value: "list", label: "List", icon: <List className="h-4 w-4" /> },
+                      { value: "classic", label: "Classic", icon: <Frame className="h-4 w-4" /> },
                     ]}
                   />
                 </LabeledRow>

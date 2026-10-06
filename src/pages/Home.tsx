@@ -105,7 +105,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
 
       <main
         id="grid"
-        className={`mx-auto px-4 pb-24 sm:px-8 ${view === "list" ? "max-w-3xl pt-3" : "max-w-[1400px]"}`}
+        className={`mx-auto px-4 pb-24 sm:px-8 ${view === "list" ? "max-w-3xl pt-3" : view === "classic" ? "max-w-[1400px] pt-8 sm:pt-10" : "max-w-[1400px]"}`}
       >
         <Gallery
           sections={sections}
@@ -115,7 +115,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
           eagerFirst={!search && !covered}
           deferImages={deferImages}
           peeking={peeked ? peeked.slug : null}
-          onPeek={(p) => setPeek(p.slug)}
+          onPeek={view === "classic" ? undefined : (p) => setPeek(p.slug)}
           returningSlug={returningSlug}
           onReturned={onReturned}
         />

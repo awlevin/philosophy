@@ -19,6 +19,7 @@ import {
 } from "../lib/filters";
 import { eraVars } from "../lib/era";
 import { lifespan } from "../lib/format";
+import { useViewMode } from "../lib/view";
 import { ease, morph, nameId } from "../lib/motion";
 
 export type DetailState = {
@@ -60,6 +61,7 @@ export function Detail({ slug }: { slug: string }) {
   const scroller = useRef<HTMLDivElement>(null);
 
   const p = bySlug.get(slug);
+  const [view] = useViewMode();
   const i = p ? philosophers.indexOf(p) : -1;
   const n = philosophers.length;
   const prev = philosophers[(i - 1 + n) % n];
@@ -206,7 +208,7 @@ export function Detail({ slug }: { slug: string }) {
                     priority
                     withGridPlaceholder={!!state.fromGrid}
                     sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 92vw"
-                    radius={16}
+                    radius={view === "classic" ? 4 : 16}
                     className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
                     layoutTransition={layoutTransition}
                   />

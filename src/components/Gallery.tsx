@@ -16,7 +16,8 @@ type Props = {
   eagerFirst: boolean;
   deferImages: boolean;
   peeking: string | null;
-  onPeek: (p: Philosopher) => void;
+  /** Absent in Classic: a tap opens the page. */
+  onPeek?: (p: Philosopher) => void;
   returningSlug: string | null;
   onReturned: () => void;
 };
@@ -34,6 +35,20 @@ export function Gallery({ sections, view, timeline, gridSearch, eagerFirst, defe
     priority: eagerFirst && i < 4,
   });
   let index = 0;
+
+  if (view === "classic") {
+    return (
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <AnimatePresence mode="popLayout" initial={false}>
+          {sections
+            .flatMap((s) => s.items)
+            .map((p, i) => (
+              <PhilosopherCard key={p.slug} {...item(p, i)} classic eager={eagerFirst && i < 2} priority={eagerFirst && i < 2} />
+            ))}
+        </AnimatePresence>
+      </ul>
+    );
+  }
 
   return (
     <AnimatePresence initial={false}>
