@@ -149,3 +149,15 @@ test("in the list, a selected first row stays distinct from its section band", a
   await page.waitForTimeout(500);
   await snap(page, "g10-list-first-row-selected");
 });
+
+test("on touch, peeking can be turned off so a tap opens the page even while filtering", async ({ page }) => {
+  test.skip(!isTouch(), "peek is for touch screens");
+  await page.goto(RULED, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: /^Show as:/ }).click();
+  await page.getByRole("radio", { name: /Open the page/ }).click();
+  await page.getByRole("button", { name: "Done" }).click();
+  const card = page.locator('[data-slug="plato"] a');
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
+  await expect(page).toHaveURL(/\/p\/plato$/);
+});

@@ -11,7 +11,7 @@ import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
 import { EMPTY_FILTERS, activeCount, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
 import { ease } from "../lib/motion";
 import { toSections } from "../lib/sections";
-import { useViewMode } from "../lib/view";
+import { useTapMode, useViewMode } from "../lib/view";
 import type { GalleryState } from "./Detail";
 
 type Props = {
@@ -32,8 +32,10 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
   const sections = useMemo(() => toSections(list, filters.sort), [list, filters.sort]);
   const [view, setView] = useViewMode();
   // Peeking is for comparing: only while filtering (on touch screens), where the sheet can show
-  // each face's take on the filtered question. Otherwise a tap opens the page.
-  const peeks = view !== "classic" && activeCount(filters) > 0;
+  // each face's take on the filtered question, and only if the viewer wants it. Otherwise a tap
+  // opens the page.
+  const [tap] = useTapMode();
+  const peeks = view !== "classic" && tap === "peek" && activeCount(filters) > 0;
 
   const [peek, setPeek] = useState<string | null>(null);
   const closePeek = useCallback(() => setPeek(null), []);
