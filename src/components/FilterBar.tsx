@@ -199,7 +199,7 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
             onChange={(q) => set({ q })}
             label="Search by name"
             placeholder={`Search ${total} names or places`}
-            debounce={150}
+            debounce={200}
             className="h-11 rounded-full pl-10 text-base sm:text-[0.95rem]"
             iconClassName="left-3.5"
           />

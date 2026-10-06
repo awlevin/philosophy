@@ -16,7 +16,7 @@ test("search waits for a pause in typing, then filters; the clear button empties
   }
   await expect(box).toHaveValue("kant");
   await expect(page).not.toHaveURL(/q=/);
-  await page.clock.runFor(100);
+  await page.clock.runFor(150);
   await expect(page).toHaveURL(/q=kant$/);
   await page.clock.resume();
   await expect(page.locator("[data-slug]")).toHaveCount(1);
