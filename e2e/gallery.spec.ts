@@ -128,3 +128,12 @@ test("on touch, opening from the peek grows the page out of the sheet", async ({
   await expect(page).toHaveURL(/\/p\/kant$/);
   await expect(page.getByRole("heading", { name: "Immanuel Kant", level: 1 })).toBeInViewport();
 });
+
+test("in the list, a selected first row stays distinct from its section band", async ({ page }) => {
+  test.skip(!isTouch(), "peek is for touch screens");
+  await chooseView(page, "List");
+  await page.locator('[data-slug="thales"] a').click();
+  await expect(page.getByRole("dialog", { name: "Thales, preview" })).toBeVisible();
+  await page.waitForTimeout(500);
+  await snap(page, "g10-list-first-row-selected");
+});

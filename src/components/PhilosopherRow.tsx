@@ -39,7 +39,9 @@ export function PhilosopherRow({ p, gridSearch, timeline, deferImage, peeking, o
         state={{ gridSearch, fromGrid: true }}
         onClick={(e) => onPeek && !peeking && peekInstead(e, () => onPeek(p))}
         className={`flex h-16 items-center gap-3 rounded-xl pr-3 transition-colors ${
-          peeking ? "bg-[var(--era-tint)]" : "hover:bg-paper-2"
+          // Not the section band's tint at full strength: a lighter fill with an outline, so a selected
+          // first row reads as its own thing under the band.
+          peeking ? "bg-[var(--era-tint)]/55 ring-1 ring-[var(--era)]/45 ring-inset" : "hover:bg-paper-2"
         } ${timeline ? "" : "pl-2"}`}
       >
         {timeline && (

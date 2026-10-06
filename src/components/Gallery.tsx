@@ -83,7 +83,8 @@ export function Gallery({ sections, view, timeline, gridSearch, eagerFirst, defe
                 {s.range && <span className="text-[0.75rem] font-medium text-[var(--era-ink)]">{s.range}</span>}
                 <span className="ml-auto text-[0.75rem] font-semibold text-[var(--era-ink,var(--ink-2))] tabular-nums">{s.items.length}</span>
               </div>
-              <ol>
+              {/* A little air under the sticky band, so the first row never sits flush against it. */}
+              <ol className="py-1.5">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {s.items.map((p) => (
                     <PhilosopherRow key={p.slug} timeline={timeline} {...item(p, index++)} />
