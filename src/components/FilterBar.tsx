@@ -198,7 +198,7 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
             placeholder={`Search ${total} names`}
             autoComplete="off"
             spellCheck={false}
-            className="h-11 w-full rounded-full bg-paper-2 pr-3 pl-10 text-[0.95rem] text-ink placeholder:text-muted focus:ring-2 focus:ring-ink/20 focus:outline-none"
+            className="h-11 w-full rounded-full bg-paper-2 pr-3 pl-10 text-base text-ink sm:text-[0.95rem] placeholder:text-muted focus:ring-2 focus:ring-ink/20 focus:outline-none"
           />
         </label>
 
@@ -353,7 +353,7 @@ function TraditionOptions({ filters, set }: { filters: Filters; set: (patch: Par
             onChange={(e) => setQ(e.target.value)}
             placeholder="Find a tradition"
             autoComplete="off"
-            className="h-10 w-full rounded-xl bg-paper-2 pr-3 pl-9 text-[0.9rem] text-ink placeholder:text-muted focus:outline-none"
+            className="h-10 w-full rounded-xl bg-paper-2 pr-3 pl-9 text-base text-ink sm:text-[0.9rem] placeholder:text-muted focus:outline-none"
           />
         </label>
       </div>

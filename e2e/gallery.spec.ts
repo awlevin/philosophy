@@ -174,3 +174,13 @@ test("on touch, every question has takes: e.g. what is the mind?", async ({ page
   await page.waitForTimeout(400);
   await snap(page, "g11-peek-mind");
 });
+
+test("on phones, text fields are at least 16px so iOS doesn't zoom in on focus", async ({ page }) => {
+  test.skip(!isTouch(), "phone layout");
+  const sizes = await page.locator("input").evaluateAll((els) => els.map((el) => parseFloat(getComputedStyle(el).fontSize)));
+  expect(sizes.length).toBeGreaterThan(0);
+  for (const size of sizes) expect(size).toBeGreaterThanOrEqual(16);
+  await page.getByRole("button", { name: "Tradition", exact: true }).click();
+  const find = page.getByRole("searchbox", { name: "Find a tradition" });
+  expect(parseFloat(await find.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(16);
+});
