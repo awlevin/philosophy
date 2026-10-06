@@ -433,7 +433,7 @@ function FacetButton({
       aria-label={on ? `${label}: ${picked.join(", ")}` : label}
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full whitespace-nowrap transition-colors ${
         small ? "h-9 pr-2.5 pl-3.5 text-[0.85rem]" : "h-11 pr-3 pl-4 text-[0.875rem]"
-      } ${on ? "bg-ink font-semibold text-paper" : `border ${open ? "border-ink text-ink" : "border-rule text-ink-2 hover:text-ink"}`}`}
+      } ${on ? "bg-paper-2 font-semibold text-ink ring-1 ring-rule ring-inset" :`border ${open ? "border-ink text-ink" : "border-rule text-ink-2 hover:text-ink"}`}`}
     >
       {on && <span className="font-medium opacity-60">{label}</span>}
       <span className="max-w-[11rem] truncate">{on ? (picked.length === 1 ? picked[0] : picked.length) : label}</span>
@@ -472,7 +472,7 @@ function ActivePill({
         setFlying(false);
         onLanded?.();
       }}
-      className="relative inline-flex h-9 shrink-0 items-center rounded-full bg-ink text-[0.85rem] text-paper"
+      className="relative inline-flex h-9 shrink-0 items-center rounded-full bg-paper-2 text-[0.85rem] text-ink ring-1 ring-rule ring-inset"
     >
       <button
         type="button"
@@ -540,7 +540,7 @@ function ActiveChip({ t, arrived, onRemove }: { t: FilterToken; arrived: boolean
       onLayoutAnimationComplete={() => setFlying(false)}
       onClick={onRemove}
       aria-label={`Remove filter: ${GROUP_LABELS[t.group]} ${t.value}`}
-      className="relative inline-flex h-9 max-w-full items-center gap-1.5 rounded-full bg-ink pr-2.5 pl-3.5 text-[0.8rem] whitespace-nowrap text-paper"
+      className="relative inline-flex h-9 max-w-full items-center gap-1.5 rounded-full bg-paper-2 pr-2.5 pl-3.5 text-[0.8rem] whitespace-nowrap text-ink ring-1 ring-rule ring-inset"
     >
       {arrived && (
         <m.span
@@ -553,7 +553,7 @@ function ActiveChip({ t, arrived, onRemove }: { t: FilterToken; arrived: boolean
       )}
       {/* `layout` keeps the label from stretching while the chip changes size mid-flight. */}
       <m.span layout={flying ? "position" : false} className="inline-flex min-w-0 items-center gap-1.5">
-        <span className="shrink-0 text-paper/60">{GROUP_LABELS[t.group]}</span>
+        <span className="shrink-0 text-muted">{GROUP_LABELS[t.group]}</span>
         <span className="truncate font-medium">{t.value}</span>
         <Close className="h-3.5 w-3.5 shrink-0 opacity-80" />
       </m.span>
