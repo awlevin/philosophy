@@ -49,7 +49,8 @@ function page(url: string, title: string, description: string, image: string, im
   ].join("\n    ");
   return template
     .replace(/<title>.*?<\/title>/, `<title>${esc(title)}</title>`)
-    .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${d}" />\n    ${social}`)
+    .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${d}" />`)
+    .replace(/<!--social-->[\s\S]*?<!--\/social-->/, () => social)
     .replace('<div id="root"></div>', `<div id="root">${render(url)}</div>`);
 }
 
