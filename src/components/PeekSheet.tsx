@@ -38,8 +38,12 @@ export function PeekSheet({ p, gridSearch, onClose }: { p: Philosopher; gridSear
       exit={{ y: "120%", transition: { duration: 0.22, ease: "easeIn" } }}
       transition={{ type: "spring", stiffness: 420, damping: 38 }}
       style={eraVars(p.era)}
-      className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-[420px] touch-none rounded-[22px] bg-[var(--sheet)] px-4 pt-2.5 pb-4 shadow-[var(--shadow-lift)]"
+      // Phones: flush with the bottom edge and padded past the home indicator, so nothing shows
+      // underneath as Safari's toolbar slides. Larger screens: a floating card.
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto touch-none rounded-t-[22px] bg-[var(--sheet)] px-4 pt-2.5 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[var(--shadow-lift)] sm:inset-x-2 sm:bottom-4 sm:max-w-[420px] sm:rounded-[22px] sm:pb-4"
     >
+      {/* Fills in below when the sheet is pulled up past its resting place. */}
+      <span aria-hidden className="absolute inset-x-0 top-full h-[50vh] bg-[var(--sheet)] sm:hidden" />
       <div aria-hidden className="mx-auto mb-3 h-1 w-9 rounded-full bg-rule" />
       <div className="flex items-center gap-3.5">
         <Thumb p={p} sizes="144px" className="h-[72px] w-[72px] shrink-0 rounded-[14px]" />
