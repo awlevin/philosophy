@@ -20,7 +20,8 @@ import { fold } from "../lib/format";
 import { morph } from "../lib/motion";
 import { useMedia } from "../lib/useMedia";
 import { useTapMode, type TapMode, type ViewMode } from "../lib/view";
-import { ChevronDown, Close, Frame, Grid, List, Search } from "./Icons";
+import { ChevronDown, Close, Frame, Grid, List } from "./Icons";
+import { SearchField } from "./SearchField";
 import { Menu, OptionRow } from "./Menu";
 
 type Props = {
@@ -192,19 +193,17 @@ export function FilterBar({ filters, onChange, view, onView, shown, total, arriv
       className={`sticky top-0 ${raised ? "z-[60]" : "z-30"} border-b border-rule bg-paper/90 backdrop-blur-md supports-[backdrop-filter]:bg-paper/75`}
     >
       <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-4 py-3 sm:px-8">
-        <label className="relative min-w-0 flex-1 md:max-w-xs">
-          <span className="sr-only">Search by name</span>
-          <Search className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted" />
-          <input
-            type="search"
+        <div className="min-w-0 flex-1 md:max-w-xs">
+          <SearchField
             value={filters.q}
-            onChange={(e) => set({ q: e.target.value })}
-            placeholder={`Search ${total} names`}
-            autoComplete="off"
-            spellCheck={false}
-            className="h-11 w-full rounded-full bg-paper-2 pr-3 pl-10 text-base text-ink sm:text-[0.95rem] placeholder:text-muted focus:ring-2 focus:ring-ink/20 focus:outline-none"
+            onChange={(q) => set({ q })}
+            label="Search by name"
+            placeholder={`Search ${total} names or places`}
+            debounce={150}
+            className="h-11 rounded-full pl-10 text-base sm:text-[0.95rem]"
+            iconClassName="left-3.5"
           />
-        </label>
+        </div>
 
         {/* Larger screens: a button per facet with its popover. Phones open the same menus as sheets. */}
         {facets.map((f) => (
@@ -348,18 +347,14 @@ function TraditionOptions({ filters, set }: { filters: Filters; set: (patch: Par
   return (
     <>
       <div className="sticky top-0 z-10 bg-[var(--sheet)] px-3 pt-1.5 pb-2">
-        <label className="relative block">
-          <span className="sr-only">Find a tradition</span>
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted" />
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Find a tradition"
-            autoComplete="off"
-            className="h-10 w-full rounded-xl bg-paper-2 pr-3 pl-9 text-base text-ink sm:text-[0.9rem] placeholder:text-muted focus:outline-none"
-          />
-        </label>
+        <SearchField
+          value={q}
+          onChange={setQ}
+          label="Find a tradition"
+          placeholder="Find a tradition"
+          className="h-10 rounded-xl pl-9 text-base sm:text-[0.9rem]"
+          iconClassName="left-3"
+        />
       </div>
       {matches.map((t) => (
         <OptionRow

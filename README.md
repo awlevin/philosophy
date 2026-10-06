@@ -33,7 +33,7 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
   to an element with `eraVars()` from `src/lib/era.ts`). Portraits sit on their era's tint.
 - **Filters** — a menu per facet (Era, Tradition, Big question) with counts, plus Order and the
   view: popovers on larger screens, bottom sheets from a row of pills on phones (`FilterBar.tsx`,
-  `Menu.tsx`). OR within a group, AND across groups; name search is diacritic-insensitive. Filters
+  `Menu.tsx`). OR within a group, AND across groups. Search (`SearchField.tsx`, debounced, with a clear button) matches names and birthplaces, diacritic-insensitive. Filters
   and order are mirrored in the URL, e.g. `/?era=ancient,medieval&question=live&sort=alpha&q=th`.
   Chips on a detail page ("See others like …") filter the gallery; the tapped chip flies into the
   bar, and "Back to …" returns to the page.

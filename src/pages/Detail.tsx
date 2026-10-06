@@ -18,7 +18,7 @@ import {
   type FilterToken,
 } from "../lib/filters";
 import { eraVars } from "../lib/era";
-import { lifespan, shortName } from "../lib/format";
+import { birthplace, lifespan, shortName } from "../lib/format";
 import { useRanking } from "../lib/quiz";
 import type { QuizState } from "./Quiz";
 import { useLockPageScroll } from "../lib/useLockPageScroll";
@@ -315,6 +315,9 @@ export function Detail({ slug }: { slug: string }) {
                 >
                   {p.aka && <p className="mt-1 font-display text-[1.5rem] text-ink-2 italic">{p.aka}</p>}
                   <p className="mt-3 text-[0.95rem] tracking-[0.06em] text-ink-2 tabular-nums">{lifespan(p)}</p>
+                  <p className="mt-1 text-[0.95rem] text-ink-2">
+                    {p.origin.traditional ? "By tradition born in" : "Born in"} {birthplace(p)}
+                  </p>
                   <YouAnd p={p} gridSearch={state.gridSearch ?? ""} />
                   <p className="eyebrow mt-6">See others like {p.name}</p>
                   <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label={`See others like ${p.name}`}>

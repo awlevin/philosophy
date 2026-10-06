@@ -8,6 +8,16 @@ export function lifespan(p: Pick<Philosopher, "born" | "died" | "circa">): strin
   return `${c}${p.born}–${p.died}${p.died < 1000 ? " CE" : ""}`;
 }
 
+/** "Königsberg, Prussia (now Russia)", "La Haye en Touraine, France". */
+export function birthplace({ origin: o }: Pick<Philosopher, "origin">): string {
+  return o.then ? `${o.place}, ${o.then} (now ${o.country})` : `${o.place}, ${o.country}`;
+}
+
+/** Where they're from in a word or two, as it was then: "Prussia", "France". */
+export function homeland({ origin: o }: Pick<Philosopher, "origin">): string {
+  return o.then ?? o.country;
+}
+
 const SORT_NAME: Record<string, string> = {
   buddha: "Buddha",
   augustine: "Augustine",

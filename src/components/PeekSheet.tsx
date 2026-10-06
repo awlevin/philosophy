@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import type { BigQuestion, Philosopher } from "../data/philosophers";
 import { eraVars } from "../lib/era";
-import { lifespan, shortName } from "../lib/format";
+import { homeland, lifespan, shortName } from "../lib/format";
 import { grow, type SheetRect } from "../lib/motion";
 import type { DetailState } from "../pages/Detail";
 import { ArrowRight, Close } from "./Icons";
@@ -112,7 +112,9 @@ export function PeekSheet({
               {p.era} · {p.tradition[0]}
             </p>
             <p className="mt-1 font-display text-[1.9rem] leading-none font-semibold text-balance text-ink">{p.name}</p>
-            <p className="mt-1.5 text-[0.8rem] text-muted tabular-nums">{lifespan(p)}</p>
+            <p className="mt-1.5 text-[0.8rem] text-muted tabular-nums">
+              {lifespan(p)} · {homeland(p)}
+            </p>
           </div>
           <button
             type="button"

@@ -59,6 +59,18 @@ export type Portrait = {
   zoom?: number;
 };
 
+/** Where they were born. */
+export type Origin = {
+  /** As named at the time, e.g. "Königsberg". */
+  place: string;
+  /** The state or region then, when it isn't the modern country, e.g. "Prussia". */
+  then?: string;
+  /** Where that place is today, e.g. "Russia". */
+  country: string;
+  /** Rests on tradition rather than record. */
+  traditional?: boolean;
+};
+
 export type Philosopher = {
   slug: string;
   name: string;
@@ -69,6 +81,7 @@ export type Philosopher = {
   died: number;
   /** Dates are approximate. */
   circa?: boolean;
+  origin: Origin;
   era: Era;
   /** Primary tradition first, optional secondary second. */
   tradition: [Tradition] | [Tradition, Tradition];

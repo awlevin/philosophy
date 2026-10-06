@@ -146,8 +146,9 @@ export function onlyToken(t: FilterToken): Filters {
 export const tokenSearch = (t: FilterToken) => serializeFilters(onlyToken(t));
 
 /**
- * OR within a group, AND across groups; name search matches name + aka, diacritics-insensitive.
- * "match" order needs each philosopher's quiz rank; unranked ones keep time order at the end.
+ * OR within a group, AND across groups; search matches name, aka and birthplace (then and now),
+ * diacritics-insensitive. "match" order needs each philosopher's quiz rank; unranked ones keep time
+ * order at the end.
  */
 export function applyFilters(list: Philosopher[], f: Filters, rankOf?: (p: Philosopher) => number | undefined): Philosopher[] {
   const q = fold(f.q.trim());
@@ -156,7 +157,7 @@ export function applyFilters(list: Philosopher[], f: Filters, rankOf?: (p: Philo
       (!f.eras.length || f.eras.includes(p.era)) &&
       (!f.traditions.length || p.tradition.some((t) => f.traditions.includes(t))) &&
       (!f.questions.length || p.questions.some((x) => f.questions.includes(x))) &&
-      (!q || fold(`${p.name} ${p.aka ?? ""}`).includes(q)),
+      (!q || fold(`${p.name} ${p.aka ?? ""} ${p.origin.place} ${p.origin.then ?? ""} ${p.origin.country}`).includes(q)),
   );
   if (f.sort === "alpha") {
     out.sort((a, b) => sortName(a).localeCompare(sortName(b), "en", { sensitivity: "base" }));

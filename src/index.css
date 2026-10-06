@@ -256,10 +256,18 @@ body {
   color: var(--accent-ink);
 }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 2px;
+/* In the base layer, so a component's own utilities (its radius, its own focus ring) win. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* SearchField draws its own clear button. */
+  input[type="search"]::-webkit-search-cancel-button {
+    appearance: none;
+  }
 }
 
 /* Theme-dependent visibility (works before hydration) */
