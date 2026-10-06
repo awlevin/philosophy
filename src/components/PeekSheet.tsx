@@ -10,8 +10,8 @@ import { ArrowRight, Close } from "./Icons";
 import { Thumb } from "./Portrait";
 
 /**
- * A quick look from a filtered gallery on touch screens: face, dates, and their take on each
- * filtered Big Question (or a fact when there is none). Swipe down to dismiss, up (or "Open") for
+ * A quick look from the gallery on touch screens: face, dates, and their take on each filtered
+ * Big Question (or their first fact when no question is filtered). Swipe down to dismiss, up (or "Open") for
  * the full page; tapping another face swaps the sheet, for comparing takes.
  *
  * Opening grows the sheet up to fill the screen as the page fades in over it, rather than flying

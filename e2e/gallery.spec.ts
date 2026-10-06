@@ -46,11 +46,14 @@ test("a menu per facet: pick a tradition, see the count, keep the chip", async (
 
 const RULED = "/?question=ruled";
 
-test("without a filter, a tap opens the page directly", async ({ page }) => {
+test("without a filter, a tap opens the page on desktop and peeks with a fact on touch", async ({ page }) => {
   const card = page.locator('[data-slug="kant"] a');
   await card.scrollIntoViewIfNeeded();
   await card.click();
-  await expect(page).toHaveURL(/\/p\/kant$/);
+  if (!isTouch()) return expect(page).toHaveURL(/\/p\/kant$/);
+  const peek = page.getByRole("dialog", { name: "Immanuel Kant, preview" });
+  await expect(peek).toContainText("Act only on rules you could will everyone to follow.");
+  await expect(page).toHaveURL(/\/$/);
 });
 
 test("on touch, filtering by a question turns a tap into a peek at that philosopher's take", async ({ page }) => {
@@ -150,7 +153,7 @@ test("in the list, a selected first row stays distinct from its section band", a
   await snap(page, "g10-list-first-row-selected");
 });
 
-test("on touch, peeking can be turned off so a tap opens the page even while filtering", async ({ page }) => {
+test("on touch, peeking can be turned off so a tap opens the page", async ({ page }) => {
   test.skip(!isTouch(), "peek is for touch screens");
   await page.goto(RULED, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: /^Show as:/ }).click();

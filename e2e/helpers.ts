@@ -11,8 +11,8 @@ export async function openFromGallery(page: Page, slug: string, name: string) {
   const card = page.locator(`[data-slug="${slug}"] a`);
   await card.scrollIntoViewIfNeeded();
   await card.click();
-  // Touch screens peek first, but only while a filter is on.
-  if (isTouch() && /[?&](era|tradition|question)=/.test(page.url())) {
+  // Touch screens peek first.
+  if (isTouch()) {
     const peek = page.getByRole("dialog", { name: `${name}, preview` });
     await expect(peek).toBeVisible();
     await page.waitForTimeout(350);

@@ -8,7 +8,7 @@ import { PeekSheet } from "../components/PeekSheet";
 import { Thumb } from "../components/Portrait";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { bySlug, philosophers, type Philosopher } from "../data/philosophers";
-import { EMPTY_FILTERS, activeCount, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
+import { EMPTY_FILTERS, applyFilters, parseFilters, serializeFilters, type Filters } from "../lib/filters";
 import { ease } from "../lib/motion";
 import { toSections } from "../lib/sections";
 import { useTapMode, useViewMode } from "../lib/view";
@@ -31,11 +31,10 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
   const hidden = useMemo(() => philosophers.filter((p) => !list.includes(p)), [list]);
   const sections = useMemo(() => toSections(list, filters.sort), [list, filters.sort]);
   const [view, setView] = useViewMode();
-  // Peeking is for comparing: only while filtering (on touch screens), where the sheet can show
-  // each face's take on the filtered question, and only if the viewer wants it. Otherwise a tap
-  // opens the page.
+  // On touch screens a tap peeks first unless the viewer chose to open pages directly (Classic always
+  // opens). With a question filtered, the sheet shows each face's take on it.
   const [tap] = useTapMode();
-  const peeks = view !== "classic" && tap === "peek" && activeCount(filters) > 0;
+  const peeks = view !== "classic" && tap === "peek";
 
   const [peek, setPeek] = useState<string | null>(null);
   const closePeek = useCallback(() => setPeek(null), []);

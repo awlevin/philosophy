@@ -26,8 +26,9 @@ npm run e2e              # Playwright, phone + desktop-dark (screens in test-res
   back again (including on the browser back button), and the grid keeps its scroll and filters.
 - **Gallery** — three views: Faces (default), List, or Classic (the original flat, sepia grid,
   set page-wide via `<html data-look="classic">`). Faces and List are grouped by era (by time) or by initial (A–Z).
-  The choice of view is remembered per device (`src/lib/view.ts`). In Faces and List, on touch screens a tap opens a peek sheet (face, dates, one fact);
-  "Open" or a swipe up goes to the full page.
+  The choice of view is remembered per device (`src/lib/view.ts`). In Faces and List, on touch screens a tap opens a peek sheet (face, dates, and their take on any
+  filtered question, else a fact); a second tap, "Open" or a swipe up goes to the full page. "When
+  you tap a face" under Show as can switch peeking off.
 - **Color** — each era has a color, an ink and a tint (`--era-*` tokens in `src/index.css`, scoped
   to an element with `eraVars()` from `src/lib/era.ts`). Portraits sit on their era's tint.
 - **Filters** — a menu per facet (Era, Tradition, Big question) with counts, plus Order and the
