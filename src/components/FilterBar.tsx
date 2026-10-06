@@ -633,15 +633,6 @@ function ActivePill({
       }}
       className="relative inline-flex h-9 shrink-0 items-center rounded-full bg-ink text-[0.85rem] text-paper"
     >
-      {arrived && (
-        <m.span
-          aria-hidden
-          className="pointer-events-none absolute -inset-[3px] rounded-full border-2 border-accent"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 0 }}
-          transition={{ delay: 1.1, duration: 0.9 }}
-        />
-      )}
       <button
         type="button"
         onClick={onClick}
