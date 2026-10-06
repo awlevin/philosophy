@@ -11,6 +11,7 @@
     "og": "tsx scripts/og.ts",
     "fetch-portraits": "tsx scripts/fetch-portraits.ts",
     "e2e": "playwright test",
+    "demo": "tsx scripts/demo.ts",
     "lab": "rm -rf lab-out && playwright test -c lab/playwright.config.ts && sh lab/encode.sh"
   },
   "dependencies": {
