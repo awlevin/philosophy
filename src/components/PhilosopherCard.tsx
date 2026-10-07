@@ -43,7 +43,7 @@ export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, pe
       <Shell p={p} returning={returning} onReturned={onReturned} ref={ref}>
         <Link to={`/p/${p.slug}`} state={{ gridSearch, fromGrid: true }} className="card group block rounded-[3px] outline-offset-4">
           <div className="transition-transform duration-500 ease-out group-hover:-translate-y-1">
-            <Portrait p={p} eager={eager} priority={priority} decorative defer={deferImage} sizes={CLASSIC_SIZES} radius={3} className="shadow-[var(--shadow)]" />
+            <Portrait p={p} eager={eager} priority={priority} decorative defer={deferImage} sizes={CLASSIC_SIZES} radius={3} shadow />
           </div>
           <div className="pt-3 pr-1">
             <m.h2
@@ -77,7 +77,8 @@ export function PhilosopherCard({ p, gridSearch, eager, priority, deferImage, pe
             defer={deferImage}
             sizes={GRID_SIZES}
             radius={10}
-            className={`shadow-[var(--shadow)] transition-shadow ${peeking ? "ring-[2.5px] ring-[var(--era)] ring-offset-2 ring-offset-paper" : ""}`}
+            shadow
+            className={`transition-shadow ${peeking ? "ring-[2.5px] ring-[var(--era)] ring-offset-2 ring-offset-paper" : ""}`}
           />
         </div>
         <div className="pt-1.5 text-center sm:pt-3 sm:pr-1 sm:text-left">

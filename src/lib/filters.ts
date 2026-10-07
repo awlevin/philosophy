@@ -150,6 +150,9 @@ export const tokenSearch = (t: FilterToken) => serializeFilters(onlyToken(t));
  * diacritics-insensitive. "match" order needs each philosopher's quiz rank; unranked ones keep time
  * order at the end.
  */
+// One collator for every sort: localeCompare with options builds a new one for each comparison.
+const collator = new Intl.Collator("en", { sensitivity: "base" });
+
 export function applyFilters(list: Philosopher[], f: Filters, rankOf?: (p: Philosopher) => number | undefined): Philosopher[] {
   const q = fold(f.q.trim());
   const out = list.filter(
@@ -160,7 +163,7 @@ export function applyFilters(list: Philosopher[], f: Filters, rankOf?: (p: Philo
       (!q || fold(`${p.name} ${p.aka ?? ""} ${p.origin.place} ${p.origin.then ?? ""} ${p.origin.country}`).includes(q)),
   );
   if (f.sort === "alpha") {
-    out.sort((a, b) => sortName(a).localeCompare(sortName(b), "en", { sensitivity: "base" }));
+    out.sort((a, b) => collator.compare(sortName(a), sortName(b)));
   } else if (f.sort === "match" && rankOf) {
     out.sort((a, b) => (rankOf(a) ?? Infinity) - (rankOf(b) ?? Infinity));
   }

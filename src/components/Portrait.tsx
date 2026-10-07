@@ -28,6 +28,8 @@ type Props = {
   layoutTransition?: Transition;
   /** Morph to and from this philosopher's card. Off when there's no card to come from (quiz results). */
   shared?: boolean;
+  /** The theme's drop shadow, drawn from an image for this radius (see "Portrait drop shadows" in index.css). */
+  shadow?: boolean;
 };
 
 /** Square, face-centered portrait on its era's tint. Shares a layoutId between grid card and detail page. */
@@ -43,6 +45,7 @@ export function Portrait({
   radius = 0,
   layoutTransition = morph,
   shared = true,
+  shadow = false,
 }: Props) {
   const { src } = p.portrait;
   return (
@@ -51,6 +54,7 @@ export function Portrait({
       layoutCrossfade={false}
       transition={{ layout: layoutTransition }}
       style={{ borderRadius: radius, ...eraVars(p.era) }}
+      data-shadow={shadow ? radius : undefined}
       className={`portrait aspect-square ${className}`}
     >
       {!src ? (

@@ -294,7 +294,8 @@ export function Detail({ slug }: { slug: string }) {
                     withGridPlaceholder={!!state.fromGrid}
                     sizes="(min-width: 1280px) 500px, (min-width: 768px) 40vw, 92vw"
                     radius={view === "classic" ? 4 : 16}
-                    className="mx-auto w-full max-w-[460px] shadow-[var(--shadow)] md:max-w-none"
+                    shadow
+                    className="mx-auto w-full max-w-[460px] md:max-w-none"
                     layoutTransition={layoutTransition}
                     shared={!fromQuiz}
                   />

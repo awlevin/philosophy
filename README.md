@@ -13,6 +13,9 @@ npm run preview
 npm run fetch-portraits  # (re)download portraits from Wikidata / Wikimedia Commons
 npm run e2e              # Playwright, phone + desktop-dark (screens in test-results/shots); BASE_URL=… to test a deploy
 npm run lab              # Peek → page frame by frame, as layers for the motion lab (lab/index.html → lab-out/site)
+npm run perf -- dist     # profile the main flows on a built site: phone, 4x slower CPU (--webkit for Safari's engine)
+npm run shadows          # redraw the portrait shadow images after changing a theme's --shadow
+npx tsx scripts/compare-shots.ts <siteA> <siteB> <out>  # screenshot two builds in every theme and diff them
 ```
 
 ## How it's put together

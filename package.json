@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "og": "tsx scripts/og.ts",
+    "shadows": "tsx scripts/portrait-shadows.ts",
+    "perf": "tsx scripts/perf-profile.ts",
     "fetch-portraits": "tsx scripts/fetch-portraits.ts",
     "e2e": "playwright test",
     "lab": "rm -rf lab-out && playwright test -c lab/playwright.config.ts && sh lab/encode.sh"

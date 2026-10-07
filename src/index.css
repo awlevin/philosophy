@@ -328,6 +328,62 @@ body {
   background: var(--portrait-bg, var(--paper-2));
   isolation: isolate;
 }
+
+/* Portrait drop shadows: the theme's --shadow, drawn from 9-slice images (scripts/portrait-shadows.ts
+   makes them and checks them against the box-shadow). Safari repaints a blurred box-shadow whenever a
+   card moves, fades or scales, which cost a gallery of them many frames; an image is near free.
+   The image is the portrait's own border image, set outside its box: like a box-shadow, the
+   portrait's overflow doesn't clip it. data-shadow is the corner radius: cards (10, Classic 3) and
+   pages (16, Classic 4). Slices are in image pixels (drawn at 3x), widths and outsets in CSS pixels. */
+.portrait[data-shadow] {
+  border-image-slice: 150 180 210;
+  border-image-width: 50px 60px 70px;
+  border-image-outset: 10px 20px 30px;
+}
+.portrait:is([data-shadow="4"], [data-shadow="16"]) {
+  border-image-slice: 210 240 270;
+  border-image-width: 70px 80px 90px;
+}
+/* Picked by selector, not a custom property: a url() in a var() is resolved again for every portrait
+   on every style recalc. */
+.portrait[data-shadow="10"] {
+  border-image-source: url(./assets/portrait-shadows/light-10.png);
+}
+.portrait[data-shadow="16"] {
+  border-image-source: url(./assets/portrait-shadows/light-16.png);
+}
+:root[data-look="classic"] .portrait[data-shadow="3"] {
+  border-image-source: url(./assets/portrait-shadows/sepia-3.png);
+}
+:root[data-look="classic"] .portrait[data-shadow="4"] {
+  border-image-source: url(./assets/portrait-shadows/sepia-4.png);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .portrait[data-shadow="3"] {
+    border-image-source: url(./assets/portrait-shadows/dark-3.png);
+  }
+  :root:not([data-theme="light"]) .portrait[data-shadow="4"] {
+    border-image-source: url(./assets/portrait-shadows/dark-4.png);
+  }
+  :root:not([data-theme="light"]) .portrait[data-shadow="10"] {
+    border-image-source: url(./assets/portrait-shadows/dark-10.png);
+  }
+  :root:not([data-theme="light"]) .portrait[data-shadow="16"] {
+    border-image-source: url(./assets/portrait-shadows/dark-16.png);
+  }
+}
+:root[data-theme="dark"] .portrait[data-shadow="3"] {
+  border-image-source: url(./assets/portrait-shadows/dark-3.png);
+}
+:root[data-theme="dark"] .portrait[data-shadow="4"] {
+  border-image-source: url(./assets/portrait-shadows/dark-4.png);
+}
+:root[data-theme="dark"] .portrait[data-shadow="10"] {
+  border-image-source: url(./assets/portrait-shadows/dark-10.png);
+}
+:root[data-theme="dark"] .portrait[data-shadow="16"] {
+  border-image-source: url(./assets/portrait-shadows/dark-16.png);
+}
 .portrait img {
   position: absolute;
   inset: 0;
