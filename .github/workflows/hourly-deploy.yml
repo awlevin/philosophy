@@ -1,0 +1,52 @@
+# Deploys main to production at most once an hour, and only when main has
+# moved since the last deploy.
+#
+# Pushes no longer deploy on their own: `git.deploymentEnabled` in vercel.json
+# builds only `preview/*` branches, to save the account's daily deploy quota
+# (100 a day on Vercel Hobby, shared by every project). This job fires the
+# project's deploy hook instead, and moves the `deployed` tag to the commit it
+# shipped, so the next run knows whether anything changed.
+#
+# To ship now instead of waiting: Actions › hourly production deploy › Run
+# workflow, or `gh workflow run hourly-deploy.yml`.
+
+name: hourly production deploy
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Deploy if main moved since the last deploy
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          git fetch --depth=1 origin "+refs/tags/deployed:refs/tags/deployed" 2>/dev/null || true
+          head=$(git rev-parse HEAD)
+          last=$(git rev-parse -q --verify "refs/tags/deployed^{commit}" || true)
+          if [ "$head" = "$last" ]; then
+            echo "main is still at $head, deployed already; nothing to do"
+            exit 0
+          fi
+          curl --fail --silent --show-error -X POST "$HOOK" > /dev/null
+          echo "deploying $head (last deployed: ${last:-none})"
+          # the tag only marks the last commit sent to vercel; moving it is the point
+          git tag -f deployed "$head"
+          git push -f origin refs/tags/deployed

@@ -4,6 +4,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
+  "git": {
+    "deploymentEnabled": {
+      "*": false,
+      "preview/*": true
+    }
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }],
   "headers": [
