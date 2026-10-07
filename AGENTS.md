@@ -10,14 +10,12 @@ We are the only users of this project. Mainline every change:
 
 ## Deploys
 
-The Vercel account has a limit of 100 deployments a day, shared by every project. Deploys are manual, so none are spent by accident.
+The Vercel account has a limit of 100 deployments a day, shared by every project.
 
-- A push to `main` does not deploy. Production (https://butwhy.aaronideas.com) changes only when someone runs the `production deploy` GitHub Action.
-- Deploy when Aaron asks for it, or when a batch of work on `main` is finished and should be live. Do not deploy after every commit. Run `gh workflow run deploy.yml`. It does nothing if `main` has not changed since the last deploy.
-- Do not run `vercel deploy --prod`. The workflow keeps track of what it shipped, with the `deployed` tag.
-- After a deploy, confirm it is `READY` (`vercel ls` or the Vercel dashboard) and check the live site.
-- Only branches named `preview/*` get a preview deployment. Other branches get none. Name a branch `preview/<name>` only when someone must look at it on Vercel.
-- Do not change `git.deploymentEnabled` in `vercel.json`, and do not add a schedule or a push trigger to the workflow.
+- Every push to `main` deploys to production (https://butwhy.aaronideas.com). Each push spends one deployment, so batch your commits and push to `main` when a piece of work is done, not after every small commit.
+- After you push, confirm the deploy is `READY` (`vercel ls` or the Vercel dashboard) and check the live site.
+- Branches named `preview/*` get a preview deployment. Other branches get none. Name a branch `preview/<name>` only when someone must look at it on Vercel.
+- `git.deploymentEnabled` in `vercel.json` sets this. Do not change it.
 
 ## Project
 
