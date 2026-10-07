@@ -1,20 +1,18 @@
-# Deploys main to production at most once an hour, and only when main has
-# moved since the last deploy.
+# Deploys main to production, when someone asks for it. Nothing deploys on its
+# own: `git.deploymentEnabled` in vercel.json builds only `preview/*` branches,
+# to save the Vercel account's daily deploy quota (100 a day on Hobby, shared
+# by every project), and this job runs only by hand, to save Actions minutes.
 #
-# Pushes no longer deploy on their own: `git.deploymentEnabled` in vercel.json
-# builds only `preview/*` branches, to save the account's daily deploy quota
-# (100 a day on Vercel Hobby, shared by every project). This job fires the
-# project's deploy hook instead, and moves the `deployed` tag to the commit it
-# shipped, so the next run knows whether anything changed.
+# It fires the project's deploy hook (secret VERCEL_DEPLOY_HOOK) only if main
+# moved since the commit the `deployed` tag marks, then moves the tag there, so
+# running it twice never deploys the same commit twice.
 #
-# To ship now instead of waiting: Actions › hourly production deploy › Run
-# workflow, or `gh workflow run hourly-deploy.yml`.
+# Run it: Actions › production deploy › Run workflow, or
+#   gh workflow run deploy.yml
 
-name: hourly production deploy
+name: production deploy
 
 on:
-  schedule:
-    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:

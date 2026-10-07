@@ -10,13 +10,14 @@ We are the only users of this project. Mainline every change:
 
 ## Deploys
 
-The Vercel account has a limit of 100 deployments a day, shared by every project. Do not spend them on every push.
+The Vercel account has a limit of 100 deployments a day, shared by every project. Deploys are manual, so none are spent by accident.
 
-- A push to `main` does not deploy. The `hourly production deploy` GitHub Action deploys `main` to production (https://philosophy-virid.vercel.app) once an hour, and only when `main` changed since the last deploy.
-- If the change must be live now, run `gh workflow run hourly-deploy.yml`. Do not run `vercel deploy --prod`; the workflow keeps track of what it shipped.
-- Only branches named `preview/*` get a preview deployment. Other branches get none. Name a branch `preview/<name>` only when someone must look at it on Vercel.
+- A push to `main` does not deploy. Production (https://philosophy-virid.vercel.app) changes only when someone runs the `production deploy` GitHub Action.
+- Deploy when Aaron asks for it, or when a batch of work on `main` is finished and should be live. Do not deploy after every commit. Run `gh workflow run deploy.yml`. It does nothing if `main` has not changed since the last deploy.
+- Do not run `vercel deploy --prod`. The workflow keeps track of what it shipped, with the `deployed` tag.
 - After a deploy, confirm it is `READY` (`vercel ls` or the Vercel dashboard) and check the live site.
-- Do not change `git.deploymentEnabled` in `vercel.json` or the workflow to deploy on every push.
+- Only branches named `preview/*` get a preview deployment. Other branches get none. Name a branch `preview/<name>` only when someone must look at it on Vercel.
+- Do not change `git.deploymentEnabled` in `vercel.json`, and do not add a schedule or a push trigger to the workflow.
 
 ## Project
 
