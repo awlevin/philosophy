@@ -56,6 +56,8 @@ export function SearchField({ value, onChange, label, placeholder, debounce = 0,
       <input
         ref={input}
         type="search"
+        // Chrome flags a field with neither id nor name, as autofill can't tell it apart.
+        name="search"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         placeholder={placeholder}

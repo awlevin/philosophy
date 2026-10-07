@@ -1,5 +1,5 @@
 import { AnimatePresence, m } from "framer-motion";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { FacePile } from "../components/FacePile";
 import { FilterBar } from "../components/FilterBar";
@@ -57,6 +57,14 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
     if (covered) setPeek(null);
   }, [covered]);
 
+  // Once a detail page covers the grid, `inert` drops focus from the card that opened it, but only
+  // later. Drop it now, so the card isn't still focused under aria-hidden, which Chrome warns about.
+  const root = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const active = document.activeElement;
+    if (covered && active instanceof HTMLElement && root.current?.contains(active)) active.blur();
+  }, [covered]);
+
   // Reached by tapping a chip on a detail page. Changing filters here replaces the entry without
   // this state, so "Back to …" goes away once the view is no longer the one that chip produced.
   const arrival = covered ? {} : ((location.state ?? {}) as GalleryState);
@@ -94,7 +102,7 @@ export function Home({ search, covered, returningSlug, onReturned }: Props) {
   const clearFilters = () => setFilters({ ...EMPTY_FILTERS, sort: filters.sort });
 
   return (
-    <div inert={covered} aria-hidden={covered || undefined}>
+    <div ref={root} inert={covered} aria-hidden={covered || undefined}>
       <header className="mx-auto max-w-[1400px] px-4 pt-8 pb-3 sm:px-8 sm:pt-16 sm:pb-10">
         <div className="flex items-start justify-between gap-6">
           <div>
