@@ -56,8 +56,8 @@ npm run lab              # Peek → page frame by frame, as layers for the motio
 
 ## Deploying to Vercel
 
-Live at https://philosophy-virid.vercel.app. The GitHub repo is connected to the Vercel project
-`philosophy`, so every push to `main` deploys to production.
+Live at https://butwhy.aaronideas.com (Vercel project `philosophy`). A push to `main` does not
+deploy. Run `gh workflow run deploy.yml` to ship `main` to production.
 
 `vercel.json` is set up: Vite preset, `npm run build`, output `dist`, `cleanUrls` so
 `/p/plato` serves the prerendered `p/plato.html`, an SPA fallback, and long-lived caching for

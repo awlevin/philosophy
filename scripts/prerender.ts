@@ -26,7 +26,7 @@ if (cssLink) {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
-const SITE = "https://philosophy-virid.vercel.app";
+const SITE = "https://butwhy.aaronideas.com";
 
 /** At most 160 characters, cut at a word break. */
 function clip(s: string, max = 160) {
